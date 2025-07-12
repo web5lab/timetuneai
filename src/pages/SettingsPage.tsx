@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, Shield, Trash2 } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
+import { useTheme } from '../contexts/ThemeContext';
 
 const SettingsPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     notifications: {
       push: true,
@@ -13,7 +15,7 @@ const SettingsPage: React.FC = () => {
       vibration: true,
     },
     appearance: {
-      theme: 'light',
+      theme: theme,
       fontSize: 'medium',
     },
     privacy: {
@@ -39,6 +41,11 @@ const SettingsPage: React.FC = () => {
         [key]: value,
       },
     }));
+    
+    // Update theme when appearance.theme changes
+    if (category === 'appearance' && key === 'theme') {
+      setTheme(value);
+    }
   };
 
   const ToggleSwitch: React.FC<{ enabled: boolean; onChange: (value: boolean) => void }> = ({ enabled, onChange }) => (
@@ -57,7 +64,7 @@ const SettingsPage: React.FC = () => {
   );
 
   return (
-    <div className="h-full bg-gray-50 overflow-hidden flex flex-col">
+    <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
      
@@ -66,16 +73,16 @@ const SettingsPage: React.FC = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           
           {/* Notifications Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <Bell className="w-6 h-6 text-orange-500" />
-              <h2 className="text-xl font-semibold text-gray-900">Notifications</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Notifications</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Push Notifications</h3>
-                  <p className="text-sm text-gray-600">Receive notifications on your device</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Push Notifications</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Receive notifications on your device</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.notifications.push}
@@ -84,8 +91,8 @@ const SettingsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Email Notifications</h3>
-                  <p className="text-sm text-gray-600">Get reminders via email</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Email Notifications</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Get reminders via email</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.notifications.email}
@@ -94,8 +101,8 @@ const SettingsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Sound</h3>
-                  <p className="text-sm text-gray-600">Play sound for notifications</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Sound</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Play sound for notifications</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.notifications.sound}
@@ -104,8 +111,8 @@ const SettingsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Vibration</h3>
-                  <p className="text-sm text-gray-600">Vibrate for notifications</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Vibration</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Vibrate for notifications</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.notifications.vibration}
@@ -116,21 +123,21 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Appearance Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <Sun className="w-6 h-6 text-orange-500" />
-              <h2 className="text-xl font-semibold text-gray-900">Appearance</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Appearance</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <h3 className="font-medium text-gray-900 mb-3">Theme</h3>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Theme</h3>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => updateSetting('appearance', 'theme', 'light')}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
                       settings.appearance.theme === 'light'
-                        ? 'border-orange-500 bg-orange-50 text-orange-700'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
+                        : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <Sun className="w-4 h-4" />
@@ -140,8 +147,8 @@ const SettingsPage: React.FC = () => {
                     onClick={() => updateSetting('appearance', 'theme', 'dark')}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
                       settings.appearance.theme === 'dark'
-                        ? 'border-orange-500 bg-orange-50 text-orange-700'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
+                        : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <Moon className="w-4 h-4" />
@@ -150,11 +157,11 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="font-medium text-gray-900 mb-3">Font Size</h3>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Font Size</h3>
                 <select
                   value={settings.appearance.fontSize}
                   onChange={(e) => updateSetting('appearance', 'fontSize', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
                 >
                   <option value="small">Small</option>
                   <option value="medium">Medium</option>
@@ -165,27 +172,27 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Reminder Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <Bell className="w-6 h-6 text-orange-500" />
-              <h2 className="text-xl font-semibold text-gray-900">Reminder Defaults</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Reminder Defaults</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">Default Reminder Time</h3>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Default Reminder Time</h3>
                 <input
                   type="time"
                   value={settings.reminders.defaultTime}
                   onChange={(e) => updateSetting('reminders', 'defaultTime', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
                 />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">Snooze Duration (minutes)</h3>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Snooze Duration (minutes)</h3>
                 <select
                   value={settings.reminders.snoozeTime}
                   onChange={(e) => updateSetting('reminders', 'snoozeTime', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
                 >
                   <option value="5">5 minutes</option>
                   <option value="10">10 minutes</option>
@@ -195,8 +202,8 @@ const SettingsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Auto-complete recurring reminders</h3>
-                  <p className="text-sm text-gray-600">Automatically mark recurring reminders as complete</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Auto-complete recurring reminders</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Automatically mark recurring reminders as complete</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.reminders.autoComplete}
@@ -207,16 +214,16 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Privacy Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <Shield className="w-6 h-6 text-orange-500" />
-              <h2 className="text-xl font-semibold text-gray-900">Privacy & Data</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Privacy & Data</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Data Collection</h3>
-                  <p className="text-sm text-gray-600">Allow data collection to improve the app</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Data Collection</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Allow data collection to improve the app</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.privacy.dataCollection}
@@ -225,8 +232,8 @@ const SettingsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">Analytics</h3>
-                  <p className="text-sm text-gray-600">Share usage analytics</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Analytics</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Share usage analytics</p>
                 </div>
                 <ToggleSwitch
                   enabled={settings.privacy.analytics}
@@ -237,16 +244,16 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-red-200 dark:border-red-800 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <Trash2 className="w-6 h-6 text-red-500" />
-              <h2 className="text-xl font-semibold text-red-900">Danger Zone</h2>
+              <h2 className="text-xl font-semibold text-red-900 dark:text-red-400">Danger Zone</h2>
             </div>
             <div className="space-y-4">
-              <button className="w-full px-4 py-3 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium">
+              <button className="w-full px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium">
                 Clear All Reminders
               </button>
-              <button className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+              <button className="w-full px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
                 Delete Account
               </button>
             </div>
