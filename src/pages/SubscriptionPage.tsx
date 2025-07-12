@@ -62,21 +62,21 @@ const SubscriptionPage: React.FC = () => {
   const currentPlan = plans.find(plan => plan.current);
 
   return (
-    <div className="h-full bg-gray-50 overflow-hidden flex flex-col">
+    <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Subscription Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white shadow-lg">
         <div className="px-4 lg:px-6 py-8">
         
           
           {/* Current Plan Status */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold text-lg">Current Plan: {currentPlan?.name}</h3>
-                <p className="text-orange-100 text-sm">
+                <p className="text-orange-100 dark:text-orange-200 text-sm">
                   {currentPlan?.name === 'Free' ? 'Upgrade to unlock more features' : 'Next billing: January 15, 2024'}
                 </p>
               </div>
@@ -86,7 +86,7 @@ const SubscriptionPage: React.FC = () => {
                   <span className="text-sm font-normal">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                 </div>
                 {currentPlan?.name !== 'Free' && (
-                  <button className="text-sm text-orange-100 hover:text-white underline">
+                  <button className="text-sm text-orange-100 dark:text-orange-200 hover:text-white underline">
                     Cancel subscription
                   </button>
                 )}
@@ -102,13 +102,13 @@ const SubscriptionPage: React.FC = () => {
           
           {/* Billing Toggle */}
           <div className="text-center mb-8">
-            <div className="inline-flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+            <div className="inline-flex bg-white dark:bg-slate-800 rounded-xl p-1 shadow-sm border border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-6 py-2 rounded-lg font-medium transition-all ${
                   billingCycle === 'monthly'
                     ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 Monthly
@@ -118,7 +118,7 @@ const SubscriptionPage: React.FC = () => {
                 className={`px-6 py-2 rounded-lg font-medium transition-all relative ${
                   billingCycle === 'yearly'
                     ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 Yearly
@@ -136,11 +136,11 @@ const SubscriptionPage: React.FC = () => {
                 key={index}
                 className={`bg-white rounded-xl shadow-sm border p-6 relative ${
                   plan.popular
-                    ? 'border-orange-500 ring-2 ring-orange-200 scale-105'
+                    ? 'border-orange-500 ring-2 ring-orange-200 dark:ring-orange-800 scale-105'
                     : plan.current
-                    ? 'border-green-500 ring-2 ring-green-200'
-                    : 'border-gray-200'
-                }`}
+                    ? 'border-green-500 ring-2 ring-green-200 dark:ring-green-800'
+                    : 'border-gray-200 dark:border-gray-700'
+                } bg-white dark:bg-slate-800 transition-colors duration-200`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -159,11 +159,11 @@ const SubscriptionPage: React.FC = () => {
                 )}
 
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
-                  <div className="text-3xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{plan.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{plan.description}</p>
+                  <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                     ${plan.price[billingCycle]}
-                    <span className="text-sm font-normal text-gray-600">
+                    <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
                       /{billingCycle === 'monthly' ? 'month' : 'year'}
                     </span>
                   </div>
@@ -185,6 +185,9 @@ const SubscriptionPage: React.FC = () => {
                       <span className={feature.included ? 'text-gray-900' : 'text-gray-500'}>
                         {feature.text}
                       </span>
+                      <span className={feature.included ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-600'}>
+                        {feature.text}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -192,10 +195,10 @@ const SubscriptionPage: React.FC = () => {
                 <button
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
                     plan.current
-                      ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed'
                       : plan.popular
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                      : 'bg-gray-900 dark:bg-slate-700 text-white hover:bg-gray-800 dark:hover:bg-slate-600'
                   }`}
                   disabled={plan.current}
                 >
@@ -206,32 +209,32 @@ const SubscriptionPage: React.FC = () => {
           </div>
 
           {/* Payment Method */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <CreditCard className="w-6 h-6 text-orange-500" />
-              <h2 className="text-xl font-semibold text-gray-900">Payment Method</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Payment Method</h2>
             </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">
                   VISA
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">•••• •••• •••• 4242</p>
-                  <p className="text-sm text-gray-600">Expires 12/25</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">•••• •••• •••• 4242</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Expires 12/25</p>
                 </div>
               </div>
-              <button className="text-orange-500 hover:text-orange-600 font-medium">
+              <button className="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 font-medium">
                 Update
               </button>
             </div>
           </div>
 
           {/* Billing History */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
               <Calendar className="w-6 h-6 text-orange-500" />
-              <h2 className="text-xl font-semibold text-gray-900">Billing History</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Billing History</h2>
             </div>
             <div className="space-y-3">
               {[
@@ -239,14 +242,14 @@ const SubscriptionPage: React.FC = () => {
                 { date: 'Nov 15, 2023', amount: '$9.99', status: 'Paid', plan: 'Pro Monthly' },
                 { date: 'Oct 15, 2023', amount: '$9.99', status: 'Paid', plan: 'Pro Monthly' },
               ].map((invoice, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">{invoice.plan}</p>
-                    <p className="text-sm text-gray-600">{invoice.date}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{invoice.plan}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{invoice.date}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-gray-900">{invoice.amount}</p>
-                    <span className="inline-block bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{invoice.amount}</p>
+                    <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-full">
                       {invoice.status}
                     </span>
                   </div>
