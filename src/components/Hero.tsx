@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Lightbulb, Send, Mic, User, Bot } from 'lucide-react';
+import { Download, Play, ArrowRight, Sparkles, Clock, CheckCircle, Mic, Send, Bot, Star } from 'lucide-react';
 
 interface ChatMessage {
   id: number;
@@ -13,7 +13,7 @@ const Hero: React.FC = () => {
     {
       id: 1,
       type: 'ai',
-      message: "Hi! I'm TimeTuneAI. I can help you set reminders using natural language. Just tell me what you need to remember!",
+      message: "Hi! I'm TimeTuneAI. Ready to transform how you manage reminders?",
       timestamp: "10:30 AM"
     }
   ]);
@@ -30,12 +30,12 @@ const Hero: React.FC = () => {
     },
     {
       user: "Yes, that would be great",
-      ai: "Done! You'll get a notification at 2:45 PM and another at 3:00 PM tomorrow. I've also added this to your calendar. Is there anything else you'd like me to help you remember?",
+      ai: "Done! You'll get notifications at 2:45 PM and 3:00 PM tomorrow. I've also added this to your calendar. Anything else?",
       delay: 1500
     },
     {
       user: "Set a daily reminder to drink water every 2 hours",
-      ai: "Excellent! I've created a recurring reminder for you to drink water every 2 hours during your active hours (8 AM - 8 PM). You'll get gentle notifications throughout the day. Stay hydrated! 💧",
+      ai: "Excellent! I've created a recurring reminder for you to drink water every 2 hours during your active hours (8 AM - 8 PM). Stay hydrated! 💧",
       delay: 2500
     }
   ];
@@ -77,7 +77,7 @@ const Hero: React.FC = () => {
         setMessages([{
           id: 1,
           type: 'ai',
-          message: "Hi! I'm TimeTuneAI. I can help you set reminders using natural language. Just tell me what you need to remember!",
+          message: "Hi! I'm TimeTuneAI. Ready to transform how you manage reminders?",
           timestamp: "10:30 AM"
         }]);
         setDemoStep(0);
@@ -88,73 +88,138 @@ const Hero: React.FC = () => {
   }, [demoStep, messages.length]);
 
   return (
-    <section className="gradient-light-yellow-to-peach relative pt-20 pb-20 overflow-hidden min-h-screen">
-      <div className="container mx-auto px-6 h-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen py-20">
+    <section className="relative min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        {/* Animated Background Shapes */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-orange-400/20 to-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-red-400/20 to-orange-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-2xl animate-bounce" style={{ animationDuration: '6s' }}></div>
+        
+        {/* Floating Icons */}
+        <div className="absolute top-32 right-1/4 animate-float">
+          <div className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg flex items-center justify-center">
+            <Clock className="w-6 h-6 text-orange-500" />
+          </div>
+        </div>
+        <div className="absolute bottom-1/3 left-1/4 animate-float" style={{ animationDelay: '1s' }}>
+          <div className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+        </div>
+        <div className="absolute top-1/2 right-12 animate-float" style={{ animationDelay: '2s' }}>
+          <div className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-yellow-500" />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative container mx-auto px-6 pt-32 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
           
-          {/* Left Side - Main Content */}
-          <div className="order-2 lg:order-1 text-center lg:text-left">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-8 text-gray-900">
-              Never Miss a Beat with <span className="hero-gradient-text-light">TimeTuneAI</span>
-            </h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-gray-700 mb-8 max-w-2xl">
-              Your intelligent AI assistant for effortless reminders and a perfectly organized life. Simply speak or type, and stay on track.
-            </p>
-            
-            {/* Feature Highlights */}
-            <div className="mb-10 space-y-4">
-              <div className="flex items-center justify-center lg:justify-start space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+          {/* Left Side - Enhanced Content */}
+          <div className="text-center lg:text-left space-y-8">
+            {/* Badge */}
+            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-orange-200">
+              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+              <span className="text-sm font-medium text-gray-700">Trusted by 50,000+ users</span>
+            </div>
+
+            {/* Main Headline */}
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
+                <span className="block text-gray-900">Never Miss</span>
+                <span className="block bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
+                  Anything Again
+                </span>
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-600 max-w-2xl leading-relaxed">
+                Your AI-powered reminder assistant that understands natural language and keeps you perfectly organized.
+              </p>
+            </div>
+
+            {/* Key Benefits */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-6">
+              <div className="flex items-center justify-center lg:justify-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-orange-100">
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                  <Mic className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-gray-700 font-medium">Natural language processing</span>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-900">Voice Control</div>
+                  <div className="text-sm text-gray-600">Just speak naturally</div>
+                </div>
               </div>
-              <div className="flex items-center justify-center lg:justify-start space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+              <div className="flex items-center justify-center lg:justify-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-orange-100">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-gray-700 font-medium">Smart scheduling & calendar sync</span>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-900">Smart AI</div>
+                  <div className="text-sm text-gray-600">Learns your habits</div>
+                </div>
               </div>
-              <div className="flex items-center justify-center lg:justify-start space-x-3">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+              <div className="flex items-center justify-center lg:justify-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-orange-100">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-gray-700 font-medium">Voice & text input support</span>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-900">Never Forget</div>
+                  <div className="text-sm text-gray-600">100% reliable</div>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-6">
-              <a href="#" className="px-8 py-4 bg-gradient-to-br from-yellow-500 to-orange-600 text-white font-semibold rounded-full shadow-xl hover:from-yellow-600 hover:to-orange-700 transition duration-300 flex items-center justify-center text-lg">
-                <Download className="w-6 h-6 mr-3" /> Get Started Free
-              </a>
-              <a href="#features" className="px-8 py-4 border-2 border-orange-500 text-orange-600 font-semibold rounded-full hover:bg-orange-100 hover:text-orange-700 transition duration-300 flex items-center justify-center text-lg">
-                <Lightbulb className="w-6 h-6 mr-3" /> Discover Features
-              </a>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button className="group relative px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center justify-center space-x-3">
+                  <Download className="w-6 h-6" />
+                  <span className="text-lg">Download Free</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
+              </button>
+              
+              <button className="group px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-900 font-semibold rounded-2xl border-2 border-orange-200 hover:border-orange-400 hover:bg-white transition-all duration-300 flex items-center justify-center space-x-3">
+                <Play className="w-5 h-5 text-orange-500" />
+                <span>Watch Demo</span>
+              </button>
+            </div>
+
+            {/* Social Proof */}
+            <div className="flex items-center justify-center lg:justify-start space-x-6 pt-6">
+              <div className="flex -space-x-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-400 rounded-full border-2 border-white flex items-center justify-center text-white font-semibold text-sm">
+                    {String.fromCharCode(64 + i)}
+                  </div>
+                ))}
+              </div>
+              <div className="text-left">
+                <div className="flex items-center space-x-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <div className="text-sm text-gray-600">4.9/5 from 2,000+ reviews</div>
+              </div>
             </div>
           </div>
 
           {/* Right Side - Enhanced Phone Mockup */}
-          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-sm">
-              {/* Floating Elements */}
-              <div className="absolute -top-8 -left-8 w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full opacity-20 animate-pulse"></div>
-              <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-gradient-to-br from-orange-400 to-red-500 rounded-full opacity-15 animate-pulse" style={{ animationDelay: '1s' }}></div>
-              <div className="absolute top-1/2 -left-12 w-8 h-8 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full opacity-25 animate-bounce" style={{ animationDelay: '2s' }}></div>
+          <div className="flex justify-center lg:justify-end">
+            <div className="relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-[3rem] blur-2xl opacity-20 scale-110"></div>
               
               {/* Phone Frame */}
-              <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 rounded-[3rem] shadow-2xl p-2 border-4 border-gray-700 transform hover:scale-105 transition-transform duration-500">
+              <div className="relative bg-gradient-to-b from-gray-900 to-black rounded-[3rem] shadow-2xl p-2 border-4 border-gray-800 transform hover:scale-105 transition-transform duration-500">
                 {/* Screen Bezel */}
                 <div className="bg-black rounded-[2.5rem] p-1">
                   {/* Screen */}
                   <div className="bg-white rounded-[2rem] overflow-hidden h-[650px] flex flex-col relative">
                     
-                    {/* Dynamic Island / Notch */}
+                    {/* Dynamic Island */}
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-full z-10"></div>
                     
                     {/* Status Bar */}
