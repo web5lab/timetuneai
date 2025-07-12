@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, Shield, Trash2, Palette } from 'lucide-react';
+import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, Shield, Trash2 } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
 import { useTheme } from '../contexts/ThemeContext';
@@ -125,72 +125,36 @@ const SettingsPage: React.FC = () => {
           {/* Appearance Settings */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
             <div className="flex items-center space-x-3 mb-6">
-              <Palette className="w-6 h-6 text-orange-500" />
+              <Sun className="w-6 h-6 text-orange-500" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Appearance</h2>
             </div>
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Theme</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[
-                    { id: 'light', name: 'Light', icon: Sun, color: 'bg-white border-gray-300', preview: 'bg-gradient-to-br from-orange-100 to-yellow-100' },
-                    { id: 'dark', name: 'Dark', icon: Moon, color: 'bg-slate-800 border-slate-600', preview: 'bg-gradient-to-br from-slate-700 to-slate-800' },
-                    { id: 'blue', name: 'Ocean', icon: Palette, color: 'bg-blue-50 border-blue-300', preview: 'bg-gradient-to-br from-blue-400 to-blue-600' },
-                    { id: 'green', name: 'Forest', icon: Palette, color: 'bg-green-50 border-green-300', preview: 'bg-gradient-to-br from-green-400 to-green-600' },
-                    { id: 'purple', name: 'Cosmic', icon: Palette, color: 'bg-purple-50 border-purple-300', preview: 'bg-gradient-to-br from-purple-400 to-purple-600' },
-                    { id: 'rose', name: 'Sunset', icon: Palette, color: 'bg-rose-50 border-rose-300', preview: 'bg-gradient-to-br from-rose-400 to-rose-600' },
-                    { id: 'amber', name: 'Golden', icon: Palette, color: 'bg-amber-50 border-amber-300', preview: 'bg-gradient-to-br from-amber-400 to-amber-600' },
-                  ].map((themeOption) => {
-                    const IconComponent = themeOption.icon;
-                    const isSelected = settings.appearance.theme === themeOption.id;
-                    return (
-                      <button
-                        key={themeOption.id}
-                        onClick={() => updateSetting('appearance', 'theme', themeOption.id)}
-                        className={`relative p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
-                          isSelected
-                            ? 'border-orange-500 ring-2 ring-orange-200 shadow-lg'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                        } ${themeOption.color}`}
-                      >
-                        {/* Theme Preview */}
-                        <div className={`w-full h-8 rounded-lg mb-3 ${themeOption.preview} shadow-inner`}></div>
-                        
-                        {/* Theme Info */}
-                        <div className="flex items-center justify-center space-x-2">
-                          <IconComponent className={`w-4 h-4 ${
-                            themeOption.id === 'dark' ? 'text-slate-300' : 
-                            themeOption.id === 'light' ? 'text-gray-600' :
-                            'text-white'
-                          }`} />
-                          <span className={`text-sm font-medium ${
-                            themeOption.id === 'dark' ? 'text-slate-300' : 
-                            themeOption.id === 'light' ? 'text-gray-700' :
-                            themeOption.id === 'blue' ? 'text-blue-700' :
-                            themeOption.id === 'green' ? 'text-green-700' :
-                            themeOption.id === 'purple' ? 'text-purple-700' :
-                            themeOption.id === 'rose' ? 'text-rose-700' :
-                            'text-amber-700'
-                          }`}>
-                            {themeOption.name}
-                          </span>
-                        </div>
-                        
-                        {/* Selected Indicator */}
-                        {isSelected && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => updateSetting('appearance', 'theme', 'light')}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                      settings.appearance.theme === 'light'
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
+                        : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <Sun className="w-4 h-4" />
+                    <span>Light</span>
+                  </button>
+                  <button
+                    onClick={() => updateSetting('appearance', 'theme', 'dark')}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                      settings.appearance.theme === 'dark'
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
+                        : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <Moon className="w-4 h-4" />
+                    <span>Dark</span>
+                  </button>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-                  Choose a theme that matches your style and preferences. Changes apply instantly across the entire app.
-                </p>
               </div>
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Font Size</h3>

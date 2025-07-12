@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark' | 'blue' | 'green' | 'purple' | 'rose' | 'amber';
+type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -26,7 +26,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     // Check localStorage first, then system preference
     const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme && ['light', 'dark', 'blue', 'green', 'purple', 'rose', 'amber'].includes(savedTheme)) {
+    if (savedTheme) {
       return savedTheme;
     }
     
@@ -41,8 +41,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     const root = window.document.documentElement;
     
-    // Remove all theme classes
-    root.classList.remove('light', 'dark', 'blue', 'green', 'purple', 'rose', 'amber');
+    // Remove previous theme classes
+    root.classList.remove('light', 'dark');
     
     // Add current theme class
     root.classList.add(theme);
