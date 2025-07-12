@@ -17,6 +17,7 @@ const RemindersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [showAddModal, setShowAddModal] = useState(false);
   const [reminders, setReminders] = useState<Reminder[]>([
     {
       id: 1,
@@ -111,19 +112,135 @@ const RemindersPage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 overflow-hidden flex flex-col">
-      {/* Header Section - Responsive */}
-      <div className="bg-white border-b border-gray-200 p-3 ">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
-          <div className="text-center sm:text-left">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Reminders</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">
-              {upcomingReminders.length} upcoming, {completedReminders.length} completed
-            </p>
+      {/* Special Reminders Header */}
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+        <div className="px-4 lg:px-6 py-6">
+          {/* Header Top Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">My Reminders</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-orange-100">
+                <div className="flex items-center justify-center sm:justify-start space-x-2">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm">{upcomingReminders.length} upcoming</span>
+                </div>
+                <div className="flex items-center justify-center sm:justify-start space-x-2">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="text-sm">{completedReminders.length} completed</span>
+                </div>
+                <div className="flex items-center justify-center sm:justify-start space-x-2">
+                  <Calendar className="w-4 h-4" />
+                  <span className="text-sm">Today: {new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Add Reminder Button */}
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="bg-white text-orange-600 px-6 py-3 rounded-xl hover:bg-orange-50 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg font-semibold text-sm sm:text-base group"
+            >
+              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+              <span>Add Reminder</span>
+            </button>
           </div>
-          <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="font-medium">New Reminder</span>
-          </button>
+          
+          {/* Quick Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold">{reminders.filter(r => r.priority === 'high' && !r.completed).length}</div>
+              <div className="text-xs sm:text-sm text-orange-100">High Priority</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold">{reminders.filter(r => r.recurring).length}</div>
+              <div className="text-xs sm:text-sm text-orange-100">Recurring</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold">{new Set(reminders.map(r => r.category)).size}</div>
+              <div className="text-xs sm:text-sm text-orange-100">Categories</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-2xl font-bold">{Math.round((completedReminders.length / reminders.length) * 100) || 0}%</div>
+              <div className="text-xs sm:text-sm text-orange-100">Completed</div>
+            </div>
+          </div>
+          
+          {/* Search and Filters */}
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+            {/* Search Bar */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search reminders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white text-gray-800 placeholder-gray-500"
+              />
+            </div>
+            
+            {/* View Toggle */}
+            <div className="flex bg-white/10 backdrop-blur-sm rounded-xl p-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                  viewMode === 'list' 
+                    ? 'bg-white text-orange-600 shadow-sm' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <div className="w-4 h-4 flex flex-col space-y-1">
+                  <div className="h-0.5 bg-current rounded"></div>
+                  <div className="h-0.5 bg-current rounded"></div>
+                  <div className="h-0.5 bg-current rounded"></div>
+                </div>
+                <span className="text-sm font-medium">List</span>
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                  viewMode === 'grid' 
+                    ? 'bg-white text-orange-600 shadow-sm' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
+                  <div className="bg-current rounded-sm"></div>
+                  <div className="bg-current rounded-sm"></div>
+                  <div className="bg-current rounded-sm"></div>
+                  <div className="bg-current rounded-sm"></div>
+                </div>
+                <span className="text-sm font-medium">Grid</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Category Filters */}
+      <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setFilterCategory(category.id)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap transition-all duration-200 ${
+                filterCategory === category.id
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${category.color}`}></div>
+              <span className="text-sm font-medium">{category.name}</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                filterCategory === category.id 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
+                {category.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -261,6 +378,117 @@ const RemindersPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Add Reminder Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Add New Reminder</h2>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                  <input
+                    type="text"
+                    placeholder="What do you want to be reminded about?"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    placeholder="Add more details (optional)"
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <input
+                      type="date"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                    <input
+                      type="time"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="health">Health</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                  <div className="flex space-x-3">
+                    {['low', 'medium', 'high'].map((priority) => (
+                      <button
+                        key={priority}
+                        className={`flex-1 px-4 py-2 rounded-xl border transition-all duration-200 ${
+                          priority === 'high' 
+                            ? 'border-red-300 bg-red-50 text-red-700'
+                            : priority === 'medium'
+                            ? 'border-yellow-300 bg-yellow-50 text-yellow-700'
+                            : 'border-green-300 bg-green-50 text-green-700'
+                        }`}
+                      >
+                        <span className="capitalize text-sm font-medium">{priority}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="recurring"
+                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <label htmlFor="recurring" className="text-sm font-medium text-gray-700">
+                    Make this a recurring reminder
+                  </label>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 mt-8">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-medium"
+                >
+                  Create Reminder
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
