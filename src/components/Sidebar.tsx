@@ -30,18 +30,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full bg-white shadow-xl z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-slate-800 shadow-xl z-40 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 w-64`}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
               <MessageCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-800">TimeTuneAI</h1>
-              <p className="text-sm text-gray-500">Your AI Assistant</p>
+              <h1 className="text-lg font-bold text-gray-800 dark:text-gray-200">TimeTuneAI</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Your AI Assistant</p>
             </div>
           </div>
         </div>
@@ -57,8 +58,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   className={({ isActive }) =>
                     `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-orange-50 text-orange-600 border-r-4 border-orange-600'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-orange-500'
+                        ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-r-4 border-orange-600'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-orange-500'
                     }`
                   }
                 >
@@ -71,14 +72,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* User Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
               AJ
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-800">Alex Johnson</p>
-              <p className="text-xs text-gray-500">Pro Plan</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Alex Johnson</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Pro Plan</p>
             </div>
           </div>
         </div>

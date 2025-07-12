@@ -21,7 +21,7 @@ import Footer from './components/Footer';
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="font-sans text-gray-800 bg-yellow-50 antialiased overflow-x-hidden">
+    <div className="font-sans text-gray-800 dark:text-gray-200 bg-white dark:bg-slate-900 antialiased overflow-x-hidden transition-colors duration-200">
       <Header />
       <main>
         <Hero />
