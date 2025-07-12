@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Star, Users, Shield, Zap, ArrowRight, Play } from 'lucide-react';
+import { Download as DownloadIcon, Star, Users, Shield, Zap, ArrowRight, Play } from 'lucide-react';
 
 const Download: React.FC = () => {
   const stats = [
@@ -34,7 +34,7 @@ const Download: React.FC = () => {
           <div className="text-center lg:text-left space-y-8">
             {/* Badge */}
             <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
-              <Download className="w-4 h-4 text-orange-400" />
+              <DownloadIcon className="w-4 h-4 text-orange-400" />
               <span className="text-sm font-medium">Available Now</span>
             </div>
 
@@ -86,7 +86,7 @@ const Download: React.FC = () => {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative flex items-center justify-center space-x-3">
-                  <Download className="w-6 h-6" />
+                  <DownloadIcon className="w-6 h-6" />
                   <span className="text-lg">Download for Android</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
@@ -134,7 +134,7 @@ const Download: React.FC = () => {
                     {/* App Icon */}
                     <div className="text-center mb-6">
                       <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
-                        <Download className="w-12 h-12 text-white" />
+                        <DownloadIcon className="w-12 h-12 text-white" />
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900">TimeTuneAI</h3>
                       <p className="text-gray-600">Productivity</p>
