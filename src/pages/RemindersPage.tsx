@@ -112,7 +112,7 @@ const RemindersPage: React.FC = () => {
   return (
     <div className="h-full bg-gray-50 overflow-hidden flex flex-col">
       {/* Header Section - Responsive */}
-      <div className="bg-white border-b border-gray-200 p-3 sm:p-4 lg:p-6">
+      <div className="bg-white border-b border-gray-200 p-3 ">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
           <div className="text-center sm:text-left">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Reminders</h1>
@@ -124,64 +124,6 @@ const RemindersPage: React.FC = () => {
             <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="font-medium">New Reminder</span>
           </button>
-        </div>
-
-        {/* Search and View Toggle - Responsive */}
-        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-            <input
-              type="text"
-              placeholder="Search reminders..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base"
-            />
-          </div>
-          
-          <div className="flex items-center justify-center lg:justify-start">
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
-                  viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
-                }`}
-              >
-                List
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
-                  viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
-                }`}
-              >
-                Grid
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Category Filters - Responsive Horizontal Scroll */}
-        <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setFilterCategory(category.id)}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                filterCategory === category.id
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${category.color}`}></div>
-              <span>{category.name}</span>
-              <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
-                filterCategory === category.id ? 'bg-white/20' : 'bg-gray-100'
-              }`}>
-                {category.count}
-              </span>
-            </button>
-          ))}
         </div>
       </div>
 

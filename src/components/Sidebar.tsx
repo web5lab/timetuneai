@@ -12,8 +12,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navItems = [
     { to: '/app', icon: MessageCircle, label: 'Chat' },
     { to: '/app/reminders', icon: Calendar, label: 'Reminders' },
-    { to: '/app/notifications', icon: BellRing, label: 'Alerts' },
-    { to: '/app/profile', icon: User, label: 'Profile' },
   ];
 
   return (
