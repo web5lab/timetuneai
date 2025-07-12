@@ -34,34 +34,7 @@ const ProfilePage: React.FC = () => {
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      {/* Profile Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
-        <div className="px-4 lg:px-6 py-8">
-          <div className="flex flex-col items-center text-center">
-            <div className="relative mb-4">
-              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-white text-2xl font-bold backdrop-blur-sm">
-                AJ
-              </div>
-              <button className="absolute bottom-0 right-0 w-8 h-8 bg-white text-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-50 transition-colors">
-                <Camera className="w-4 h-4" />
-              </button>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">{profileData.name}</h1>
-            <p className="text-orange-100 mb-4">{profileData.email}</p>
-            <div className="flex items-center space-x-4 text-sm text-orange-100">
-              <div className="flex items-center space-x-1">
-                <Calendar className="w-4 h-4" />
-                <span>Joined {profileData.joinDate}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <MapPin className="w-4 h-4" />
-                <span>{profileData.location}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+     
       {/* Profile Content */}
       <div className="flex-1 overflow-y-auto p-4 lg:p-6">
         <div className="max-w-2xl mx-auto">

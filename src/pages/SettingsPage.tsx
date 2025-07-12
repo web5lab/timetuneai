@@ -60,20 +60,7 @@ const SettingsPage: React.FC = () => {
     <div className="h-full bg-gray-50 overflow-hidden flex flex-col">
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      
-      {/* Settings Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
-        <div className="px-4 lg:px-6 py-8">
-          <div className="flex items-center space-x-3">
-            <Settings className="w-8 h-8" />
-            <div>
-              <h1 className="text-2xl font-bold">Account Settings</h1>
-              <p className="text-orange-100">Customize your TimeTuneAI experience</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+     
       {/* Settings Content */}
       <div className="flex-1 overflow-y-auto p-4 lg:p-6">
         <div className="max-w-2xl mx-auto space-y-6">

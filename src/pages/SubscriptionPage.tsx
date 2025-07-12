@@ -69,13 +69,7 @@ const SubscriptionPage: React.FC = () => {
       {/* Subscription Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
         <div className="px-4 lg:px-6 py-8">
-          <div className="flex items-center space-x-3 mb-6">
-            <Crown className="w-8 h-8" />
-            <div>
-              <h1 className="text-2xl font-bold">Subscription</h1>
-              <p className="text-orange-100">Manage your TimeTuneAI subscription</p>
-            </div>
-          </div>
+        
           
           {/* Current Plan Status */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
