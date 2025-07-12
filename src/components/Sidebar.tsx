@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MessageCircle, Calendar, BellRing, User, Menu, X } from 'lucide-react';
+import { MessageCircle, Calendar, BellRing, User, Settings, Crown } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,6 +12,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navItems = [
     { to: '/app', icon: MessageCircle, label: 'Chat' },
     { to: '/app/reminders', icon: Calendar, label: 'Reminders' },
+    { to: '/app/profile', icon: User, label: 'Profile' },
+    { to: '/app/settings', icon: Settings, label: 'Settings' },
+    { to: '/app/subscription', icon: Crown, label: 'Subscription' },
   ];
 
   return (
