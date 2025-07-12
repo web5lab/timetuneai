@@ -185,15 +185,15 @@ const HomePage: React.FC = () => {
       {/* Input Area */}
       <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-end space-x-2 sm:space-x-3">
             <button
               onClick={toggleListening}
-              className={`p-4 rounded-full transition-all duration-300 shadow-lg ${isListening
-                  ? 'bg-red-500 text-white animate-pulse scale-110'
+              className={`p-3 sm:p-4 rounded-full transition-all duration-300 shadow-lg flex-shrink-0 ${isListening
+                  ? 'bg-red-500 text-white animate-pulse scale-110 ring-4 ring-red-200'
                   : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:scale-105'
                 }`}
             >
-              {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+              {isListening ? <MicOff className="w-5 h-5 sm:w-6 sm:h-6" /> : <Mic className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
 
             <div className="flex-1 relative">
@@ -202,28 +202,66 @@ const HomePage: React.FC = () => {
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your reminder or use voice..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none shadow-sm"
+                className="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none shadow-sm text-sm sm:text-base min-h-[48px] max-h-32"
                 rows={1}
+                style={{
+                  height: 'auto',
+                  minHeight: '48px'
+                }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  target.style.height = Math.min(target.scrollHeight, 128) + 'px';
+                }}
               />
+              
+              {/* Character count for mobile */}
+              {inputText.length > 0 && (
+                <div className="absolute bottom-1 right-2 text-xs text-gray-400">
+                  {inputText.length}/500
+                </div>
+              )}
             </div>
 
             <button
               onClick={() => handleSendMessage()}
               disabled={!inputText.trim()}
-              className="p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-105"
+              className="p-3 sm:p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-105 flex-shrink-0"
             >
-              <Send className="w-6 h-6" />
+              <Send className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
 
           {isListening && (
-            <div className="text-center mt-3">
-              <p className="text-sm text-gray-500 animate-pulse flex items-center justify-center">
+            <div className="text-center mt-2 sm:mt-3">
+              <p className="text-xs sm:text-sm text-gray-500 animate-pulse flex items-center justify-center">
                 <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-ping"></div>
                 🎤 Listening... Speak your reminder
               </p>
             </div>
           )}
+          
+          {/* Quick action buttons for mobile */}
+          <div className="flex sm:hidden justify-center space-x-2 mt-3">
+            <button
+              onClick={() => handleSendMessage("Remind me to drink water in 1 hour")}
+              className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
+            >
+              💧 Drink water
+            </button>
+            <button
+              onClick={() => handleSendMessage("Remind me about lunch at 12 PM")}
+              className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium hover:bg-green-200 transition-colors"
+            >
+              🍽️ Lunch
+            </button>
+            <button
+              onClick={() => handleSendMessage("Remind me to call mom tomorrow")}
+              className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium hover:bg-purple-200 transition-colors"
+            >
+              📞 Call mom
+            </button>
+          </div>
         </div>
       </div>
     </div>
