@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell, MoreVertical, Star, X } from 'lucide-react';
+import AppHeader from '../components/AppHeader';
+import Sidebar from '../components/Sidebar';
 
 interface Reminder {
   id: number;
@@ -14,6 +16,12 @@ interface Reminder {
 }
 
 const RemindersPage: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -112,6 +120,9 @@ const RemindersPage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 overflow-hidden flex flex-col">
+      <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      
       {/* Special Reminders Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
         <div className="px-4 lg:px-6 py-6">
