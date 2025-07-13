@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Check, X, Settings, Sync, Clock, AlertCircle, ExternalLink } from 'lucide-react';
+import { Calendar, Check, X, Settings, FolderSync as Sync, Clock, AlertCircle, ExternalLink } from 'lucide-react';
 import { useCalendar } from '../contexts/CalendarContext';
 
 const CalendarSync: React.FC = () => {
