@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, Shield, Trash2 } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
-import CalendarSync from '../components/CalendarSync';
 import { useTheme } from '../contexts/ThemeContext';
 
 const SettingsPage: React.FC = () => {
@@ -213,9 +212,6 @@ const SettingsPage: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Calendar Sync */}
-          <CalendarSync />
 
           {/* Privacy Settings */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200">
