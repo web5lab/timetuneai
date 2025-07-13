@@ -1,99 +1,71 @@
 import React, { useState } from 'react';
-import { Crown, Check, X, CreditCard, Calendar, Star, Gift, RefreshCw, AlertCircle } from 'lucide-react';
+import { Crown, Check, X, CreditCard, Calendar, Star, Gift } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
-import { usePayments } from '../hooks/usePayments';
 
 const SubscriptionPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const {
-    isInitialized,
-    isLoading,
-    subscriptionPlans,
-    currentSubscription,
-    error,
-    purchaseSubscription,
-    restorePurchases,
-    isSubscriptionActive,
-    clearError,
-  } = usePayments();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handlePurchase = async (productId: string) => {
-    clearError();
-    const result = await purchaseSubscription(productId);
-    
-    if (result.success) {
-      // Show success message
-      alert('Subscription purchased successfully!');
-    }
-  };
-
-  const handleRestorePurchases = async () => {
-    clearError();
-    const restored = await restorePurchases();
-    
-    if (restored) {
-      alert('Purchases restored successfully!');
-    }
-  };
-
-  // Add free plan to subscription plans
-  const allPlans = [
+  const plans = [
     {
-      id: 'free',
       name: 'Free',
-      price: '$0',
+      price: { monthly: 0, yearly: 0 },
       description: 'Perfect for getting started',
-      productId: '',
       features: [
-        'Up to 10 reminders per day',
-        'Basic voice commands',
-        'Standard notifications',
+        { text: 'Up to 10 reminders per day', included: true },
+        { text: 'Basic voice commands', included: true },
+        { text: 'Standard notifications', included: true },
+        { text: 'Calendar sync', included: false },
+        { text: 'Advanced AI features', included: false },
+        { text: 'Priority support', included: false },
       ],
-      current: !isSubscriptionActive(),
+      current: false,
       popular: false,
     },
-    ...subscriptionPlans.filter(plan => 
-      billingCycle === 'monthly' 
-        ? plan.id.includes('monthly') 
-        : plan.id.includes('yearly')
-    ).map(plan => ({
-      ...plan,
-      current: currentSubscription?.productId === plan.productId,
-      popular: plan.id.includes('pro'),
-    })),
+    {
+      name: 'Pro',
+      price: { monthly: 9.99, yearly: 99.99 },
+      description: 'For power users who want more',
+      features: [
+        { text: 'Unlimited reminders', included: true },
+        { text: 'Advanced voice commands', included: true },
+        { text: 'Smart notifications', included: true },
+        { text: 'Calendar sync', included: true },
+        { text: 'Advanced AI features', included: true },
+        { text: 'Priority support', included: false },
+      ],
+      current: true,
+      popular: true,
+    },
+    {
+      name: 'Premium',
+      price: { monthly: 19.99, yearly: 199.99 },
+      description: 'Ultimate productivity experience',
+      features: [
+        { text: 'Everything in Pro', included: true },
+        { text: 'Team collaboration', included: true },
+        { text: 'Advanced analytics', included: true },
+        { text: 'Custom integrations', included: true },
+        { text: 'White-label options', included: true },
+        { text: '24/7 priority support', included: true },
+      ],
+      current: false,
+      popular: false,
+    },
   ];
 
-  const currentPlan = allPlans.find(plan => plan.current);
+  const currentPlan = plans.find(plan => plan.current);
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      {/* Error Banner */}
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 lg:px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-              <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
-            </div>
-            <button
-              onClick={clearError}
-              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Subscription Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white shadow-lg">
         <div className="px-4 lg:px-6 py-8">
@@ -105,17 +77,13 @@ const SubscriptionPage: React.FC = () => {
               <div>
                 <h3 className="font-semibold text-lg">Current Plan: {currentPlan?.name}</h3>
                 <p className="text-orange-100 dark:text-orange-200 text-sm">
-                  {currentPlan?.name === 'Free' ? 'Upgrade to unlock more features' : 
-                   currentSubscription ? `Active since: ${new Date(currentSubscription.purchaseDate).toLocaleDateString()}` : 
-                   'Next billing: January 15, 2024'}
+                  {currentPlan?.name === 'Free' ? 'Upgrade to unlock more features' : 'Next billing: January 15, 2024'}
                 </p>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold">
-                  {currentPlan?.price}
-                  <span className="text-sm font-normal">
-                    {currentPlan?.name !== 'Free' ? `/${billingCycle === 'monthly' ? 'mo' : 'yr'}` : ''}
-                  </span>
+                  ${currentPlan?.price[billingCycle]}
+                  <span className="text-sm font-normal">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                 </div>
                 {currentPlan?.name !== 'Free' && (
                   <button className="text-sm text-orange-100 dark:text-orange-200 hover:text-white underline">
@@ -124,20 +92,6 @@ const SubscriptionPage: React.FC = () => {
                 )}
               </div>
             </div>
-            
-            {/* Restore Purchases Button */}
-            {isInitialized && (
-              <div className="mt-4 pt-4 border-t border-white/20">
-                <button
-                  onClick={handleRestorePurchases}
-                  disabled={isLoading}
-                  className="flex items-center space-x-2 text-sm text-orange-100 dark:text-orange-200 hover:text-white transition-colors"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                  <span>Restore Purchases</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -177,7 +131,7 @@ const SubscriptionPage: React.FC = () => {
 
           {/* Plans Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {allPlans.map((plan, index) => (
+            {plans.map((plan, index) => (
               <div
                 key={index}
                 className={`bg-white rounded-xl shadow-sm border p-6 relative ${
@@ -208,14 +162,14 @@ const SubscriptionPage: React.FC = () => {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{plan.name}</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{plan.description}</p>
                   <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {plan.price}
+                    ${plan.price[billingCycle]}
                     <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
-                      {plan.name !== 'Free' ? `/${billingCycle === 'monthly' ? 'month' : 'year'}` : ''}
+                      /{billingCycle === 'monthly' ? 'month' : 'year'}
                     </span>
                   </div>
-                  {billingCycle === 'yearly' && plan.name !== 'Free' && (
+                  {billingCycle === 'yearly' && plan.price.yearly > 0 && (
                     <p className="text-sm text-green-600 mt-1">
-                      Save 20% per year
+                      Save ${(plan.price.monthly * 12 - plan.price.yearly).toFixed(2)} per year
                     </p>
                   )}
                 </div>
@@ -223,31 +177,32 @@ const SubscriptionPage: React.FC = () => {
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-center">
-                      <Check className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                      <span className="text-gray-900 dark:text-gray-100">
-                        {feature}
+                      {feature.included ? (
+                        <Check className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
+                      ) : (
+                        <X className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
+                      )}
+                      <span className={feature.included ? 'text-gray-900' : 'text-gray-500'}>
+                        {feature.text}
+                      </span>
+                      <span className={feature.included ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-600'}>
+                        {feature.text}
                       </span>
                     </li>
                   ))}
                 </ul>
 
                 <button
-                  onClick={() => plan.productId && handlePurchase(plan.productId)}
-                  disabled={plan.current || isLoading || !isInitialized}
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
                     plan.current
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed'
-                      : !isInitialized
-                      ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                       : plan.popular
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
                       : 'bg-gray-900 dark:bg-slate-700 text-white hover:bg-gray-800 dark:hover:bg-slate-600'
                   }`}
+                  disabled={plan.current}
                 >
-                  {isLoading ? 'Processing...' : 
-                   plan.current ? 'Current Plan' : 
-                   !isInitialized ? 'Loading...' :
-                   plan.name === 'Free' ? 'Downgrade' : 'Upgrade'}
+                  {plan.current ? 'Current Plan' : plan.name === 'Free' ? 'Downgrade' : 'Upgrade'}
                 </button>
               </div>
             ))}
