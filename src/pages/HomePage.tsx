@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
+import Logo from '../components/Logo';
 import { useChat } from '../hooks/useChat';
 import { useVoice } from '../hooks/useVoice';
 
@@ -102,9 +103,7 @@ const HomePage: React.FC = () => {
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm transition-colors duration-200">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <Logo size="sm" variant="dark" showText={false} />
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-gray-100">TimeTuneAI Assistant</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">

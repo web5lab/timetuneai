@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle, Clock, Sparkles } from 'lucide-react';
+import Logo from './Logo';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -68,25 +68,17 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       <div className="text-center text-white z-10 px-8">
         {/* Logo */}
         <div className="mb-8 relative">
-          <div className="w-24 h-24 mx-auto bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-4 animate-bounce">
-            <MessageCircle className="w-12 h-12 text-white" />
-          </div>
-          
-          {/* Floating Icons */}
-          <div className="absolute -top-4 -right-4 w-8 h-8 bg-white/30 rounded-full flex items-center justify-center animate-float">
-            <Clock className="w-4 h-4 text-white" />
-          </div>
-          <div className="absolute -bottom-2 -left-4 w-6 h-6 bg-white/30 rounded-full flex items-center justify-center animate-float delay-300">
-            <Sparkles className="w-3 h-3 text-white" />
+          <div className="animate-bounce mb-4">
+            <Logo size="xl" variant="white" showText={false} className="justify-center" />
           </div>
         </div>
 
         {/* App Name */}
         <h1 className="text-4xl font-bold mb-2 tracking-wide">
-          TimeTuneAI
+          TimeTune<span className="text-yellow-300">AI</span>
         </h1>
         <p className="text-xl text-white/90 mb-12 font-light">
-          Your Intelligent Reminder Assistant
+          Your Smart Reminder Assistant
         </p>
 
         {/* Loading Progress */}

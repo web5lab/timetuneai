@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, Settings, User, Menu, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import Logo from './Logo';
 
 interface AppHeaderProps {
   onToggleSidebar: () => void;
@@ -33,6 +34,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onToggleSidebar, isSidebarOpen })
             >
               {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+            
+            {/* Logo for mobile when sidebar is closed */}
+            <div className="lg:hidden flex-1">
+              {!isSidebarOpen && (
+                <Logo size="sm" variant="white" showText={true} />
+              )}
+            </div>
+            
             {/* Header Actions */}
             <div className="flex items-center space-x-2">
               {/* Theme Toggle */}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MessageCircle, Calendar, BellRing, User, Settings, Crown } from 'lucide-react';
+import { Calendar, BellRing, User, Settings, Crown } from 'lucide-react';
+import Logo from './Logo';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,15 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Logo */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-800 dark:text-gray-200">TimeTuneAI</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Your AI Assistant</p>
-            </div>
-          </div>
+          <Logo size="md" variant="dark" showText={true} />
         </div>
 
         {/* Navigation */}
