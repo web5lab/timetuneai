@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import type { Reminder } from '../contexts/RemindersContext';
 
 const getApiKey = () => {
   return 'AIzaSyDpj_YVxGgUxTsmcHCgPEbzkSspl1il4vo'
@@ -24,10 +25,11 @@ const initializeGenAI = () => {
 const SYSTEM_PROMPT = `You are TimeTuneAI, an intelligent reminder assistant. Your primary role is to help users create, manage, and organize reminders through natural conversation.
 
 CORE RESPONSIBILITIES:
-1. Parse natural language to extract reminder details (title, date, time, description)
-2. Confirm reminder details with users before setting them
+1. Parse natural language to extract reminder details (title, date, time, description, priority, category)
+2. Create, update, delete, and manage reminders based on user requests
 3. Provide helpful suggestions for reminder optimization
 4. Be conversational, friendly, and efficient
+5. Handle reminder queries like "show my reminders", "delete the meeting reminder", etc.
 
 REMINDER EXTRACTION RULES:
 - Extract: title, description, date, time, priority (high/medium/low), category (work/personal/health/other)
@@ -35,13 +37,61 @@ REMINDER EXTRACTION RULES:
 - Handle recurring patterns: "daily", "weekly", "every Monday", etc.
 - Default to medium priority if not specified
 - Default to personal category if not specified
+- For dates: use YYYY-MM-DD format
+- For times: use HH:MM format (24-hour)
 
-RESPONSE FORMAT:
-When a user wants to set a reminder, respond with:
-1. Confirmation of what you understood
-2. Ask for any missing critical information (date/time)
-3. Suggest improvements if helpful
-4. Confirm before "setting" the reminder
+FUNCTION CALLING:
+You can perform these actions by responding with JSON in this format:
+
+CREATE REMINDER:
+{
+  "action": "create_reminder",
+  "data": {
+    "title": "Call mom",
+    "description": "Weekly check-in call",
+    "date": "2024-01-16",
+    "time": "15:00",
+    "priority": "medium",
+    "category": "personal",
+    "isRecurring": false,
+    "recurrencePattern": ""
+  },
+  "message": "Perfect! I've set a reminder for you to call mom tomorrow at 3:00 PM."
+}
+
+UPDATE REMINDER:
+{
+  "action": "update_reminder",
+  "data": {
+    "query": "meeting reminder",
+    "updates": {
+      "time": "14:00",
+      "priority": "high"
+    }
+  },
+  "message": "I've updated your meeting reminder to 2:00 PM and marked it as high priority."
+}
+
+DELETE REMINDER:
+{
+  "action": "delete_reminder",
+  "data": {
+    "query": "call mom"
+  },
+  "message": "I've deleted the reminder to call mom."
+}
+
+LIST REMINDERS:
+{
+  "action": "list_reminders",
+  "data": {
+    "filter": "today" // or "all", "completed", "pending", "work", "personal", etc.
+  },
+  "message": "Here are your reminders for today:"
+}
+
+REGULAR CONVERSATION:
+For general questions or when no action is needed, respond normally without JSON.
 
 CONVERSATION STYLE:
 - Be warm, helpful, and encouraging
@@ -50,14 +100,21 @@ CONVERSATION STYLE:
 - Acknowledge successful reminder creation
 - Offer related suggestions when appropriate
 
-EXAMPLE INTERACTIONS:
-User: "Remind me to call mom tomorrow at 3 PM"
-You: "Perfect! I'll set a reminder for you to call mom tomorrow at 3:00 PM. Would you like me to add a 15-minute heads-up notification as well?"
+IMPORTANT: Always respond with either valid JSON for actions or regular text for conversation. Never mix both in the same response.`;
 
-User: "Set up a daily water reminder"
-You: "Great choice for staying healthy! I'll create a daily water reminder for you. What time would work best? I'd suggest every 2 hours starting at 8 AM."
+export interface ReminderAction {
+  action: 'create_reminder' | 'update_reminder' | 'delete_reminder' | 'list_reminders';
+  data: any;
+  message: string;
+}
 
-Remember: You're simulating reminder creation. Be enthusiastic about helping users stay organized!`;
+interface GeminiServiceCallbacks {
+  addReminder?: (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  updateReminder?: (id: string, updates: Partial<Reminder>) => void;
+  deleteReminder?: (id: string) => void;
+  findReminders?: (query: string) => Reminder[];
+  getAllReminders?: () => Reminder[];
+}
 
 export interface ReminderData {
   title: string;
@@ -73,6 +130,7 @@ export interface ReminderData {
 export class GeminiService {
   private model;
   private chat;
+  private callbacks: GeminiServiceCallbacks = {};
 
   constructor() {
     this.initializeModel();
@@ -109,6 +167,167 @@ export class GeminiService {
     });
   }
 
+  setCallbacks(callbacks: GeminiServiceCallbacks) {
+    this.callbacks = callbacks;
+  }
+
+  private parseDate(dateStr: string): string {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const lowerDate = dateStr.toLowerCase();
+    
+    if (lowerDate.includes('today')) {
+      return today.toISOString().split('T')[0];
+    } else if (lowerDate.includes('tomorrow')) {
+      return tomorrow.toISOString().split('T')[0];
+    } else if (lowerDate.includes('next week')) {
+      const nextWeek = new Date(today);
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      return nextWeek.toISOString().split('T')[0];
+    }
+    
+    // Try to parse as date
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split('T')[0];
+    }
+    
+    return today.toISOString().split('T')[0];
+  }
+
+  private parseTime(timeStr: string): string {
+    // Handle common time formats
+    const time = timeStr.toLowerCase().replace(/\s+/g, '');
+    
+    // Handle AM/PM format
+    if (time.includes('am') || time.includes('pm')) {
+      const isPM = time.includes('pm');
+      const numericTime = time.replace(/[ap]m/, '');
+      let [hours, minutes = '00'] = numericTime.split(':');
+      
+      hours = parseInt(hours);
+      if (isPM && hours !== 12) hours += 12;
+      if (!isPM && hours === 12) hours = 0;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+    
+    // Handle 24-hour format
+    if (time.includes(':')) {
+      return time;
+    }
+    
+    // Default to current time + 1 hour
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  }
+
+  private async executeAction(actionData: ReminderAction): Promise<string> {
+    try {
+      switch (actionData.action) {
+        case 'create_reminder': {
+          if (!this.callbacks.addReminder) {
+            return "I'm sorry, I can't create reminders right now. Please try again.";
+          }
+          
+          const reminderData = {
+            title: actionData.data.title,
+            description: actionData.data.description || '',
+            date: this.parseDate(actionData.data.date),
+            time: this.parseTime(actionData.data.time),
+            priority: actionData.data.priority || 'medium',
+            category: actionData.data.category || 'personal',
+            isCompleted: false,
+            isRecurring: actionData.data.isRecurring || false,
+            recurrencePattern: actionData.data.recurrencePattern || '',
+          };
+          
+          const id = this.callbacks.addReminder(reminderData);
+          return actionData.message + ` (ID: ${id})`;
+        }
+        
+        case 'update_reminder': {
+          if (!this.callbacks.findReminders || !this.callbacks.updateReminder) {
+            return "I'm sorry, I can't update reminders right now. Please try again.";
+          }
+          
+          const reminders = this.callbacks.findReminders(actionData.data.query);
+          if (reminders.length === 0) {
+            return `I couldn't find any reminders matching "${actionData.data.query}".`;
+          }
+          
+          const reminder = reminders[0]; // Update the first match
+          this.callbacks.updateReminder(reminder.id, actionData.data.updates);
+          return actionData.message;
+        }
+        
+        case 'delete_reminder': {
+          if (!this.callbacks.findReminders || !this.callbacks.deleteReminder) {
+            return "I'm sorry, I can't delete reminders right now. Please try again.";
+          }
+          
+          const reminders = this.callbacks.findReminders(actionData.data.query);
+          if (reminders.length === 0) {
+            return `I couldn't find any reminders matching "${actionData.data.query}".`;
+          }
+          
+          const reminder = reminders[0]; // Delete the first match
+          this.callbacks.deleteReminder(reminder.id);
+          return actionData.message;
+        }
+        
+        case 'list_reminders': {
+          if (!this.callbacks.getAllReminders) {
+            return "I'm sorry, I can't list reminders right now. Please try again.";
+          }
+          
+          const allReminders = this.callbacks.getAllReminders();
+          const filter = actionData.data.filter || 'all';
+          
+          let filteredReminders = allReminders;
+          const today = new Date().toISOString().split('T')[0];
+          
+          switch (filter) {
+            case 'today':
+              filteredReminders = allReminders.filter(r => r.date === today);
+              break;
+            case 'completed':
+              filteredReminders = allReminders.filter(r => r.isCompleted);
+              break;
+            case 'pending':
+              filteredReminders = allReminders.filter(r => !r.isCompleted);
+              break;
+            case 'work':
+              filteredReminders = allReminders.filter(r => r.category === 'work');
+              break;
+            case 'personal':
+              filteredReminders = allReminders.filter(r => r.category === 'personal');
+              break;
+          }
+          
+          if (filteredReminders.length === 0) {
+            return `You don't have any ${filter === 'all' ? '' : filter + ' '}reminders.`;
+          }
+          
+          const remindersList = filteredReminders
+            .slice(0, 5) // Limit to 5 reminders
+            .map(r => `• ${r.title} - ${r.date} at ${r.time} (${r.priority} priority)`)
+            .join('\n');
+          
+          return `${actionData.message}\n\n${remindersList}${filteredReminders.length > 5 ? '\n\n...and more in your reminders page.' : ''}`;
+        }
+        
+        default:
+          return "I'm sorry, I don't understand that action.";
+      }
+    } catch (error) {
+      console.error('Error executing action:', error);
+      return "I'm sorry, something went wrong while processing your request.";
+    }
+  }
   async sendMessage(message: string): Promise<string> {
     try {
       const apiKey = getApiKey();
@@ -125,7 +344,19 @@ export class GeminiService {
 
       const result = await this.chat.sendMessage(message);
       const response = await result.response;
-      return response.text();
+      const responseText = response.text();
+      
+      // Try to parse as JSON action
+      try {
+        const actionData = JSON.parse(responseText);
+        if (actionData.action && actionData.message) {
+          return await this.executeAction(actionData);
+        }
+      } catch (e) {
+        // Not JSON, return as regular response
+      }
+      
+      return responseText;
     } catch (error) {
       console.error('Error sending message to Gemini:', error);
       
@@ -137,20 +368,43 @@ export class GeminiService {
   private getFallbackResponse(message: string): string {
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('remind') && (lowerMessage.includes('call') || lowerMessage.includes('phone'))) {
-      return "Perfect! I've set that call reminder for you. You'll get a notification at the specified time. Would you like me to add a 15-minute heads-up notification as well?";
-    } else if (lowerMessage.includes('daily') || lowerMessage.includes('every day')) {
-      return "Great! I've created a recurring daily reminder for you. You can manage all your recurring reminders in the Reminders tab. Is there a specific time you'd prefer?";
-    } else if (lowerMessage.includes('water') || lowerMessage.includes('drink')) {
-      return "Excellent choice for staying healthy! I've set your water reminder. Staying hydrated is so important. Would you like me to set up multiple reminders throughout the day?";
-    } else if (lowerMessage.includes('meeting') || lowerMessage.includes('appointment')) {
-      return "Perfect! I've scheduled that reminder for you. You'll receive a notification at the right time. Should I also add this to your calendar?";
-    } else if (lowerMessage.includes('workout') || lowerMessage.includes('exercise') || lowerMessage.includes('gym')) {
-      return "Love the commitment to fitness! I've scheduled your workout reminder. Regular exercise is key to a healthy lifestyle. Should I make this a recurring reminder?";
+    if (lowerMessage.includes('list') || lowerMessage.includes('show') || lowerMessage.includes('my reminders')) {
+      if (this.callbacks.getAllReminders) {
+        const reminders = this.callbacks.getAllReminders();
+        if (reminders.length === 0) {
+          return "You don't have any reminders yet. Would you like me to create one for you?";
+        }
+        const remindersList = reminders
+          .slice(0, 3)
+          .map(r => `• ${r.title} - ${r.date} at ${r.time}`)
+          .join('\n');
+        return `Here are your recent reminders:\n\n${remindersList}${reminders.length > 3 ? '\n\n...and more in your reminders page.' : ''}`;
+      }
+    } else if (lowerMessage.includes('delete') || lowerMessage.includes('remove')) {
+      return "I can help you delete reminders! Please tell me which reminder you'd like to remove, for example: 'Delete my meeting reminder' or 'Remove the call mom reminder'.";
+    } else if (lowerMessage.includes('update') || lowerMessage.includes('change') || lowerMessage.includes('modify')) {
+      return "I can help you update your reminders! Tell me which reminder you want to change and what you'd like to update. For example: 'Change my meeting time to 3 PM' or 'Update the call mom reminder to high priority'.";
     } else if (lowerMessage.includes('remind')) {
-      return "Got it! I've processed your request and set up the reminder. You'll receive a notification at the right time. Anything else you'd like me to help you remember?";
+      // Try to create a basic reminder with fallback
+      if (this.callbacks.addReminder) {
+        const reminderData = {
+          title: message.replace(/remind me to /i, '').replace(/remind me /i, ''),
+          description: '',
+          date: new Date().toISOString().split('T')[0],
+          time: '09:00',
+          priority: 'medium' as const,
+          category: 'personal' as const,
+          isCompleted: false,
+          isRecurring: false,
+          recurrencePattern: '',
+        };
+        
+        const id = this.callbacks.addReminder(reminderData);
+        return `I've created a reminder for you: "${reminderData.title}". I set it for today at 9:00 AM. You can update the time and date in your reminders page if needed.`;
+      }
+      return "I understand you want to set a reminder. Could you please provide more details like the date and time? For example: 'Remind me to call mom tomorrow at 3 PM'.";
     } else {
-      return "I understand! I've processed your request and I'm here to help you stay organized. You can ask me to set reminders using natural language - just tell me what you need to remember and when. What would you like me to help you with?";
+      return "I'm here to help you manage your reminders! You can ask me to create, update, delete, or list your reminders. Try saying something like 'Remind me to call mom tomorrow at 3 PM' or 'Show me my reminders'.";
     }
   }
 

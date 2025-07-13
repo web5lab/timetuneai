@@ -2,18 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell, MoreVertical, Star, X } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
-
-interface Reminder {
-  id: number;
-  title: string;
-  description: string;
-  time: string;
-  date: string;
-  priority: 'high' | 'medium' | 'low';
-  category: string;
-  completed: boolean;
-  recurring: boolean;
-}
+import { useReminders } from '../contexts/RemindersContext';
 
 const RemindersPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -26,52 +15,7 @@ const RemindersPage: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [reminders, setReminders] = useState<Reminder[]>([
-    {
-      id: 1,
-      title: 'Team Meeting',
-      description: 'Weekly team sync meeting with product updates',
-      time: '2:00 PM',
-      date: '2024-01-15',
-      priority: 'high',
-      category: 'work',
-      completed: false,
-      recurring: true,
-    },
-    {
-      id: 2,
-      title: 'Call Dentist',
-      description: 'Schedule dental checkup appointment',
-      time: '4:30 PM',
-      date: '2024-01-15',
-      priority: 'medium',
-      category: 'health',
-      completed: false,
-      recurring: false,
-    },
-    {
-      id: 3,
-      title: 'Buy Groceries',
-      description: 'Weekly grocery shopping - milk, bread, fruits',
-      time: '6:00 PM',
-      date: '2024-01-15',
-      priority: 'low',
-      category: 'personal',
-      completed: false,
-      recurring: true,
-    },
-    {
-      id: 4,
-      title: 'Morning Workout',
-      description: 'Gym session - chest and triceps',
-      time: '7:00 AM',
-      date: '2024-01-15',
-      priority: 'medium',
-      category: 'health',
-      completed: true,
-      recurring: true,
-    },
-  ]);
+  const { reminders, toggleComplete, deleteReminder: removeReminder, addReminder } = useReminders();
 
   const categories = [
     { id: 'all', name: 'All', count: reminders.length, color: 'bg-gray-500' },
@@ -82,19 +26,17 @@ const RemindersPage: React.FC = () => {
 
   const filteredReminders = reminders.filter(reminder => {
     const matchesSearch = reminder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         reminder.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         reminder.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || reminder.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const toggleComplete = (id: number) => {
-    setReminders(prev => prev.map(reminder =>
-      reminder.id === id ? { ...reminder, completed: !reminder.completed } : reminder
-    ));
+  const handleToggleComplete = (id: string) => {
+    toggleComplete(id);
   };
 
-  const deleteReminder = (id: number) => {
-    setReminders(prev => prev.filter(reminder => reminder.id !== id));
+  const handleDeleteReminder = (id: string) => {
+    removeReminder(id);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -115,8 +57,8 @@ const RemindersPage: React.FC = () => {
     }
   };
 
-  const upcomingReminders = filteredReminders.filter(r => !r.completed);
-  const completedReminders = filteredReminders.filter(r => r.completed);
+  const upcomingReminders = filteredReminders.filter(r => !r.isCompleted);
+  const completedReminders = filteredReminders.filter(r => r.isCompleted);
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
@@ -277,10 +219,10 @@ const RemindersPage: React.FC = () => {
                   <div className="flex items-start justify-between mb-2 sm:mb-3 lg:mb-4">
                     <div className="flex items-center space-x-2 sm:space-x-3">
                       <button
-                        onClick={() => toggleComplete(reminder.id)}
+                        onClick={() => handleToggleComplete(reminder.id)}
                         className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full border-2 border-gray-300 dark:border-gray-600 hover:border-orange-500 transition-colors flex items-center justify-center flex-shrink-0"
                       >
-                        {reminder.completed && <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-green-500" />}
+                        {reminder.isCompleted && <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-green-500" />}
                       </button>
                       <span className="text-base sm:text-lg lg:text-2xl">{getCategoryIcon(reminder.category)}</span>
                     </div>
@@ -308,7 +250,7 @@ const RemindersPage: React.FC = () => {
                         <span>{new Date(reminder.date).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    {reminder.recurring && (
+                    {reminder.isRecurring && (
                       <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium self-start sm:self-auto">
                         Recurring
                       </span>
@@ -325,7 +267,7 @@ const RemindersPage: React.FC = () => {
                       </button>
                     </div>
                     <button
-                      onClick={() => deleteReminder(reminder.id)}
+                      onClick={() => handleDeleteReminder(reminder.id)}
                       className="p-1 sm:p-1.5 lg:p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                     >
                       <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -362,7 +304,7 @@ const RemindersPage: React.FC = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => deleteReminder(reminder.id)}
+                      onClick={() => handleDeleteReminder(reminder.id)}
                       className="p-1 sm:p-1.5 lg:p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all flex-shrink-0"
                     >
                       <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />

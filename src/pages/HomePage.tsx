@@ -225,14 +225,14 @@ const HomePage: React.FC = () => {
           {/* Quick action buttons for mobile */}
           <div className="flex sm:hidden justify-center space-x-2 mt-3">
             <button
-              onClick={() => !isLoading && handleSendMessage("Remind me to drink water in 1 hour")}
+              onClick={() => !isLoading && handleSendMessage("Remind me to drink water at 3 PM today")}
               disabled={isLoading}
               className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
             >
               💧 Drink water
             </button>
             <button
-              onClick={() => !isLoading && handleSendMessage("Remind me about lunch at 12 PM")}
+              onClick={() => !isLoading && handleSendMessage("Remind me about lunch at 12 PM today")}
               disabled={isLoading}
               className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium hover:bg-green-200 transition-colors"
             >
@@ -244,6 +244,13 @@ const HomePage: React.FC = () => {
               className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium hover:bg-purple-200 transition-colors"
             >
               📞 Call mom
+            </button>
+            <button
+              onClick={() => !isLoading && handleSendMessage("Show me my reminders")}
+              disabled={isLoading}
+              className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-medium hover:bg-orange-200 transition-colors"
+            >
+              📋 My reminders
             </button>
           </div>
         </div>

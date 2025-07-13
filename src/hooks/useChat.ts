@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { geminiService } from '../services/geminiService';
+import { useReminders } from '../contexts/RemindersContext';
 
 export interface Message {
   id: number;
@@ -13,7 +14,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm TimeTuneAI, your personal reminder assistant. I can help you set reminders using natural language. Try saying something like 'Remind me to call mom at 3 PM tomorrow' or just type it!",
+      text: "Hi! I'm TimeTuneAI, your personal reminder assistant. I can help you create, update, delete, and manage your reminders using natural language. Try saying something like 'Remind me to call mom at 3 PM tomorrow' or 'Show me my reminders'!",
       sender: 'ai',
       timestamp: new Date(),
       type: 'suggestion'
@@ -21,6 +22,18 @@ export const useChat = () => {
   ]);
   
   const [isLoading, setIsLoading] = useState(false);
+  const { addReminder, updateReminder, deleteReminder, findReminders, reminders } = useReminders();
+
+  // Set up callbacks for the Gemini service
+  useState(() => {
+    geminiService.setCallbacks({
+      addReminder,
+      updateReminder,
+      deleteReminder,
+      findReminders,
+      getAllReminders: () => reminders,
+    });
+  });
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -42,9 +55,9 @@ export const useChat = () => {
       
       // Determine message type based on content
       let messageType: 'reminder' | 'confirmation' | 'suggestion' = 'suggestion';
-      if (aiResponse.toLowerCase().includes('set') || aiResponse.toLowerCase().includes('created') || aiResponse.toLowerCase().includes('scheduled')) {
+      if (aiResponse.toLowerCase().includes('set') || aiResponse.toLowerCase().includes('created') || aiResponse.toLowerCase().includes('scheduled') || aiResponse.toLowerCase().includes('reminder')) {
         messageType = 'confirmation';
-      } else if (text.toLowerCase().includes('remind')) {
+      } else if (text.toLowerCase().includes('remind') || text.toLowerCase().includes('delete') || text.toLowerCase().includes('update')) {
         messageType = 'reminder';
       }
 
@@ -73,13 +86,13 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addReminder, updateReminder, deleteReminder, findReminders, reminders]);
 
   const clearChat = useCallback(() => {
     setMessages([
       {
         id: 1,
-        text: "Hi! I'm TimeTuneAI, your personal reminder assistant. I can help you set reminders using natural language. Try saying something like 'Remind me to call mom at 3 PM tomorrow' or just type it!",
+        text: "Hi! I'm TimeTuneAI, your personal reminder assistant. I can help you create, update, delete, and manage your reminders using natural language. Try saying something like 'Remind me to call mom at 3 PM tomorrow' or 'Show me my reminders'!",
         sender: 'ai',
         timestamp: new Date(),
         type: 'suggestion'
