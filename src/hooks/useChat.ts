@@ -25,7 +25,7 @@ export const useChat = () => {
   const { addReminder, updateReminder, deleteReminder, findReminders, reminders } = useReminders();
 
   // Set up callbacks for the Gemini service
-  useState(() => {
+  useEffect(() => {
     geminiService.setCallbacks({
       addReminder,
       updateReminder,
@@ -33,7 +33,7 @@ export const useChat = () => {
       findReminders,
       getAllReminders: () => reminders,
     });
-  });
+  }, [addReminder, updateReminder, deleteReminder, findReminders, reminders]);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;

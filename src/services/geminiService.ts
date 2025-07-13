@@ -348,12 +348,43 @@ export class GeminiService {
       
       // Try to parse as JSON action
       try {
-        const actionData = JSON.parse(responseText);
+        // Clean up the response text to extract JSON
+        let cleanedResponse = responseText.trim();
+        
+        // Look for JSON patterns in the response
+        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const jsonString = jsonMatch[0];
+          const actionData = JSON.parse(jsonString);
+          
+          if (actionData.action && actionData.message) {
+            return await this.executeAction(actionData);
+          }
+        }
+        
+        // If no JSON found, try parsing the entire response
+        const actionData = JSON.parse(cleanedResponse);
         if (actionData.action && actionData.message) {
           return await this.executeAction(actionData);
         }
       } catch (e) {
-        // Not JSON, return as regular response
+        // Not valid JSON, check if it contains JSON-like content
+        if (responseText.includes('"action"') && responseText.includes('"create_reminder"')) {
+          // Try to extract and fix malformed JSON
+          try {
+            const jsonStart = responseText.indexOf('{');
+            const jsonEnd = responseText.lastIndexOf('}') + 1;
+            if (jsonStart !== -1 && jsonEnd > jsonStart) {
+              const jsonPart = responseText.substring(jsonStart, jsonEnd);
+              const actionData = JSON.parse(jsonPart);
+              if (actionData.action && actionData.message) {
+                return await this.executeAction(actionData);
+              }
+            }
+          } catch (parseError) {
+            console.error('Failed to parse extracted JSON:', parseError);
+          }
+        }
       }
       
       return responseText;
