@@ -82,12 +82,13 @@ export class GeminiService {
     if (initializeGenAI() && genAI) {
       this.model = genAI.getGenerativeModel({ 
         model: "ggemini-2.5-flash",
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        },
+       generationConfig: {
+      maxOutputTokens: 65536,
+      temperature: 1,
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+    }
       });
       this.initializeChat();
     }
