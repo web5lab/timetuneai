@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { notificationService } from '../services/notificationService';
 
 export interface Reminder {
   id: string;
@@ -125,20 +126,50 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
 
   const addReminder = (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>): string => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const newReminder = {
+      ...reminder,
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
     dispatch({ type: 'ADD_REMINDER', payload: reminder });
+    
+    // Schedule notification for the new reminder
+    if (!newReminder.isCompleted) {
+      notificationService.scheduleReminderNotification(newReminder);
+    }
+    
     return id;
   };
 
   const updateReminder = (id: string, updates: Partial<Reminder>) => {
     dispatch({ type: 'UPDATE_REMINDER', payload: { id, updates } });
+    
+    // Update notification
+    const updatedReminder = state.reminders.find(r => r.id === id);
+    if (updatedReminder) {
+      const finalReminder = { ...updatedReminder, ...updates };
+      notificationService.updateReminderNotification(finalReminder);
+    }
   };
 
   const deleteReminder = (id: string) => {
     dispatch({ type: 'DELETE_REMINDER', payload: id });
+    
+    // Cancel notification
+    notificationService.cancelReminderNotification(id);
   };
 
   const toggleComplete = (id: string) => {
     dispatch({ type: 'TOGGLE_COMPLETE', payload: id });
+    
+    // Update notification based on completion status
+    const reminder = state.reminders.find(r => r.id === id);
+    if (reminder) {
+      const updatedReminder = { ...reminder, isCompleted: !reminder.isCompleted };
+      notificationService.updateReminderNotification(updatedReminder);
+    }
   };
 
   const findReminders = (query: string): Reminder[] => {

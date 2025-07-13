@@ -3,6 +3,7 @@ import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, S
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
 import { useTheme } from '../contexts/ThemeContext';
+import { notificationService } from '../services/notificationService';
 
 const SettingsPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,6 +46,13 @@ const SettingsPage: React.FC = () => {
     // Update theme when appearance.theme changes
     if (category === 'appearance' && key === 'theme') {
       setTheme(value);
+    }
+    
+    // Handle notification permission changes
+    if (category === 'notifications' && key === 'push') {
+      if (value) {
+        notificationService.initialize();
+      }
     }
   };
 

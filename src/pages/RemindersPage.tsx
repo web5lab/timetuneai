@@ -3,9 +3,11 @@ import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
 import { useReminders } from '../contexts/RemindersContext';
+import { useNotifications } from '../hooks/useNotifications';
 
 const RemindersPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isPermissionGranted, requestPermission } = useNotifications();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -60,6 +62,8 @@ const RemindersPage: React.FC = () => {
   const upcomingReminders = filteredReminders.filter(r => !r.isCompleted);
   const completedReminders = filteredReminders.filter(r => r.isCompleted);
 
+  // Show notification permission banner if not granted
+  const showNotificationBanner = !isPermissionGranted && upcomingReminders.length > 0;
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
@@ -84,6 +88,31 @@ const RemindersPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Notification Permission Banner */}
+      {showNotificationBanner && (
+        <div className="bg-orange-50 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800 px-4 lg:px-6 py-3 transition-colors duration-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Bell className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              <div>
+                <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                  Enable notifications to get reminded on time
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">
+                  You'll receive alerts when your reminders are due
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={requestPermission}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              Enable
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Category Filters */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-colors duration-200">
