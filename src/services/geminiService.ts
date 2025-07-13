@@ -81,7 +81,7 @@ export class GeminiService {
   private initializeModel() {
     if (initializeGenAI() && genAI) {
       this.model = genAI.getGenerativeModel({ 
-        model: "gemini-pro",
+        model: "ggemini-2.5-flash",
         generationConfig: {
           temperature: 0.7,
           topK: 40,
