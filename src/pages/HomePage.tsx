@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX, Moon, Sun } from 'lucide-react';
 import Logo from '../components/Logo';
+import VoiceInputModal from '../components/VoiceInputModal';
 import { useChat } from '../hooks/useChat';
 import { useVoice } from '../hooks/useVoice';
 import { useTheme } from '../contexts/ThemeContext';
@@ -21,6 +22,7 @@ const HomePage: React.FC = () => {
   } = useVoice();
   const [inputText, setInputText] = useState('');
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -62,21 +64,29 @@ const HomePage: React.FC = () => {
   };
 
   const handleVoiceToggle = async () => {
-    console.log('Voice toggle clicked, current listening state:', isListening);
-    
-    // Prevent rapid clicking
-    if (isLoading) {
-      console.log('Currently loading, ignoring voice toggle');
-      return;
+    setShowVoiceModal(true);
+  };
+
+  const handleVoiceModalClose = () => {
+    setShowVoiceModal(false);
+    if (isListening) {
+      toggleListening();
     }
-    
-    await toggleListening((text) => {
-      // Auto-send when voice recognition completes
-      if (text.trim()) {
-        console.log('Auto-sending voice result:', text);
-        handleSendMessage(text);
-      }
-    });
+  };
+
+  const handleVoiceModalSend = (text: string) => {
+    handleSendMessage(text);
+    setShowVoiceModal(false);
+  };
+
+  const handleStartListening = () => {
+    toggleListening();
+  };
+
+  const handleStopListening = () => {
+    if (isListening) {
+      toggleListening();
+    }
   };
 
   const handleSpeakToggle = async () => {
@@ -276,6 +286,17 @@ const HomePage: React.FC = () => {
         </div>
 
         <BottomNavigation />
+
+        {/* Voice Input Modal */}
+        <VoiceInputModal
+          isOpen={showVoiceModal}
+          isListening={isListening}
+          transcribedText={transcribedText}
+          onClose={handleVoiceModalClose}
+          onSend={handleVoiceModalSend}
+          onStartListening={handleStartListening}
+          onStopListening={handleStopListening}
+        />
       </div>
     </div>
   );
