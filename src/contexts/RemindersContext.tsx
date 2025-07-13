@@ -126,6 +126,8 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
 
   const addReminder = (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>): string => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    console.log('RemindersContext: Adding reminder with ID:', id, reminder);
+    
     const newReminder = {
       ...reminder,
       id,
@@ -135,11 +137,13 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
     
     dispatch({ type: 'ADD_REMINDER', payload: reminder });
     
+    console.log('RemindersContext: Reminder added, scheduling notification...');
     // Schedule notification for the new reminder
     if (!newReminder.isCompleted) {
       notificationService.scheduleReminderNotification(newReminder);
     }
     
+    console.log('RemindersContext: Returning ID:', id);
     return id;
   };
 

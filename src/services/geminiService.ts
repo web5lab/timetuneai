@@ -227,17 +227,22 @@ export class GeminiService {
 
   private async executeAction(actionData: ReminderAction): Promise<string> {
     try {
+      console.log('Executing action:', actionData);
+      
       switch (actionData.action) {
         case 'create_reminder': {
           if (!this.callbacks.addReminder) {
+            console.error('addReminder callback not available');
             return "I'm sorry, I can't create reminders right now. Please try again.";
           }
+          
+          console.log('Creating reminder with data:', actionData.data);
           
           const reminderData = {
             title: actionData.data.title,
             description: actionData.data.description || '',
-            date: this.parseDate(actionData.data.date),
-            time: this.parseTime(actionData.data.time),
+            date: this.parseDate(actionData.data.date || 'today'),
+            time: this.parseTime(actionData.data.time || '09:00'),
             priority: actionData.data.priority || 'medium',
             category: actionData.data.category || 'personal',
             isCompleted: false,
@@ -245,7 +250,10 @@ export class GeminiService {
             recurrencePattern: actionData.data.recurrencePattern || '',
           };
           
+          console.log('Parsed reminder data:', reminderData);
+          
           const id = this.callbacks.addReminder(reminderData);
+          console.log('Reminder created with ID:', id);
           return actionData.message + ` (ID: ${id})`;
         }
         
@@ -330,6 +338,8 @@ export class GeminiService {
   }
   async sendMessage(message: string): Promise<string> {
     try {
+      console.log('Gemini service sending message:', message);
+      
       const apiKey = getApiKey();
       if (!apiKey || apiKey === 'your_gemini_api_key_here') {
         return "I'm sorry, but I need an API key to function properly. Please add your Gemini API key to the environment variables.";
@@ -346,38 +356,50 @@ export class GeminiService {
       const response = await result.response;
       const responseText = response.text();
       
+      console.log('Raw Gemini response:', responseText);
+      
       // Try to parse as JSON action
       try {
         // Clean up the response text to extract JSON
         let cleanedResponse = responseText.trim();
         
+        console.log('Attempting to parse JSON from response...');
+        
         // Look for JSON patterns in the response
         const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const jsonString = jsonMatch[0];
+          console.log('Found JSON string:', jsonString);
           const actionData = JSON.parse(jsonString);
           
           if (actionData.action && actionData.message) {
+            console.log('Valid action data found, executing...');
             return await this.executeAction(actionData);
           }
         }
         
         // If no JSON found, try parsing the entire response
+        console.log('Trying to parse entire response as JSON...');
         const actionData = JSON.parse(cleanedResponse);
         if (actionData.action && actionData.message) {
+          console.log('Entire response is valid JSON action, executing...');
           return await this.executeAction(actionData);
         }
       } catch (e) {
+        console.log('JSON parsing failed, checking for JSON-like content...');
         // Not valid JSON, check if it contains JSON-like content
         if (responseText.includes('"action"') && responseText.includes('"create_reminder"')) {
           // Try to extract and fix malformed JSON
           try {
+            console.log('Attempting to extract malformed JSON...');
             const jsonStart = responseText.indexOf('{');
             const jsonEnd = responseText.lastIndexOf('}') + 1;
             if (jsonStart !== -1 && jsonEnd > jsonStart) {
               const jsonPart = responseText.substring(jsonStart, jsonEnd);
+              console.log('Extracted JSON part:', jsonPart);
               const actionData = JSON.parse(jsonPart);
               if (actionData.action && actionData.message) {
+                console.log('Extracted JSON is valid, executing...');
                 return await this.executeAction(actionData);
               }
             }
@@ -387,6 +409,7 @@ export class GeminiService {
         }
       }
       
+      console.log('No valid JSON action found, returning raw response');
       return responseText;
     } catch (error) {
       console.error('Error sending message to Gemini:', error);

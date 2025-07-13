@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
 import { useReminders } from '../contexts/RemindersContext';
 
@@ -26,17 +26,35 @@ export const useChat = () => {
 
   // Set up callbacks for the Gemini service
   useEffect(() => {
+    console.log('Setting up Gemini service callbacks...');
     geminiService.setCallbacks({
-      addReminder,
-      updateReminder,
-      deleteReminder,
-      findReminders,
-      getAllReminders: () => reminders,
+      addReminder: (reminderData) => {
+        console.log('Adding reminder via callback:', reminderData);
+        return addReminder(reminderData);
+      },
+      updateReminder: (id, updates) => {
+        console.log('Updating reminder via callback:', id, updates);
+        updateReminder(id, updates);
+      },
+      deleteReminder: (id) => {
+        console.log('Deleting reminder via callback:', id);
+        deleteReminder(id);
+      },
+      findReminders: (query) => {
+        console.log('Finding reminders via callback:', query);
+        return findReminders(query);
+      },
+      getAllReminders: () => {
+        console.log('Getting all reminders via callback, count:', reminders.length);
+        return reminders;
+      },
     });
   }, [addReminder, updateReminder, deleteReminder, findReminders, reminders]);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
+
+    console.log('Sending message:', text);
 
     // Add user message
     const userMessage: Message = {
@@ -51,13 +69,20 @@ export const useChat = () => {
 
     try {
       // Get AI response
+      console.log('Calling Gemini service...');
       const aiResponse = await geminiService.sendMessage(text);
+      console.log('Received AI response:', aiResponse);
       
       // Determine message type based on content
       let messageType: 'reminder' | 'confirmation' | 'suggestion' = 'suggestion';
-      if (aiResponse.toLowerCase().includes('set') || aiResponse.toLowerCase().includes('created') || aiResponse.toLowerCase().includes('scheduled') || aiResponse.toLowerCase().includes('reminder')) {
+      if (aiResponse.toLowerCase().includes('set') || 
+          aiResponse.toLowerCase().includes('created') || 
+          aiResponse.toLowerCase().includes('scheduled') || 
+          aiResponse.toLowerCase().includes('reminder')) {
         messageType = 'confirmation';
-      } else if (text.toLowerCase().includes('remind') || text.toLowerCase().includes('delete') || text.toLowerCase().includes('update')) {
+      } else if (text.toLowerCase().includes('remind') || 
+                 text.toLowerCase().includes('delete') || 
+                 text.toLowerCase().includes('update')) {
         messageType = 'reminder';
       }
 
@@ -86,7 +111,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [addReminder, updateReminder, deleteReminder, findReminders, reminders]);
+  }, []);
 
   const clearChat = useCallback(() => {
     setMessages([
