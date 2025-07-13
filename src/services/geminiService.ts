@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const getApiKey = () => {
-  return import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gemini_api_key');
+  return 'AIzaSyDpj_YVxGgUxTsmcHCgPEbzkSspl1il4vo'
 };
 
 const API_KEY = getApiKey();
