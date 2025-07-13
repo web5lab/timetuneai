@@ -1,8 +1,17 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import type { Reminder } from '../contexts/RemindersContext';
 
 const getApiKey = () => {
   return 'AIzaSyDpj_YVxGgUxTsmcHCgPEbzkSspl1il4vo'
 };
+
+const API_KEY = getApiKey();
+
+if (!API_KEY || API_KEY === 'your_gemini_api_key_here') {
+  console.warn('Gemini API key not found. Please add VITE_GEMINI_API_KEY to your .env file');
+}
+
+let genAI: GoogleGenerativeAI | null = null;
 
 const initializeGenAI = () => {
   const apiKey = getApiKey();
@@ -89,6 +98,7 @@ CONVERSATION STYLE:
 - Use emojis sparingly but effectively
 - Keep responses concise but complete
 - Acknowledge successful reminder creation
+- Offer related suggestions when appropriate
 
 IMPORTANT: Always respond with either valid JSON for actions or regular text for conversation. Never mix both in the same response.`;
 
@@ -176,34 +186,6 @@ export class GeminiService {
       const nextWeek = new Date(today);
       nextWeek.setDate(nextWeek.getDate() + 7);
       return nextWeek.toISOString().split('T')[0];
-    } else if (lowerDate.includes('monday')) {
-      const nextMonday = new Date(today);
-      nextMonday.setDate(today.getDate() + (1 + 7 - today.getDay()) % 7);
-      return nextMonday.toISOString().split('T')[0];
-    } else if (lowerDate.includes('tuesday')) {
-      const nextTuesday = new Date(today);
-      nextTuesday.setDate(today.getDate() + (2 + 7 - today.getDay()) % 7);
-      return nextTuesday.toISOString().split('T')[0];
-    } else if (lowerDate.includes('wednesday')) {
-      const nextWednesday = new Date(today);
-      nextWednesday.setDate(today.getDate() + (3 + 7 - today.getDay()) % 7);
-      return nextWednesday.toISOString().split('T')[0];
-    } else if (lowerDate.includes('thursday')) {
-      const nextThursday = new Date(today);
-      nextThursday.setDate(today.getDate() + (4 + 7 - today.getDay()) % 7);
-      return nextThursday.toISOString().split('T')[0];
-    } else if (lowerDate.includes('friday')) {
-      const nextFriday = new Date(today);
-      nextFriday.setDate(today.getDate() + (5 + 7 - today.getDay()) % 7);
-      return nextFriday.toISOString().split('T')[0];
-    } else if (lowerDate.includes('saturday')) {
-      const nextSaturday = new Date(today);
-      nextSaturday.setDate(today.getDate() + (6 + 7 - today.getDay()) % 7);
-      return nextSaturday.toISOString().split('T')[0];
-    } else if (lowerDate.includes('sunday')) {
-      const nextSunday = new Date(today);
-      nextSunday.setDate(today.getDate() + (7 - today.getDay()) % 7);
-      return nextSunday.toISOString().split('T')[0];
     }
     
     // Try to parse as date
@@ -251,40 +233,6 @@ export class GeminiService {
             return "I'm sorry, I can't create reminders right now. Please try again.";
           }
           
-          // Handle recurring reminders
-          const isRecurring = actionData.data.isRecurring || false;
-          let recurrenceDetails = actionData.data.recurrenceDetails || {};
-          
-          // Parse recurrence pattern
-          if (isRecurring && actionData.data.recurrencePattern) {
-            const pattern = actionData.data.recurrencePattern.toLowerCase();
-            
-            if (pattern === 'weekdays') {
-              recurrenceDetails = {
-                frequency: 1,
-                daysOfWeek: [1, 2, 3, 4, 5], // Monday to Friday
-                ...recurrenceDetails
-              };
-            } else if (pattern === 'weekends') {
-              recurrenceDetails = {
-                frequency: 1,
-                daysOfWeek: [0, 6], // Sunday and Saturday
-                ...recurrenceDetails
-              };
-            } else if (pattern === 'daily') {
-              recurrenceDetails = {
-                frequency: 1,
-                ...recurrenceDetails
-              };
-            } else if (pattern === 'weekly') {
-              recurrenceDetails = {
-                frequency: 1,
-                daysOfWeek: [new Date(this.parseDate(actionData.data.date)).getDay()],
-                ...recurrenceDetails
-              };
-            }
-          }
-          
           const reminderData = {
             title: actionData.data.title,
             description: actionData.data.description || '',
@@ -293,15 +241,8 @@ export class GeminiService {
             priority: actionData.data.priority || 'medium',
             category: actionData.data.category || 'personal',
             isCompleted: false,
-            isRecurring,
-            recurrencePattern: actionData.data.recurrencePattern || undefined,
-            recurrenceDetails: isRecurring ? recurrenceDetails : undefined,
-            nextOccurrence: isRecurring ? this.calculateNextOccurrence(
-              this.parseDate(actionData.data.date),
-              this.parseTime(actionData.data.time),
-              actionData.data.recurrencePattern,
-              recurrenceDetails
-            ) : undefined,
+            isRecurring: actionData.data.isRecurring || false,
+            recurrencePattern: actionData.data.recurrencePattern || '',
           };
           
           const id = this.callbacks.addReminder(reminderData);
@@ -333,23 +274,8 @@ export class GeminiService {
             return `I couldn't find any reminders matching "${actionData.data.query}".`;
           }
           
-          // Handle deleting recurring reminders
-          const deleteAll = actionData.data.deleteAll || false;
-          
-          if (deleteAll) {
-            // Delete all instances of recurring reminder
-            reminders.forEach(reminder => {
-              if (reminder.isRecurring || reminder.parentReminderId) {
-                this.callbacks.deleteReminder!(reminder.id);
-              }
-            });
-            return actionData.message;
-          } else {
-            // Delete only the first match
-            const reminder = reminders[0];
-            this.callbacks.deleteReminder(reminder.id);
-          }
-          
+          const reminder = reminders[0]; // Delete the first match
+          this.callbacks.deleteReminder(reminder.id);
           return actionData.message;
         }
         
@@ -374,9 +300,6 @@ export class GeminiService {
             case 'pending':
               filteredReminders = allReminders.filter(r => !r.isCompleted);
               break;
-            case 'recurring':
-              filteredReminders = allReminders.filter(r => r.isRecurring);
-              break;
             case 'work':
               filteredReminders = allReminders.filter(r => r.category === 'work');
               break;
@@ -391,10 +314,7 @@ export class GeminiService {
           
           const remindersList = filteredReminders
             .slice(0, 5) // Limit to 5 reminders
-            .map(r => {
-              const recurringText = r.isRecurring ? ` [${r.recurrencePattern}]` : '';
-              return `• ${r.title} - ${r.date} at ${r.time} (${r.priority} priority)${recurringText}`;
-            })
+            .map(r => `• ${r.title} - ${r.date} at ${r.time} (${r.priority} priority)`)
             .join('\n');
           
           return `${actionData.message}\n\n${remindersList}${filteredReminders.length > 5 ? '\n\n...and more in your reminders page.' : ''}`;
@@ -467,25 +387,6 @@ export class GeminiService {
     } else if (lowerMessage.includes('remind')) {
       // Try to create a basic reminder with fallback
       if (this.callbacks.addReminder) {
-        // Check for recurring patterns
-        const isRecurring = lowerMessage.includes('daily') || 
-                           lowerMessage.includes('every day') ||
-                           lowerMessage.includes('weekly') ||
-                           lowerMessage.includes('every week');
-        
-        let recurrencePattern = undefined;
-        let recurrenceDetails = undefined;
-        
-        if (isRecurring) {
-          if (lowerMessage.includes('daily') || lowerMessage.includes('every day')) {
-            recurrencePattern = 'daily';
-            recurrenceDetails = { frequency: 1 };
-          } else if (lowerMessage.includes('weekly') || lowerMessage.includes('every week')) {
-            recurrencePattern = 'weekly';
-            recurrenceDetails = { frequency: 1 };
-          }
-        }
-        
         const reminderData = {
           title: message.replace(/remind me to /i, '').replace(/remind me /i, ''),
           description: '',
@@ -494,20 +395,12 @@ export class GeminiService {
           priority: 'medium' as const,
           category: 'personal' as const,
           isCompleted: false,
-          isRecurring,
-          recurrencePattern,
-          recurrenceDetails,
-          nextOccurrence: isRecurring ? this.calculateNextOccurrence(
-            new Date().toISOString().split('T')[0],
-            '09:00',
-            recurrencePattern,
-            recurrenceDetails
-          ) : undefined,
+          isRecurring: false,
+          recurrencePattern: '',
         };
         
         const id = this.callbacks.addReminder(reminderData);
-        const recurringText = isRecurring ? ` as a ${recurrencePattern} reminder` : '';
-        return `I've created a reminder for you: "${reminderData.title}"${recurringText}. I set it for today at 9:00 AM. You can update the time and date in your reminders page if needed.`;
+        return `I've created a reminder for you: "${reminderData.title}". I set it for today at 9:00 AM. You can update the time and date in your reminders page if needed.`;
       }
       return "I understand you want to set a reminder. Could you please provide more details like the date and time? For example: 'Remind me to call mom tomorrow at 3 PM'.";
     } else {

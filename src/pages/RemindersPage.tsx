@@ -251,8 +251,8 @@ const RemindersPage: React.FC = () => {
                       </div>
                     </div>
                     {reminder.isRecurring && (
-                      <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium self-start sm:self-auto capitalize">
-                        {reminder.recurrencePattern || 'Recurring'}
+                      <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium self-start sm:self-auto">
+                        Recurring
                       </span>
                     )}
                   </div>
