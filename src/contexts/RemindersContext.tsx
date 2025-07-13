@@ -10,7 +10,15 @@ export interface Reminder {
   category: 'personal' | 'work' | 'health' | 'other';
   isCompleted: boolean;
   isRecurring: boolean;
-  recurrencePattern?: string;
+  recurrencePattern?: 'daily' | 'weekly' | 'monthly' | 'weekdays' | 'weekends' | 'custom';
+  recurrenceDetails?: {
+    frequency: number; // Every X days/weeks/months
+    daysOfWeek?: number[]; // 0-6 (Sunday-Saturday)
+    endDate?: string;
+    customPattern?: string;
+  };
+  nextOccurrence?: string;
+  parentReminderId?: string; // For instances of recurring reminders
   createdAt: string;
   updatedAt: string;
 }
