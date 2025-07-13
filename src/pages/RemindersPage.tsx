@@ -66,107 +66,22 @@ const RemindersPage: React.FC = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Special Reminders Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white shadow-lg">
-        <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
-          {/* Header Top Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
-            <div className="text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">My Reminders</h1>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-orange-100">
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">{upcomingReminders.length} upcoming</span>
-                </div>
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm">{completedReminders.length} completed</span>
-                </div>
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">Today: {new Date().toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Add Reminder Button */}
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="bg-white text-orange-600 px-6 py-3 rounded-xl hover:bg-orange-50 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg font-semibold text-sm sm:text-base group"
-            >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-              <span>Add Reminder</span>
-            </button>
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 transition-colors duration-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reminders</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {upcomingReminders.length} upcoming • {completedReminders.length} completed
+            </p>
           </div>
           
-          {/* Quick Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
-            <div className="bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
-              <div className="text-base sm:text-lg lg:text-2xl font-bold">{reminders.filter(r => r.priority === 'high' && !r.completed).length}</div>
-              <div className="text-xs sm:text-sm text-orange-100 dark:text-orange-200">High Priority</div>
-            </div>
-            <div className="bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
-              <div className="text-base sm:text-lg lg:text-2xl font-bold">{reminders.filter(r => r.recurring).length}</div>
-              <div className="text-xs sm:text-sm text-orange-100 dark:text-orange-200">Recurring</div>
-            </div>
-            <div className="bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
-              <div className="text-base sm:text-lg lg:text-2xl font-bold">{new Set(reminders.map(r => r.category)).size}</div>
-              <div className="text-xs sm:text-sm text-orange-100 dark:text-orange-200">Categories</div>
-            </div>
-            <div className="bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center">
-              <div className="text-base sm:text-lg lg:text-2xl font-bold">{Math.round((completedReminders.length / reminders.length) * 100) || 0}%</div>
-              <div className="text-xs sm:text-sm text-orange-100 dark:text-orange-200">Completed</div>
-            </div>
-          </div>
-          
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
-            {/* Search Bar */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-              <input
-                type="text"
-                placeholder="Search reminders..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-white/20 dark:border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white dark:focus:bg-slate-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
-              />
-            </div>
-            
-            {/* View Toggle */}
-            <div className="flex bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-1 w-full sm:w-auto">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  viewMode === 'list' 
-                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm' 
-                    : 'text-white hover:bg-white/10 dark:hover:bg-white/20'
-                }`}
-              >
-                <div className="w-4 h-4 flex flex-col space-y-1">
-                  <div className="h-0.5 bg-current rounded"></div>
-                  <div className="h-0.5 bg-current rounded"></div>
-                  <div className="h-0.5 bg-current rounded"></div>
-                </div>
-                <span className="text-sm font-medium">List</span>
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  viewMode === 'grid' 
-                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm' 
-                    : 'text-white hover:bg-white/10 dark:hover:bg-white/20'
-                }`}
-              >
-                <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
-                  <div className="bg-current rounded-sm"></div>
-                  <div className="bg-current rounded-sm"></div>
-                  <div className="bg-current rounded-sm"></div>
-                  <div className="bg-current rounded-sm"></div>
-                </div>
-                <span className="text-sm font-medium">Grid</span>
-              </button>
-            </div>
-          </div>
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Add Reminder</span>
+          </button>
         </div>
       </div>
 
