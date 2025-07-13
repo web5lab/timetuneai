@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
-import Sidebar from '../components/Sidebar';
 import Logo from '../components/Logo';
 import { useChat } from '../hooks/useChat';
 import { useVoice } from '../hooks/useVoice';
 
 const HomePage: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { 
     isListening, 
@@ -96,8 +91,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-200">
-      <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AppHeader />
       
       {/* Chat Header */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm transition-colors duration-200">

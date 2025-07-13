@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, Shield, Trash2 } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
-import Sidebar from '../components/Sidebar';
 import { useTheme } from '../contexts/ThemeContext';
 import { notificationService } from '../services/notificationService';
 
 const SettingsPage: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     notifications: {
@@ -29,10 +27,6 @@ const SettingsPage: React.FC = () => {
       autoComplete: false,
     },
   });
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const updateSetting = (category: string, key: string, value: any) => {
     setSettings(prev => ({
@@ -73,8 +67,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
-      <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AppHeader />
      
       {/* Settings Content */}
       <div className="flex-1 overflow-y-auto p-4 lg:p-6">

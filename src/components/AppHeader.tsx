@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import { Bell, Settings, User, Menu, X, Sun, Moon } from 'lucide-react';
+import { Bell, Settings, User, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from './Logo';
 
-interface AppHeaderProps {
-  onToggleSidebar: () => void;
-  isSidebarOpen: boolean;
-}
-
-const AppHeader: React.FC<AppHeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
+const AppHeader: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -24,22 +19,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onToggleSidebar, isSidebarOpen })
 
   return (
     <>
-      <header className="lg:left-64 z-30 bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg">
+      <header className="z-30 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
         <div className="px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* Mobile Menu Button - Only visible on mobile */}
-            <button
-              onClick={onToggleSidebar}
-              className="lg:hidden p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors mr-3"
-            >
-              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-            
-            {/* Logo for mobile when sidebar is closed */}
-            <div className="lg:hidden flex-1">
-              {!isSidebarOpen && (
-                <Logo size="sm" variant="white" showText={true} />
-              )}
+            {/* Logo */}
+            <div className="flex-1">
+              <Logo size="sm" variant="white" showText={true} />
             </div>
             
             {/* Header Actions */}

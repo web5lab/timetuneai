@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { Crown, Check, X, CreditCard, Calendar, Star, Gift } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
-import Sidebar from '../components/Sidebar';
 
 const SubscriptionPage: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const plans = [
     {
@@ -63,8 +57,7 @@ const SubscriptionPage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
-      <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AppHeader />
       
       {/* Subscription Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white shadow-lg">

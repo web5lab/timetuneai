@@ -111,6 +111,11 @@ body {
   animation-delay: 700ms;
 }
 
+/* Safe area for mobile devices */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Theme-aware gradients */
 .gradient-light-yellow-to-peach {
   background: linear-gradient(135deg, #FFFDD0 0%, #FFDAB9 100%);

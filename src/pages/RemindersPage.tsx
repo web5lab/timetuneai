@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell, MoreVertical, Star, X } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
-import Sidebar from '../components/Sidebar';
 import { useReminders } from '../contexts/RemindersContext';
 import { useNotifications } from '../hooks/useNotifications';
 
 const RemindersPage: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isPermissionGranted, requestPermission } = useNotifications();
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -66,8 +60,7 @@ const RemindersPage: React.FC = () => {
   const showNotificationBanner = !isPermissionGranted && upcomingReminders.length > 0;
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
-      <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AppHeader />
       
       {/* Special Reminders Header */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 transition-colors duration-200">

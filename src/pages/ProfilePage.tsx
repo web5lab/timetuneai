@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { User, Camera, Mail, Phone, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
-import Sidebar from '../components/Sidebar';
 
 const ProfilePage: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: 'Alex Johnson',
@@ -14,10 +12,6 @@ const ProfilePage: React.FC = () => {
     joinDate: 'January 2024',
     bio: 'Productivity enthusiast who loves staying organized with TimeTuneAI. Always looking for ways to optimize my daily routine.',
   });
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const handleSave = () => {
     setIsEditing(false);
@@ -31,8 +25,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
-      <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <AppHeader />
       
      
       {/* Profile Content */}
