@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { useCalendar } from './CalendarContext';
 
 export interface Reminder {
   id: string;
@@ -13,6 +14,7 @@ export interface Reminder {
   recurrencePattern?: string;
   createdAt: string;
   updatedAt: string;
+  calendarEventId?: string;
 }
 
 interface RemindersState {
@@ -109,6 +111,7 @@ interface RemindersProviderProps {
 
 export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(remindersReducer, { reminders: [] });
+  const calendarContext = useCalendar?.();
 
   useEffect(() => {
     // Load reminders from localStorage on mount
@@ -126,6 +129,18 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
   const addReminder = (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>): string => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     dispatch({ type: 'ADD_REMINDER', payload: reminder });
+    
+    // Auto-sync to calendar if enabled
+    if (calendarContext?.syncSettings.autoSync) {
+      const newReminder = {
+        ...reminder,
+        id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      calendarContext.syncReminder(newReminder);
+    }
+    
     return id;
   };
 
