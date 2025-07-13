@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell, MoreVertical, Star, X } from 'lucide-react';
+import AppHeader from '../components/AppHeader';
 import { useReminders } from '../contexts/RemindersContext';
 import { useNotifications } from '../hooks/useNotifications';
 
@@ -59,8 +60,10 @@ const RemindersPage: React.FC = () => {
   const showNotificationBanner = !isPermissionGranted && upcomingReminders.length > 0;
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
-      {/* Reminders Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 transition-colors duration-200 pt-safe">
+      <AppHeader />
+      
+      {/* Special Reminders Header */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 transition-colors duration-200">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reminders</h1>

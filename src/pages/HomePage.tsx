@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX } from 'lucide-react';
+import AppHeader from '../components/AppHeader';
 import Logo from '../components/Logo';
 import { useChat } from '../hooks/useChat';
 import { useVoice } from '../hooks/useVoice';
@@ -90,9 +91,11 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-200">
+      <AppHeader />
+      
       {/* Chat Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4 shadow-sm transition-colors duration-200 pt-safe">
-        <div className="flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm transition-colors duration-200">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Logo size="sm" variant="dark" showText={false} />
             <div>
@@ -138,7 +141,7 @@ const HomePage: React.FC = () => {
       
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-4">
+        <div className="max-w-4xl mx-auto space-y-4">
        
           {messages.map((message) => (
             <div
@@ -146,7 +149,7 @@ const HomePage: React.FC = () => {
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-xs sm:max-w-sm md:max-w-md px-4 py-3 rounded-2xl shadow-md ${message.sender === 'user'
+                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-md ${message.sender === 'user'
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-br-md'
                     : message.type === 'confirmation'
                       ? 'bg-green-50 dark:bg-green-900/20 text-gray-800 dark:text-gray-200 border border-green-200 dark:border-green-800 rounded-bl-md'
@@ -197,7 +200,7 @@ const HomePage: React.FC = () => {
 
       {/* Input Area */}
       <div className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700 p-4 shadow-lg transition-colors duration-200">
-        <div>
+        <div className="max-w-4xl mx-auto">
           <div className="flex items-end space-x-2 sm:space-x-3">
             {/* Voice Input Button */}
             {isVoiceSupported && (

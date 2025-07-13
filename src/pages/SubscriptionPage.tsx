@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Crown, Check, X, CreditCard, Calendar, Star, Gift } from 'lucide-react';
+import AppHeader from '../components/AppHeader';
 
 const SubscriptionPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -56,15 +57,12 @@ const SubscriptionPage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
+      <AppHeader />
+      
       {/* Subscription Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white shadow-lg">
-        <div className="px-4 lg:px-6 py-8 pt-safe">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Subscription</h1>
-            <p className="text-orange-100 dark:text-orange-200">
-              Choose the perfect plan for your productivity needs
-            </p>
-          </div>
+        <div className="px-4 lg:px-6 py-8">
+        
           
           {/* Current Plan Status */}
           <div className="bg-white/10 dark:bg-white/20 backdrop-blur-sm rounded-xl p-4">
