@@ -89,6 +89,28 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Splash screen animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-700 {
+  animation-delay: 700ms;
+}
+
 /* Theme-aware gradients */
 .gradient-light-yellow-to-peach {
   background: linear-gradient(135deg, #FFFDD0 0%, #FFDAB9 100%);
