@@ -12,7 +12,7 @@ const BottomNavigation: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700 z-50 transition-colors duration-200">
+    <nav className=" bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700 z-50 transition-colors duration-200">
       <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink

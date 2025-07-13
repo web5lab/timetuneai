@@ -80,7 +80,7 @@ export class NotificationService {
           {
             title: 'TimeTuneAI Reminder',
             body: reminder.title,
-            id: parseInt(reminder.id),
+            id: reminder.id,
             schedule: { at: reminderDateTime },
             sound: 'default',
             attachments: undefined,
@@ -121,12 +121,12 @@ export class NotificationService {
     }
   }
 
-  async cancelReminderNotification(reminderId: string): Promise<boolean> {
+  async cancelReminderNotification(reminderId: number): Promise<boolean> {
     try {
       if (!this.isInitialized) return false;
 
       await LocalNotifications.cancel({
-        notifications: [{ id: parseInt(reminderId) }],
+        notifications: [{ id:reminderId }],
       });
 
       console.log(`Notification cancelled for reminder: ${reminderId}`);

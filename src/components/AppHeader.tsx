@@ -9,13 +9,7 @@ const AppHeader: React.FC = () => {
   const [showProfile, setShowProfile] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  const notifications = [
-    { id: 1, title: 'Team Meeting', message: 'Starting in 15 minutes', time: '2 min ago', unread: true },
-    { id: 2, title: 'Call Dentist', message: 'Reminder set for 3 PM', time: '1 hour ago', unread: true },
-    { id: 3, title: 'Daily Goal', message: 'You completed 8/10 tasks', time: '2 hours ago', unread: false },
-  ];
 
-  const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
     <>

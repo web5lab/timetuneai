@@ -10,28 +10,6 @@ import SubscriptionPage from './pages/SubscriptionPage';
 
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    // Simulate app initialization
-    const initializeApp = async () => {
-      // Add any initialization logic here
-      // For example: loading user preferences, checking permissions, etc.
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsReady(true);
-    };
-
-    initializeApp();
-  }, []);
-
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
-  if (showSplash || !isReady) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
-  }
 
   return (
     <Router>

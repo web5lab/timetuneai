@@ -110,8 +110,8 @@ export interface ReminderAction {
 
 interface GeminiServiceCallbacks {
   addReminder?: (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>) => string;
-  updateReminder?: (id: string, updates: Partial<Reminder>) => void;
-  deleteReminder?: (id: string) => void;
+  updateReminder?: (id: number, updates: Partial<Reminder>) => void;
+  deleteReminder?: (id: number) => void;
   findReminders?: (query: string) => Reminder[];
   getAllReminders?: () => Reminder[];
 }

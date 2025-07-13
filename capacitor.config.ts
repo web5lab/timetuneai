@@ -5,19 +5,9 @@ const config: CapacitorConfig = {
   appName: 'TimeTuneAi',
   webDir: 'dist',
   plugins: {
-    SplashScreen: {
-      launchShowDuration: 2000,
+    splashScreen: {
       launchAutoHide: true,
-      launchFadeOutDuration: 300,
-      backgroundColor: "#F97316",
-      androidSplashResourceName: "splash",
-      androidScaleType: "CENTER_CROP",
-      showSpinner: false,
-      androidSpinnerStyle: "large",
-      iosSpinnerStyle: "small",
-      spinnerColor: "#FFFFFF",
-      splashFullScreen: true,
-      splashImmersive: true,
+      launchShowDuration: 0
     },
     LocalNotifications: {
       smallIcon: "ic_stat_icon_config_sample",

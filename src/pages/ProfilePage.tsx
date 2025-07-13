@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Camera, Mail, Phone, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
+import BottomNavigation from '../components/BottomNavigation';
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -169,6 +170,7 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Settings, Bell, Moon, Sun, Volume2, VolumeX, Smartphone, Mail, Globe, S
 import AppHeader from '../components/AppHeader';
 import { useTheme } from '../contexts/ThemeContext';
 import { notificationService } from '../services/notificationService';
+import BottomNavigation from '../components/BottomNavigation';
 
 const SettingsPage: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -261,6 +262,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 };

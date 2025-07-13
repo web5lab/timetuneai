@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Crown, Check, X, CreditCard, Calendar, Star, Gift } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
+import BottomNavigation from '../components/BottomNavigation';
 
 const SubscriptionPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -252,6 +253,7 @@ const SubscriptionPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 };

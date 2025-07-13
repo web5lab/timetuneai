@@ -3,6 +3,7 @@ import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell
 import AppHeader from '../components/AppHeader';
 import { useReminders } from '../contexts/RemindersContext';
 import { useNotifications } from '../hooks/useNotifications';
+import BottomNavigation from '../components/BottomNavigation';
 
 const RemindersPage: React.FC = () => {
   const { isPermissionGranted, requestPermission } = useNotifications();
@@ -13,7 +14,7 @@ const RemindersPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<any>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -39,12 +40,12 @@ const RemindersPage: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleToggleComplete = (id: string) => {
+  const handleToggleComplete = (id: number) => {
     console.log('Toggling complete for reminder:', id);
     toggleComplete(id);
   };
 
-  const handleDeleteReminder = (id: string) => {
+  const handleDeleteReminder = (id: number) => {
     console.log('Deleting reminder:', id);
     removeReminder(id);
     setShowDeleteConfirm(null);
@@ -578,6 +579,7 @@ const RemindersPage: React.FC = () => {
           </div>
         </div>
       )}
+          <BottomNavigation/>
     </div>
   );
 };
