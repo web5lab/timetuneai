@@ -64,6 +64,8 @@ export class NotificationService {
         return false;
       }
 
+      console.log(`Scheduling notification for: ${reminder.title} at ${reminderDateTime}`);
+
       // Create notification
       await LocalNotifications.schedule({
         notifications: [
@@ -80,7 +82,7 @@ export class NotificationService {
               category: reminder.category,
               priority: reminder.priority,
             },
-            smallIcon: 'ic_stat_icon_config_sample',
+            smallIcon: 'ic_stat_notification',
             iconColor: '#FF6B35',
             ongoing: false,
             autoCancel: true,
@@ -180,6 +182,8 @@ export class NotificationService {
   async createNotificationChannel(): Promise<void> {
     try {
       if (!Capacitor.isNativePlatform()) return;
+
+      console.log('Creating notification channel...');
 
       // Create notification channel for Android
       await LocalNotifications.createChannel({
