@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
-import { Bell, Menu, X, Sun, Moon } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-
+import { Bell, X } from 'lucide-react';
+import logo from '../assets/logo.png'
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -20,8 +14,8 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center">
           {/* Logo - Responsive sizing */}
           <a href="#" className="flex items-center group">
-            <div className="p-1.5 sm:p-2 mr-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center text-white">
-              <Bell className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+            <div className="rounded-full flex items-center justify-center text-white">
+              <img src={logo} className="w-10 h-10 " />
             </div>
             <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-500">
               TimeTuneAI
@@ -49,17 +43,7 @@ const Header: React.FC = () => {
           
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-3 xl:space-x-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              ) : (
-                <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              )}
-            </button>
+          
             <a 
               href="/app" 
               className="px-4 py-2 xl:px-6 xl:py-2 bg-gradient-to-br from-yellow-500 to-orange-600 text-white font-medium rounded-full hover:from-yellow-600 hover:to-orange-700 transition duration-300 shadow-xl text-sm xl:text-base"
@@ -70,19 +54,7 @@ const Header: React.FC = () => {
 
           {/* Mobile Actions */}
           <div className="flex lg:hidden items-center space-x-2 sm:space-x-3">
-            {/* Theme Toggle - Mobile */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
-              ) : (
-                <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
-              )}
-            </button>
-
+          
             {/* Get App Button - Mobile */}
             <a 
               href="/app" 
@@ -91,14 +63,7 @@ const Header: React.FC = () => {
               Get App
             </a>
 
-            {/* Mobile Menu Button */}
-            <button 
-              className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
-            </button>
+          
           </div>
         </div>
       </nav>
@@ -168,27 +133,7 @@ const Header: React.FC = () => {
 
             {/* Mobile Menu Footer */}
             <div className="px-4 sm:px-6 py-6 sm:py-8 border-t border-gray-200 dark:border-gray-700 space-y-4">
-              {/* Theme Toggle - Mobile Menu */}
-              <button
-                onClick={() => {
-                  toggleTheme();
-                  closeMenu();
-                }}
-                className="flex items-center justify-center w-full space-x-3 text-lg sm:text-xl font-medium text-gray-800 dark:text-gray-200 hover:text-primary-500 transition-colors py-3"
-              >
-                {theme === 'light' ? (
-                  <>
-                    <Moon className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <span>Dark Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <Sun className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <span>Light Mode</span>
-                  </>
-                )}
-              </button>
-
+            
               {/* Get App Button - Mobile Menu */}
               <a 
                 href="/app" 

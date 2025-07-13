@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Play, ArrowRight, Sparkles, Clock, CheckCircle, Mic, Send, Bot, Star } from 'lucide-react';
+import logo from '../assets/logo.png'
 
 interface ChatMessage {
   id: number;
@@ -127,7 +128,7 @@ const Hero: React.FC = () => {
 
             {/* Main Headline */}
             <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
+              <h1 className="text-6xl md:text-6xl lg:text-7xl font-black leading-tight">
                 <span className="block text-gray-900">Never Miss</span>
                 <span className="block bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
                   Anything Again
@@ -186,24 +187,7 @@ const Hero: React.FC = () => {
               </button>
             </div>
 
-            {/* Social Proof */}
-            <div className="flex items-center justify-center lg:justify-start space-x-6 pt-6">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-400 rounded-full border-2 border-white flex items-center justify-center text-white font-semibold text-sm">
-                    {String.fromCharCode(64 + i)}
-                  </div>
-                ))}
-              </div>
-              <div className="text-left">
-                <div className="flex items-center space-x-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <div className="text-sm text-gray-600">4.9/5 from 2,000+ reviews</div>
-              </div>
-            </div>
+         
           </div>
 
           {/* Right Side - Enhanced Phone Mockup */}
@@ -225,8 +209,8 @@ const Hero: React.FC = () => {
                     {/* Status Bar */}
                     <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-4 pt-8 flex items-center justify-between relative">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-600 to-red-600 rounded-full flex items-center justify-center shadow-lg">
-                          <Bot className="w-6 h-6" />
+                        <div className="w-10 h-10  rounded-full flex items-center justify-center shadow-lg">
+                        <img src={logo} className="w-10 h-10 " />
                         </div>
                         <div>
                           <h3 className="font-bold text-base">TimeTuneAI</h3>

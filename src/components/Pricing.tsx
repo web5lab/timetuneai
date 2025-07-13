@@ -51,7 +51,7 @@ const Pricing: React.FC = () => {
   ];
 
   return (
-    <section id="pricing" className="py-20 gradient-peach-to-light-yellow">
+    <section id="pricing" className="py-20 bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
       <div className="container mx-auto px-6 text-center">
         <h2 className="text-4xl font-bold text-gray-900 mb-6">Simple & Transparent Pricing</h2>
         <p className="text-xl text-gray-700 mb-16 max-w-3xl mx-auto">

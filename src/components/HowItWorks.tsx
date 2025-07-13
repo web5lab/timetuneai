@@ -85,10 +85,7 @@ const HowItWorks: React.FC = () => {
                       }}></div>
                     </div>
 
-                    {/* Step Number */}
-                    <div className={`absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br ${step.color} rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-white`}>
-                      {step.number}
-                    </div>
+                  
 
                     {/* Icon */}
                     <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mb-6 mt-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
@@ -123,14 +120,6 @@ const HowItWorks: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Arrow for desktop */}
-                    {index < steps.length - 1 && (
-                      <div className="hidden lg:block absolute -right-6 top-1/2 transform -translate-y-1/2 z-20">
-                        <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-4 border-gray-100">
-                          <ArrowRight className="w-5 h-5 text-gray-600" />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               );
@@ -138,25 +127,6 @@ const HowItWorks: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Get Started?</h3>
-            <p className="text-gray-600 mb-6">Join thousands who have transformed their productivity with TimeTuneAI</p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-3">
-                <span>Download Free</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-              
-              <button className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-2xl border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 flex items-center justify-center space-x-3">
-                <MessageSquare className="w-5 h-5 text-orange-500" />
-                <span>Try Demo</span>
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

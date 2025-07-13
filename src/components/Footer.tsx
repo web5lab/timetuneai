@@ -1,13 +1,14 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
+import logo from '../assets/logo.png'
 
 const Footer: React.FC = () => {
   return (
     <footer className="bg-yellow-900 text-white py-12">
       <div className="container mx-auto px-6 text-center">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <a href="#" className="flex items-center text-2xl font-bold text-orange-400 mb-6 md:mb-0">
-            <Bell className="w-7 h-7 mr-2 text-orange-300" />
+          <a href="#" className="flex items-center text-2xl font-bold text-white mb-6 md:mb-0">
+          <img src={logo} className="w-10 h-10 " />
             TimeTuneAI
           </a>
           <div className="flex space-x-6">

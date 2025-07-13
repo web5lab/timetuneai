@@ -28,7 +28,7 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="py-20 gradient-light-yellow-to-peach">
+    <section id="faq" className="py-20 bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
       <div className="container mx-auto px-6 text-center">
         <h2 className="text-4xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
         <p className="text-xl text-gray-700 mb-16 max-w-3xl mx-auto">
