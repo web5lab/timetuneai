@@ -18,11 +18,3 @@ const AppLayout: React.FC = () => {
 };
 
 export default AppLayout;
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default AppLayout;
