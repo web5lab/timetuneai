@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { User, Camera, Mail, Phone, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
-import AppHeader from '../components/AppHeader';
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -25,9 +24,18 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
-      <AppHeader />
-      
-     
+      {/* Profile Header */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 transition-colors duration-200 pt-safe">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Manage your account and preferences
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Profile Content */}
       <div className="flex-1 overflow-y-auto p-4 lg:p-6">
         <div className="max-w-2xl mx-auto">
