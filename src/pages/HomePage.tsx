@@ -62,9 +62,18 @@ const HomePage: React.FC = () => {
   };
 
   const handleVoiceToggle = async () => {
+    console.log('Voice toggle clicked, current listening state:', isListening);
+    
+    // Prevent rapid clicking
+    if (isLoading) {
+      console.log('Currently loading, ignoring voice toggle');
+      return;
+    }
+    
     await toggleListening((text) => {
       // Auto-send when voice recognition completes
       if (text.trim()) {
+        console.log('Auto-sending voice result:', text);
         handleSendMessage(text);
       }
     });

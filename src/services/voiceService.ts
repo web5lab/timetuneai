@@ -59,34 +59,49 @@ export class VoiceService {
         return false;
       }
 
+      // Clear any existing listeners to prevent duplicates
+      this.removeAllListeners();
+
       this.isListening = true;
+      let hasReceivedFinalResult = false;
 
       // Start speech recognition
       await SpeechRecognition.start({
         language: 'en-US',
         maxResults: 1,
         prompt: 'Speak your reminder...',
-        partialResults: true,
+        partialResults: false, // Disable partial results to prevent multiple triggers
         popup: false,
       });
 
       // Listen for results
-      SpeechRecognition.addListener('partialResults', (data) => {
-        if (data.matches && data.matches.length > 0) {
-          onResult(data.matches[0]);
-        }
-      });
-
       SpeechRecognition.addListener('finalResults', (data) => {
+        if (hasReceivedFinalResult) return; // Prevent duplicate final results
+        hasReceivedFinalResult = true;
+        
         this.isListening = false;
         if (data.matches && data.matches.length > 0) {
+          console.log('Voice recognition final result:', data.matches[0]);
           onResult(data.matches[0]);
         }
+        
+        // Clean up listeners after getting result
+        setTimeout(() => {
+          this.removeAllListeners();
+        }, 100);
       });
 
       SpeechRecognition.addListener('speechError', (error) => {
+        if (hasReceivedFinalResult) return; // Prevent error after successful result
+        
         this.isListening = false;
+        console.error('Voice recognition error:', error);
         onError?.(error.message || 'Speech recognition error');
+        
+        // Clean up listeners after error
+        setTimeout(() => {
+          this.removeAllListeners();
+        }, 100);
       });
 
       return true;

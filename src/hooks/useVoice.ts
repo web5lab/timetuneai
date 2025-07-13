@@ -29,12 +29,20 @@ export const useVoice = () => {
     setError(null);
     setTranscribedText('');
     
+    // Prevent starting if already listening
+    if (isListening) {
+      console.log('Already listening, ignoring start request');
+      return false;
+    }
+    
     const success = await voiceService.startListening(
       (text) => {
+        console.log('Voice result received:', text);
         setTranscribedText(text);
         onResult?.(text);
       },
       (errorMessage) => {
+        console.error('Voice error received:', errorMessage);
         setError(errorMessage);
         setIsListening(false);
       }
@@ -50,8 +58,14 @@ export const useVoice = () => {
   }, []);
 
   const stopListening = useCallback(async () => {
+    if (!isListening) {
+      console.log('Not listening, ignoring stop request');
+      return;
+    }
+    
     await voiceService.stopListening();
     setIsListening(false);
+    setTranscribedText('');
   }, []);
 
   const speak = useCallback(async (text: string, options?: { rate?: number; pitch?: number; volume?: number }) => {
@@ -73,6 +87,8 @@ export const useVoice = () => {
   }, []);
 
   const toggleListening = useCallback(async (onResult?: (text: string) => void) => {
+    console.log('Toggle listening called, current state:', isListening);
+    
     if (isListening) {
       await stopListening();
     } else {
