@@ -10,11 +10,11 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const navItems = [
-    { to: '/app', icon: MessageCircle, label: 'Chat' },
-    { to: '/app/reminders', icon: Calendar, label: 'Reminders' },
-    { to: '/app/profile', icon: User, label: 'Profile' },
-    { to: '/app/settings', icon: Settings, label: 'Settings' },
-    { to: '/app/subscription', icon: Crown, label: 'Subscription' },
+    { to: '/', icon: MessageCircle, label: 'Chat' },
+    { to: '/reminders', icon: Calendar, label: 'Reminders' },
+    { to: '/profile', icon: User, label: 'Profile' },
+    { to: '/settings', icon: Settings, label: 'Settings' },
+    { to: '/subscription', icon: Crown, label: 'Subscription' },
   ];
 
   return (
