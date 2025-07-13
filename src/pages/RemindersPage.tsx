@@ -11,6 +11,15 @@ const RemindersPage: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
+    time: '09:00',
+    category: 'personal' as 'personal' | 'work' | 'health' | 'other',
+    priority: 'medium' as 'low' | 'medium' | 'high',
+    isRecurring: false,
+  });
   const { reminders, toggleComplete, deleteReminder: removeReminder, addReminder } = useReminders();
 
   const categories = [
@@ -35,6 +44,61 @@ const RemindersPage: React.FC = () => {
     removeReminder(id);
   };
 
+  const handleFormChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleCreateReminder = () => {
+    if (!formData.title.trim()) {
+      alert('Please enter a reminder title');
+      return;
+    }
+
+    const reminderData = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      date: formData.date,
+      time: formData.time,
+      category: formData.category,
+      priority: formData.priority,
+      isCompleted: false,
+      isRecurring: formData.isRecurring,
+      recurrencePattern: formData.isRecurring ? 'daily' : '',
+    };
+
+    console.log('Creating reminder:', reminderData);
+    const id = addReminder(reminderData);
+    console.log('Reminder created with ID:', id);
+
+    // Reset form and close modal
+    setFormData({
+      title: '',
+      description: '',
+      date: new Date().toISOString().split('T')[0],
+      time: '09:00',
+      category: 'personal',
+      priority: 'medium',
+      isRecurring: false,
+    });
+    setShowAddModal(false);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    // Reset form when closing
+    setFormData({
+      title: '',
+      description: '',
+      date: new Date().toISOString().split('T')[0],
+      time: '09:00',
+      category: 'personal',
+      priority: 'medium',
+      isRecurring: false,
+    });
+  };
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200';
@@ -277,7 +341,7 @@ const RemindersPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">Add New Reminder</h2>
                 <button
-                  onClick={() => setShowAddModal(false)}
+                  onClick={handleCloseModal}
                   className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                 >
                   <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
@@ -288,6 +352,8 @@ const RemindersPage: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Title</label>
                   <input
+                    value={formData.title}
+                    onChange={(e) => handleFormChange('title', e.target.value)}
                     type="text"
                     placeholder="What do you want to be reminded about?"
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200"
@@ -297,6 +363,8 @@ const RemindersPage: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Description</label>
                   <textarea
+                    value={formData.description}
+                    onChange={(e) => handleFormChange('description', e.target.value)}
                     placeholder="Add more details (optional)"
                     rows={2}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm sm:text-base transition-colors duration-200"
@@ -307,6 +375,8 @@ const RemindersPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Date</label>
                     <input
+                      value={formData.date}
+                      onChange={(e) => handleFormChange('date', e.target.value)}
                       type="date"
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200"
                     />
@@ -314,6 +384,8 @@ const RemindersPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Time</label>
                     <input
+                      value={formData.time}
+                      onChange={(e) => handleFormChange('time', e.target.value)}
                       type="time"
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200"
                     />
@@ -322,10 +394,15 @@ const RemindersPage: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Category</label>
-                  <select className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200">
+                  <select 
+                    value={formData.category}
+                    onChange={(e) => handleFormChange('category', e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200"
+                  >
                     <option value="personal">Personal</option>
                     <option value="work">Work</option>
                     <option value="health">Health</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
                 
@@ -334,13 +411,16 @@ const RemindersPage: React.FC = () => {
                   <div className="flex space-x-2 sm:space-x-3">
                     {['low', 'medium', 'high'].map((priority) => (
                       <button
+                        onClick={() => handleFormChange('priority', priority)}
                         key={priority}
                         className={`flex-1 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl border transition-all duration-200 ${
-                          priority === 'high' 
-                            ? 'border-red-300 bg-red-50 text-red-700'
-                            : priority === 'medium'
-                            ? 'border-yellow-300 bg-yellow-50 text-yellow-700'
-                            : 'border-green-300 bg-green-50 text-green-700'
+                          formData.priority === priority
+                            ? priority === 'high' 
+                              ? 'border-red-500 bg-red-100 text-red-700'
+                              : priority === 'medium'
+                              ? 'border-yellow-500 bg-yellow-100 text-yellow-700'
+                              : 'border-green-500 bg-green-100 text-green-700'
+                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600'
                         }`}
                       >
                         <span className="capitalize text-xs sm:text-sm font-medium">{priority}</span>
@@ -351,6 +431,8 @@ const RemindersPage: React.FC = () => {
                 
                 <div className="flex items-center space-x-2 sm:space-x-3">
                   <input
+                    checked={formData.isRecurring}
+                    onChange={(e) => handleFormChange('isRecurring', e.target.checked)}
                     type="checkbox"
                     id="recurring"
                     className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 rounded focus:ring-orange-500"
@@ -363,13 +445,13 @@ const RemindersPage: React.FC = () => {
               
               <div className="flex space-x-2 sm:space-x-3 mt-6 sm:mt-8">
                 <button
-                  onClick={() => setShowAddModal(false)}
+                  onClick={handleCloseModal}
                   className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors font-medium text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => setShowAddModal(false)}
+                  onClick={handleCreateReminder}
                   className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg sm:rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-medium text-sm sm:text-base"
                 >
                   Create Reminder
