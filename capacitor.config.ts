@@ -5,6 +5,11 @@ const config: CapacitorConfig = {
   appName: 'TimeTuneAi',
   webDir: 'dist',
   plugins: {
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId: '548258400256-jfrssbte8dhk0cri2e7kjb5onhs8fjd1.apps.googleusercontent.com', // Web Client ID from Google Console
+      forceCodeForRefreshToken: true
+    },
     splashScreen: {
       launchAutoHide: true,
       launchShowDuration: 0

@@ -4,4 +4,5 @@
     <string name="title_activity_main">TimeTuneAi</string>
     <string name="package_name">com.timetuneai.app</string>
     <string name="custom_url_scheme">com.timetuneai.app</string>
+    <string name="server_client_id">548258400256-jfrssbte8dhk0cri2e7kjb5onhs8fjd1.apps.googleusercontent.com</string>
 </resources>
