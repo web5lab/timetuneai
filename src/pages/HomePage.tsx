@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap } from 'lucide-react';
+import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
 import { useChat } from '../hooks/useChat';
+import { useVoice } from '../hooks/useVoice';
 
 const HomePage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -10,16 +11,49 @@ const HomePage: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
   const { messages, isLoading, sendMessage, clearChat } = useChat();
+  const { 
+    isListening, 
+    isSpeaking, 
+    isVoiceSupported, 
+    transcribedText, 
+    error: voiceError,
+    toggleListening, 
+    speak,
+    stopSpeaking 
+  } = useVoice();
   const [inputText, setInputText] = useState('');
-  const [isListening, setIsListening] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+    
+    // Auto-speak AI responses if enabled
+    if (autoSpeak && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.sender === 'ai' && !isLoading) {
+        speak(lastMessage.text);
+      }
+    }
+  }, [messages, autoSpeak, speak, isLoading]);
+
+  // Update input text when voice transcription changes
+  useEffect(() => {
+    if (transcribedText) {
+      setInputText(transcribedText);
+    }
+  }, [transcribedText]);
+
+  // Handle voice errors
+  useEffect(() => {
+    if (voiceError) {
+      console.error('Voice error:', voiceError);
+    }
+  }, [voiceError]);
 
   const handleSendMessage = async (text?: string) => {
     const messageText = text || inputText;
@@ -29,14 +63,20 @@ const HomePage: React.FC = () => {
     await sendMessage(messageText);
   };
 
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    // In a real app, this would integrate with speech recognition
-    if (!isListening) {
-      setTimeout(() => {
-        setIsListening(false);
-        setInputText("Remind me about the team meeting tomorrow at 2 PM");
-      }, 2000);
+  const handleVoiceToggle = async () => {
+    await toggleListening((text) => {
+      // Auto-send when voice recognition completes
+      if (text.trim()) {
+        handleSendMessage(text);
+      }
+    });
+  };
+
+  const handleSpeakToggle = async () => {
+    if (isSpeaking) {
+      await stopSpeaking();
+    } else {
+      setAutoSpeak(!autoSpeak);
     }
   };
 
@@ -69,17 +109,40 @@ const HomePage: React.FC = () => {
               <h2 className="font-semibold text-gray-900 dark:text-gray-100">TimeTuneAI Assistant</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
-                {isLoading ? 'Thinking...' : 'Ready to help'}
+                {isLoading ? 'Thinking...' : isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : 'Ready to help'}
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClearChat}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200"
-            title="Clear chat"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+          <div className="flex items-center space-x-2">
+            {/* Voice/TTS Toggle */}
+            {isVoiceSupported && (
+              <button
+                onClick={handleSpeakToggle}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  autoSpeak
+                    ? 'text-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                }`}
+                title={autoSpeak ? 'Disable auto-speak' : 'Enable auto-speak'}
+              >
+                {isSpeaking ? (
+                  <VolumeX className="w-4 h-4" />
+                ) : autoSpeak ? (
+                  <Volume2 className="w-4 h-4" />
+                ) : (
+                  <VolumeX className="w-4 h-4" />
+                )}
+              </button>
+            )}
+            
+            <button
+              onClick={handleClearChat}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200"
+              title="Clear chat"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
       
@@ -146,15 +209,21 @@ const HomePage: React.FC = () => {
       <div className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700 p-4 shadow-lg transition-colors duration-200">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-end space-x-2 sm:space-x-3">
-            <button
-              onClick={toggleListening}
-              className={`p-3 sm:p-4 rounded-full transition-all duration-300 shadow-lg flex-shrink-0 ${isListening
-                  ? 'bg-red-500 text-white animate-pulse scale-110 ring-4 ring-red-200'
-                  : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:scale-105'
+            {/* Voice Input Button */}
+            {isVoiceSupported && (
+              <button
+                onClick={handleVoiceToggle}
+                disabled={isLoading}
+                className={`p-3 sm:p-4 rounded-full transition-all duration-300 shadow-lg flex-shrink-0 ${
+                  isListening
+                    ? 'bg-red-500 text-white animate-pulse scale-110 ring-4 ring-red-200'
+                    : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'
                 }`}
-            >
-              {isListening ? <MicOff className="w-5 h-5 sm:w-6 sm:h-6" /> : <Mic className="w-5 h-5 sm:w-6 sm:h-6" />}
-            </button>
+                title={isListening ? 'Stop listening' : 'Start voice input'}
+              >
+                {isListening ? <MicOff className="w-5 h-5 sm:w-6 sm:h-6" /> : <Mic className="w-5 h-5 sm:w-6 sm:h-6" />}
+              </button>
+            )}
 
             <div className="flex-1 relative">
               <textarea
@@ -200,7 +269,24 @@ const HomePage: React.FC = () => {
             <div className="text-center mt-2 sm:mt-3">
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 animate-pulse flex items-center justify-center">
                 <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-ping"></div>
-                🎤 Listening... Speak your reminder
+                🎤 Listening... Speak your message
+              </p>
+            </div>
+          )}
+
+          {isSpeaking && (
+            <div className="text-center mt-2 sm:mt-3">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 animate-pulse flex items-center justify-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-ping"></div>
+                🔊 Speaking... Tap volume icon to stop
+              </p>
+            </div>
+          )}
+
+          {voiceError && (
+            <div className="text-center mt-2 sm:mt-3">
+              <p className="text-xs sm:text-sm text-red-500 dark:text-red-400 flex items-center justify-center">
+                ⚠️ Voice error: {voiceError}
               </p>
             </div>
           )}
