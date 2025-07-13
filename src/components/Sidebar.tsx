@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Calendar, BellRing, User, Settings, Crown } from 'lucide-react';
+import { Calendar, BellRing, User, Settings, Crown, MessageCircle } from 'lucide-react';
 import Logo from './Logo';
 
 interface SidebarProps {
