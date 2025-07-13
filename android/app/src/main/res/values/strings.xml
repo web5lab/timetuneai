@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TimeTuneAi</string>
+    <string name="title_activity_main">TimeTuneAi</string>
+    <string name="package_name">com.timetuneai.app</string>
+    <string name="custom_url_scheme">com.timetuneai.app</string>
+</resources>

@@ -3,29 +3,16 @@ import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap } from 'lucide-react
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
 import { useChat } from '../hooks/useChat';
-import ApiKeySetup from '../components/ApiKeySetup';
 
 const HomePage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [apiKeySet, setApiKeySet] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Check if API key is available
-    const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-    const storedKey = localStorage.getItem('gemini_api_key');
-    setApiKeySet(!!(envKey && envKey !== 'your_gemini_api_key_here') || !!storedKey);
-  }, []);
-
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -99,11 +86,7 @@ const HomePage: React.FC = () => {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto space-y-4">
-          {/* API Key Setup */}
-          {!apiKeySet && (
-            <ApiKeySetup onApiKeySet={() => setApiKeySet(true)} />
-          )}
-          
+       
           {messages.map((message) => (
             <div
               key={message.id}
