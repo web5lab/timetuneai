@@ -1,5 +1,5 @@
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import { TextToSpeech } from '@capacitor/text-to-speech';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { Capacitor } from '@capacitor/core';
 
 export class VoiceService {
