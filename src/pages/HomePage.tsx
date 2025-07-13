@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Sparkles,  Clock,  } from 'lucide-react';
+import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import Sidebar from '../components/Sidebar';
-
-interface Message {
-  id: number;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-  type?: 'reminder' | 'confirmation' | 'suggestion';
-}
+import { useChat } from '../hooks/useChat';
+import ApiKeySetup from '../components/ApiKeySetup';
 
 const HomePage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,19 +11,19 @@ const HomePage: React.FC = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: "Hi! I'm TimeTuneAI, your personal reminder assistant. I can help you set reminders using natural language. Try saying something like 'Remind me to call mom at 3 PM tomorrow' or just type it!",
-      sender: 'ai',
-      timestamp: new Date(),
-      type: 'suggestion'
-    },
-  ]);
+  
+  const { messages, isLoading, sendMessage, clearChat } = useChat();
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const [apiKeySet, setApiKeySet] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check if API key is available
+    const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const storedKey = localStorage.getItem('gemini_api_key');
+    setApiKeySet(!!(envKey && envKey !== 'your_gemini_api_key_here') || !!storedKey);
+  }, []);
 
 
   const scrollToBottom = () => {
@@ -42,68 +36,10 @@ const HomePage: React.FC = () => {
 
   const handleSendMessage = async (text?: string) => {
     const messageText = text || inputText;
-    if (!messageText.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now(),
-      text: messageText,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    if (!messageText.trim() || isLoading) return;
+    
     setInputText('');
-    setIsTyping(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(messageText);
-      const aiMessage: Message = {
-        id: Date.now() + 1,
-        text: aiResponse.text,
-        sender: 'ai',
-        timestamp: new Date(),
-        type: aiResponse.type
-      };
-      setMessages(prev => [...prev, aiMessage]);
-      setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateAIResponse = (userInput: string): { text: string; type: 'reminder' | 'confirmation' | 'suggestion' } => {
-    const input = userInput.toLowerCase();
-
-    if (input.includes('remind') && (input.includes('meeting') || input.includes('call') || input.includes('appointment'))) {
-      return {
-        text: "Perfect! I've set that reminder for you. You'll get a notification at the specified time. Would you like me to add a 15-minute heads-up notification as well?",
-        type: 'confirmation'
-      };
-    } else if (input.includes('daily') || input.includes('every day') || input.includes('recurring')) {
-      return {
-        text: "Great! I've created a recurring daily reminder for you. You can manage all your recurring reminders in the Reminders tab. Is there a specific time you'd prefer?",
-        type: 'confirmation'
-      };
-    } else if (input.includes('water') || input.includes('drink')) {
-      return {
-        text: "Excellent choice for staying healthy! I've set your water reminder. Staying hydrated is so important. Would you like me to set up multiple reminders throughout the day?",
-        type: 'confirmation'
-      };
-    } else if (input.includes('exercise') || input.includes('workout') || input.includes('gym')) {
-      return {
-        text: "Love the commitment to fitness! I've scheduled your workout reminder. Regular exercise is key to a healthy lifestyle. Should I make this a recurring reminder?",
-        type: 'confirmation'
-      };
-    } else if (input.includes('tomorrow') || input.includes('next week') || input.includes('monday') || input.includes('tuesday')) {
-      return {
-        text: "Got it! I've scheduled that reminder for the date you specified. You'll receive a notification at the right time. Anything else you'd like me to help you remember?",
-        type: 'confirmation'
-      };
-    } else {
-      return {
-        text: "I understand! I've processed your request and set up the reminder. You can view and manage all your reminders in the Reminders tab. Is there anything else you'd like me to help you remember?",
-        type: 'confirmation'
-      };
-    }
+    await sendMessage(messageText);
   };
 
   const toggleListening = () => {
@@ -115,6 +51,10 @@ const HomePage: React.FC = () => {
         setInputText("Remind me about the team meeting tomorrow at 2 PM");
       }, 2000);
     }
+  };
+
+  const handleClearChat = () => {
+    clearChat();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -130,9 +70,40 @@ const HomePage: React.FC = () => {
     <div className="flex flex-col h-full bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-200">
       <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      
+      {/* Chat Header */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm transition-colors duration-200">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">TimeTuneAI Assistant</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                {isLoading ? 'Thinking...' : 'Ready to help'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleClearChat}
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200"
+            title="Clear chat"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* API Key Setup */}
+          {!apiKeySet && (
+            <ApiKeySetup onApiKeySet={() => setApiKeySet(true)} />
+          )}
+          
           {messages.map((message) => (
             <div
               key={message.id}
@@ -152,6 +123,12 @@ const HomePage: React.FC = () => {
                     <span className="text-xs font-semibold text-green-600 dark:text-green-400">Reminder Set!</span>
                   </div>
                 )}
+                {message.sender === 'ai' && message.type === 'reminder' && (
+                  <div className="flex items-center mb-2">
+                    <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" />
+                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Processing...</span>
+                  </div>
+                )}
                 <p className="text-sm leading-relaxed">{message.text}</p>
                 <p
                   className={`text-xs mt-2 ${message.sender === 'user' ? 'text-orange-100' : 'text-gray-500 dark:text-gray-400'
@@ -163,7 +140,7 @@ const HomePage: React.FC = () => {
             </div>
           ))}
 
-          {isTyping && (
+          {isLoading && (
             <div className="flex justify-start">
               <div className="bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 shadow-md px-4 py-3 rounded-2xl rounded-bl-md border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center space-x-2">
@@ -225,10 +202,14 @@ const HomePage: React.FC = () => {
 
             <button
               onClick={() => handleSendMessage()}
-              disabled={!inputText.trim()}
-              className="p-3 sm:p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-105 flex-shrink-0"
+              disabled={!inputText.trim() || isLoading}
+              className="p-3 sm:p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-105 flex-shrink-0 relative"
             >
-              <Send className="w-5 h-5 sm:w-6 sm:h-6" />
+              {isLoading ? (
+                <div className="w-5 h-5 sm:w-6 sm:h-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Send className="w-5 h-5 sm:w-6 sm:h-6" />
+              )}
             </button>
           </div>
 
@@ -244,19 +225,22 @@ const HomePage: React.FC = () => {
           {/* Quick action buttons for mobile */}
           <div className="flex sm:hidden justify-center space-x-2 mt-3">
             <button
-              onClick={() => handleSendMessage("Remind me to drink water in 1 hour")}
+              onClick={() => !isLoading && handleSendMessage("Remind me to drink water in 1 hour")}
+              disabled={isLoading}
               className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
             >
               💧 Drink water
             </button>
             <button
-              onClick={() => handleSendMessage("Remind me about lunch at 12 PM")}
+              onClick={() => !isLoading && handleSendMessage("Remind me about lunch at 12 PM")}
+              disabled={isLoading}
               className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium hover:bg-green-200 transition-colors"
             >
               🍽️ Lunch
             </button>
             <button
-              onClick={() => handleSendMessage("Remind me to call mom tomorrow")}
+              onClick={() => !isLoading && handleSendMessage("Remind me to call mom tomorrow")}
+              disabled={isLoading}
               className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium hover:bg-purple-200 transition-colors"
             >
               📞 Call mom
