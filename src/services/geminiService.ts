@@ -467,6 +467,25 @@ export class GeminiService {
     } else if (lowerMessage.includes('remind')) {
       // Try to create a basic reminder with fallback
       if (this.callbacks.addReminder) {
+        // Check for recurring patterns
+        const isRecurring = lowerMessage.includes('daily') || 
+                           lowerMessage.includes('every day') ||
+                           lowerMessage.includes('weekly') ||
+                           lowerMessage.includes('every week');
+        
+        let recurrencePattern = undefined;
+        let recurrenceDetails = undefined;
+        
+        if (isRecurring) {
+          if (lowerMessage.includes('daily') || lowerMessage.includes('every day')) {
+            recurrencePattern = 'daily';
+            recurrenceDetails = { frequency: 1 };
+          } else if (lowerMessage.includes('weekly') || lowerMessage.includes('every week')) {
+            recurrencePattern = 'weekly';
+            recurrenceDetails = { frequency: 1 };
+          }
+        }
+        
         const reminderData = {
           title: message.replace(/remind me to /i, '').replace(/remind me /i, ''),
           description: '',
@@ -475,12 +494,20 @@ export class GeminiService {
           priority: 'medium' as const,
           category: 'personal' as const,
           isCompleted: false,
-          isRecurring: false,
-          recurrencePattern: '',
+          isRecurring,
+          recurrencePattern,
+          recurrenceDetails,
+          nextOccurrence: isRecurring ? this.calculateNextOccurrence(
+            new Date().toISOString().split('T')[0],
+            '09:00',
+            recurrencePattern,
+            recurrenceDetails
+          ) : undefined,
         };
         
         const id = this.callbacks.addReminder(reminderData);
-        return `I've created a reminder for you: "${reminderData.title}". I set it for today at 9:00 AM. You can update the time and date in your reminders page if needed.`;
+        const recurringText = isRecurring ? ` as a ${recurrencePattern} reminder` : '';
+        return `I've created a reminder for you: "${reminderData.title}"${recurringText}. I set it for today at 9:00 AM. You can update the time and date in your reminders page if needed.`;
       }
       return "I understand you want to set a reminder. Could you please provide more details like the date and time? For example: 'Remind me to call mom tomorrow at 3 PM'.";
     } else {

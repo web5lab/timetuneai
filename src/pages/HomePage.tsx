@@ -232,9 +232,16 @@ const HomePage: React.FC = () => {
               💧 Drink water
             </button>
             <button
-              onClick={() => !isLoading && handleSendMessage("Remind me about lunch at 12 PM today")}
+              onClick={() => !isLoading && handleSendMessage("Remind me daily to drink water at 9 AM")}
               disabled={isLoading}
               className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium hover:bg-green-200 transition-colors"
+            >
+              🔄 Daily water
+            </button>
+            <button
+              onClick={() => !isLoading && handleSendMessage("Remind me about lunch at 12 PM today")}
+              disabled={isLoading}
+              className="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium hover:bg-yellow-200 transition-colors"
             >
               🍽️ Lunch
             </button>
