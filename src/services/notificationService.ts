@@ -17,6 +17,9 @@ export class NotificationService {
     if (this.isInitialized) return true;
 
     try {
+      console.log('Initializing notification service...');
+      console.log('Platform check - isNativePlatform:', Capacitor.isNativePlatform());
+      
       // Check if running on native platform
       if (!Capacitor.isNativePlatform()) {
         console.log('Local notifications not available on web platform');
@@ -24,11 +27,16 @@ export class NotificationService {
       }
 
       // Request permissions
+      console.log('Requesting notification permissions...');
       const permission = await LocalNotifications.requestPermissions();
+      console.log('Permission result:', permission);
       
       if (permission.display === 'granted') {
         this.isInitialized = true;
         console.log('Local notifications permission granted');
+        
+        // Create notification channel first
+        await this.createNotificationChannel();
         
         // Listen for notification actions
         await LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
@@ -58,8 +66,8 @@ export class NotificationService {
       const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);
       const now = new Date();
 
-      // Don't schedule notifications for past dates
-      if (reminderDateTime <= now) {
+      // Don't schedule notifications for past dates (except for test reminders)
+      if (reminderDateTime <= now && !reminder.title.includes('Test')) {
         console.log('Cannot schedule notification for past date');
         return false;
       }
@@ -97,6 +105,15 @@ export class NotificationService {
       });
 
       console.log(`Notification scheduled for reminder: ${reminder.title} at ${reminderDateTime}`);
+      
+      // For test notifications, also log pending notifications
+      if (reminder.title.includes('Test')) {
+        setTimeout(async () => {
+          const pending = await this.getPendingNotifications();
+          console.log('Pending notifications after test scheduling:', pending);
+        }, 1000);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error scheduling notification:', error);
@@ -199,6 +216,15 @@ export class NotificationService {
       });
 
       console.log('Notification channel created');
+      
+      // Test if we can get channel info
+      try {
+        const channels = await LocalNotifications.listChannels();
+        console.log('Available notification channels:', channels);
+      } catch (e) {
+        console.log('Could not list channels:', e);
+      }
+      
     } catch (error) {
       console.error('Error creating notification channel:', error);
     }
