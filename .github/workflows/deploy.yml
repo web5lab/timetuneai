@@ -23,7 +23,6 @@ jobs:
       # -----------------------
       - name: Install Dependencies (Main)
         run: |
-          cd project
           npm ci
 
       - name: Build Project (Main)
@@ -44,5 +43,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /public_html/
-          local-dir: project/dist/
+          local-dir: dist/
  
