@@ -31,12 +31,11 @@ jobs:
           VITE_SERVER_URL: https://api.timetuneai.com
 
         run: |
-          cd project
           npm run build
 
       - name: Copy Extra Files to dist (Main)
         run: |
-          cp .htaccess project/dist/.htaccess
+          cp .htaccess dist/.htaccess
 
       - name: FTP Deploy Main (preserve /adminxyd folder)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
