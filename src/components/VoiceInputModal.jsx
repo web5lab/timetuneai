@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Mic, MicOff, Send, X, Volume2 } from 'lucide-react';
 
-interface VoiceInputModalProps {
-  isOpen: boolean;
-  isListening: boolean;
-  transcribedText: string;
-  onClose: () => void;
-  onSend: (text: string) => void;
-  onStartListening: () => void;
-  onStopListening: () => void;
-}
 
-const VoiceInputModal: React.FC<VoiceInputModalProps> = ({
+const VoiceInputModal = ({
   isOpen,
   isListening,
   transcribedText,

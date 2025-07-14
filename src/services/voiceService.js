@@ -3,18 +3,18 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { Capacitor } from '@capacitor/core';
 
 export class VoiceService {
-  private static instance: VoiceService;
-  private isInitialized = false;
-  private isListening = false;
+   static instance;
+   isInitialized = false;
+   isListening = false;
 
-  static getInstance(): VoiceService {
+  static getInstance() {
     if (!VoiceService.instance) {
       VoiceService.instance = new VoiceService();
     }
     return VoiceService.instance;
   }
 
-  async initialize(): Promise<boolean> {
+  async initialize() {
     if (this.isInitialized) return true;
 
     try {
@@ -41,7 +41,7 @@ export class VoiceService {
     }
   }
 
-  async startListening(onResult: (text: string) => void, onError?: (error: string) => void): Promise<boolean> {
+  async startListening(onResult, onError) {
     try {
       if (!this.isInitialized) {
         const initialized = await this.initialize();
@@ -113,7 +113,7 @@ export class VoiceService {
     }
   }
 
-  async stopListening(): Promise<void> {
+  async stopListening() {
     try {
       if (this.isListening) {
         await SpeechRecognition.stop();
@@ -124,7 +124,7 @@ export class VoiceService {
     }
   }
 
-  async speak(text: string, options?: { rate?: number; pitch?: number; volume?: number }): Promise<boolean> {
+  async speak(text, options) {
     try {
       if (!Capacitor.isNativePlatform()) {
         // Fallback to web speech synthesis
@@ -155,7 +155,7 @@ export class VoiceService {
     }
   }
 
-  async stopSpeaking(): Promise<void> {
+  async stopSpeaking(){
     try {
       if (Capacitor.isNativePlatform()) {
         await TextToSpeech.stop();
@@ -167,11 +167,11 @@ export class VoiceService {
     }
   }
 
-  isCurrentlyListening(): boolean {
+  isCurrentlyListening() {
     return this.isListening;
   }
 
-  async getSupportedLanguages(): Promise<string[]> {
+  async getSupportedLanguages() {
     try {
       if (Capacitor.isNativePlatform()) {
         const languages = await SpeechRecognition.getSupportedLanguages();
@@ -185,7 +185,7 @@ export class VoiceService {
   }
 
   // Clean up listeners
-  removeAllListeners(): void {
+  removeAllListeners() {
     try {
       SpeechRecognition.removeAllListeners();
     } catch (error) {

@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import type { Reminder } from '../contexts/RemindersContext';
 
 const getApiKey = () => {
   return 'AIzaSyDpj_YVxGgUxTsmcHCgPEbzkSspl1il4vo'
@@ -11,7 +10,7 @@ if (!API_KEY || API_KEY === 'your_gemini_api_key_here') {
   console.warn('Gemini API key not found. Please add VITE_GEMINI_API_KEY to your .env file');
 }
 
-let genAI: GoogleGenerativeAI | null = null;
+let genAI = null;
 
 const initializeGenAI = () => {
   const apiKey = getApiKey();
@@ -102,41 +101,19 @@ CONVERSATION STYLE:
 
 IMPORTANT: Always respond with either valid JSON for actions or regular text for conversation. Never mix both in the same response.`;
 
-export interface ReminderAction {
-  action: 'create_reminder' | 'update_reminder' | 'delete_reminder' | 'list_reminders';
-  data: any;
-  message: string;
-}
 
-interface GeminiServiceCallbacks {
-  addReminder?: (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>) => string;
-  updateReminder?: (id: number, updates: Partial<Reminder>) => void;
-  deleteReminder?: (id: number) => void;
-  findReminders?: (query: string) => Reminder[];
-  getAllReminders?: () => Reminder[];
-}
 
-export interface ReminderData {
-  title: string;
-  description?: string;
-  date?: string;
-  time?: string;
-  priority?: 'high' | 'medium' | 'low';
-  category?: 'work' | 'personal' | 'health' | 'other';
-  recurring?: boolean;
-  recurrencePattern?: string;
-}
 
 export class GeminiService {
-  private model;
-  private chat;
-  private callbacks: GeminiServiceCallbacks = {};
+   model;
+   chat;
+  callbacks;
 
   constructor() {
     this.initializeModel();
   }
 
-  private initializeModel() {
+  initializeModel() {
     if (initializeGenAI() && genAI) {
       this.model = genAI.getGenerativeModel({ 
         model: "gemini-2.5-flash",
@@ -152,7 +129,7 @@ export class GeminiService {
     }
   }
 
-  private initializeChat() {
+   initializeChat() {
     this.chat = this.model.startChat({
       history: [
         {
@@ -167,11 +144,11 @@ export class GeminiService {
     });
   }
 
-  setCallbacks(callbacks: GeminiServiceCallbacks) {
+  setCallbacks(callbacks) {
     this.callbacks = callbacks;
   }
 
-  private parseDate(dateStr: string): string {
+ parseDate(dateStr) {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -197,7 +174,7 @@ export class GeminiService {
     return today.toISOString().split('T')[0];
   }
 
-  private parseTime(timeStr: string): string {
+  parseTime(timeStr) {
     // Handle common time formats
     const time = timeStr.toLowerCase().replace(/\s+/g, '');
     
@@ -225,7 +202,7 @@ export class GeminiService {
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   }
 
-  private async executeAction(actionData: ReminderAction): Promise<string> {
+   async executeAction(actionData) {
     try {
       console.log('Executing action:', actionData);
       
@@ -336,7 +313,7 @@ export class GeminiService {
       return "I'm sorry, something went wrong while processing your request.";
     }
   }
-  async sendMessage(message: string): Promise<string> {
+  async sendMessage(message) {
     try {
       console.log('Gemini service sending message:', message);
       
@@ -419,7 +396,7 @@ export class GeminiService {
     }
   }
 
-  private getFallbackResponse(message: string): string {
+   getFallbackResponse(message) {
     const lowerMessage = message.toLowerCase();
     
     if (lowerMessage.includes('list') || lowerMessage.includes('show') || lowerMessage.includes('my reminders')) {
@@ -446,8 +423,8 @@ export class GeminiService {
           description: '',
           date: new Date().toISOString().split('T')[0],
           time: '09:00',
-          priority: 'medium' as const,
-          category: 'personal' as const,
+          priority: 'medium' ,
+          category: 'personal' ,
           isCompleted: false,
           isRecurring: false,
           recurrencePattern: '',
@@ -463,8 +440,8 @@ export class GeminiService {
   }
 
   // Method to extract reminder data from conversation (for future use)
-  extractReminderData(message: string): Partial<ReminderData> {
-    const data: Partial<ReminderData> = {};
+  extractReminderData(message) {
+    const data = {};
     const lowerMessage = message.toLowerCase();
 
     // Extract priority

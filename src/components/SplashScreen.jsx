@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Logo from './Logo';
 
-interface SplashScreenProps {
-  onComplete: () => void;
-}
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
+
+const SplashScreen = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [currentText, setCurrentText] = useState('Initializing...');
 
@@ -18,7 +16,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   ];
 
   useEffect(() => {
-    let progressInterval: NodeJS.Timeout;
+    let progressInterval;
     let textIndex = 0;
 
     const startLoading = () => {

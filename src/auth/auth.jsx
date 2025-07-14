@@ -1,16 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
-interface AuthContextProps {
-  user: any;
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
-}
+const AuthContext = createContext(undefined);
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any>({
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState({
     id: "test 12",
     name: "test user",
     email: "helloshiva0801@gmail.com",

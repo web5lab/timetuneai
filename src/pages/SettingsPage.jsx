@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { notificationService } from '../services/notificationService';
 import BottomNavigation from '../components/BottomNavigation';
 
-const SettingsPage: React.FC = () => {
+const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     notifications: {
@@ -29,11 +29,11 @@ const SettingsPage: React.FC = () => {
     },
   });
 
-  const updateSetting = (category: string, key: string, value: any) => {
+  const updateSetting = (category, key, value) => {
     setSettings(prev => ({
       ...prev,
       [category]: {
-        ...prev[category as keyof typeof prev],
+        ...prev[category],
         [key]: value,
       },
     }));
@@ -51,7 +51,7 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const ToggleSwitch: React.FC<{ enabled: boolean; onChange: (value: boolean) => void }> = ({ enabled, onChange }) => (
+  const ToggleSwitch = ({ enabled, onChange }) => (
     <button
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${

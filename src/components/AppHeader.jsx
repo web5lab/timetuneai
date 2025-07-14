@@ -3,7 +3,7 @@ import { Bell, Settings, User, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from './Logo';
 
-const AppHeader: React.FC = () => {
+const AppHeader = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);

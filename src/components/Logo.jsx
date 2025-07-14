@@ -1,14 +1,8 @@
 import React from 'react';
 import { Clock, MessageCircle, Sparkles } from 'lucide-react';
 
-interface LogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'default' | 'white' | 'dark';
-  showText?: boolean;
-  className?: string;
-}
 
-const Logo: React.FC<LogoProps> = ({ 
+const Logo = ({ 
   size = 'md', 
   variant = 'default', 
   showText = true, 

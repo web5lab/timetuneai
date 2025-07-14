@@ -3,7 +3,7 @@ import { notificationService } from '../services/notificationService';
 
 export const useNotifications = () => {
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
-  const [pendingNotifications, setPendingNotifications] = useState<any[]>([]);
+  const [pendingNotifications, setPendingNotifications] = useState([]);
 
   useEffect(() => {
     // Initialize notifications and check permission status
@@ -21,16 +21,16 @@ export const useNotifications = () => {
     initializeNotifications();
 
     // Listen for notification taps
-    const handleNotificationTap = (event: CustomEvent) => {
+    const handleNotificationTap = (event) => {
       console.log('Reminder notification tapped:', event.detail);
       // You can add navigation logic here
       // For example, navigate to the specific reminder or reminders page
     };
 
-    window.addEventListener('reminderNotificationTapped', handleNotificationTap as EventListener);
+    window.addEventListener('reminderNotificationTapped', handleNotificationTap);
 
     return () => {
-      window.removeEventListener('reminderNotificationTapped', handleNotificationTap as EventListener);
+      window.removeEventListener('reminderNotificationTapped', handleNotificationTap);
     };
   }, []);
 

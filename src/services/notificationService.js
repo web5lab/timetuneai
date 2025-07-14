@@ -1,19 +1,18 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
-import type { Reminder } from '../contexts/RemindersContext';
 
 export class NotificationService {
-  private static instance: NotificationService;
-  private isInitialized = false;
+   static instance;
+   isInitialized = false;
 
-  static getInstance(): NotificationService {
+  static getInstance(){
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
     }
     return NotificationService.instance;
   }
 
-  async initialize(): Promise<boolean> {
+  async initialize() {
     if (this.isInitialized) return true;
 
     try {
@@ -55,7 +54,7 @@ export class NotificationService {
     }
   }
 
-  async scheduleReminderNotification(reminder: Reminder): Promise<boolean> {
+  async scheduleReminderNotification(reminder) {
     try {
       if (!this.isInitialized) {
         const initialized = await this.initialize();
@@ -121,7 +120,7 @@ export class NotificationService {
     }
   }
 
-  async cancelReminderNotification(reminderId: number): Promise<boolean> {
+  async cancelReminderNotification(reminderId) {
     try {
       if (!this.isInitialized) return false;
 
@@ -137,7 +136,7 @@ export class NotificationService {
     }
   }
 
-  async updateReminderNotification(reminder: Reminder): Promise<boolean> {
+  async updateReminderNotification(reminder) {
     try {
       // Cancel existing notification
       await this.cancelReminderNotification(reminder.id);
@@ -154,7 +153,7 @@ export class NotificationService {
     }
   }
 
-  async cancelAllNotifications(): Promise<boolean> {
+  async cancelAllNotifications() {
     try {
       if (!this.isInitialized) return false;
 
@@ -167,7 +166,7 @@ export class NotificationService {
     }
   }
 
-  async getPendingNotifications(): Promise<any[]> {
+  async getPendingNotifications(){
     try {
       if (!this.isInitialized) return [];
 
@@ -179,7 +178,7 @@ export class NotificationService {
     }
   }
 
-  private handleNotificationAction(notification: any): void {
+   handleNotificationAction(notification) {
     console.log('Handling notification action:', notification);
     
     // You can add custom logic here to handle notification taps
@@ -196,7 +195,7 @@ export class NotificationService {
     }
   }
 
-  async createNotificationChannel(): Promise<void> {
+  async createNotificationChannel() {
     try {
       if (!Capacitor.isNativePlatform()) return;
 

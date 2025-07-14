@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Calendar, BellRing, User, Settings, Crown, MessageCircle } from 'lucide-react';
 
-const BottomNavigation: React.FC = () => {
+const BottomNavigation = () => {
   const navItems = [
     { to: '/', icon: MessageCircle, label: 'Chat' },
     { to: '/reminders', icon: Calendar, label: 'Reminders' },

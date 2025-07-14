@@ -1,42 +1,9 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { notificationService } from '../services/notificationService';
 
-export interface Reminder {
-  id: number;
-  title: string;
-  description?: string;
-  date: string;
-  time: string;
-  priority: 'low' | 'medium' | 'high';
-  category: 'personal' | 'work' | 'health' | 'other';
-  isCompleted: boolean;
-  isRecurring: boolean;
-  recurrencePattern?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
-interface RemindersState {
-  reminders: Reminder[];
-}
 
-type RemindersAction =
-  | { type: 'ADD_REMINDER'; payload: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'> }
-  | { type: 'UPDATE_REMINDER'; payload: { id: number; updates: Partial<Reminder> } }
-  | { type: 'DELETE_REMINDER'; payload: number }
-  | { type: 'TOGGLE_COMPLETE'; payload: number }
-  | { type: 'LOAD_REMINDERS'; payload: Reminder[] };
-
-interface RemindersContextType {
-  reminders: Reminder[];
-  addReminder: (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>) => string;
-  updateReminder: (id: number, updates: Partial<Reminder>) => void;
-  deleteReminder: (id: number) => void;
-  toggleComplete: (id: number) => void;
-  findReminders: (query: number) => Reminder[];
-}
-
-const RemindersContext = createContext<RemindersContextType | undefined>(undefined);
+const RemindersContext = createContext(undefined);
 
 export const useReminders = () => {
   const context = useContext(RemindersContext);
@@ -46,10 +13,10 @@ export const useReminders = () => {
   return context;
 };
 
-const remindersReducer = (state: RemindersState, action: RemindersAction): RemindersState => {
+const remindersReducer = (state, action)=> {
   switch (action.type) {
     case 'ADD_REMINDER': {
-      const newReminder: Reminder = {
+      const newReminder = {
         ...action.payload,
         id:Math.floor(Date.now() % 2147483647),
         createdAt: new Date().toISOString(),
@@ -104,11 +71,7 @@ const remindersReducer = (state: RemindersState, action: RemindersAction): Remin
   }
 };
 
-interface RemindersProviderProps {
-  children: React.ReactNode;
-}
-
-export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }) => {
+export const RemindersProvider= ({ children }) => {
   const [state, dispatch] = useReducer(remindersReducer, { reminders: [] });
 
   useEffect(() => {
@@ -124,7 +87,7 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
     }
   }, []);
 
-  const addReminder = (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>): number => {
+  const addReminder = (reminder)=> {
     const id =  Math.floor(Date.now() % 2147483647);
     console.log('RemindersContext: Adding reminder with ID:', id, reminder);
     
@@ -147,7 +110,7 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
     return id;
   };
 
-  const updateReminder = (id: number, updates: Partial<Reminder>) => {
+  const updateReminder = (id, updates) => {
     dispatch({ type: 'UPDATE_REMINDER', payload: { id, updates } });
     
     // Update notification
@@ -158,14 +121,14 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
     }
   };
 
-  const deleteReminder = (id: number) => {
+  const deleteReminder = (id) => {
     dispatch({ type: 'DELETE_REMINDER', payload: id });
     
     // Cancel notification
     notificationService.cancelReminderNotification(id);
   };
 
-  const toggleComplete = (id: number) => {
+  const toggleComplete = (id) => {
     dispatch({ type: 'TOGGLE_COMPLETE', payload: id });
     
     // Update notification based on completion status
@@ -176,7 +139,7 @@ export const RemindersProvider: React.FC<RemindersProviderProps> = ({ children }
     }
   };
 
-  const findReminders = (query: string): Reminder[] => {
+  const findReminders = (query) => {
     const lowerQuery = query.toLowerCase();
     return state.reminders.filter(reminder =>
       reminder.title.toLowerCase().includes(lowerQuery) ||

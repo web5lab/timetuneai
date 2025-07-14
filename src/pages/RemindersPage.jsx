@@ -5,23 +5,23 @@ import { useReminders } from '../contexts/RemindersContext';
 import { useNotifications } from '../hooks/useNotifications';
 import BottomNavigation from '../components/BottomNavigation';
 
-const RemindersPage: React.FC = () => {
+const RemindersPage = () => {
   const { isPermissionGranted, requestPermission } = useNotifications();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState('list');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingReminder, setEditingReminder] = useState<any>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [editingReminder, setEditingReminder] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
     time: '09:00',
-    category: 'personal' as 'personal' | 'work' | 'health' | 'other',
-    priority: 'medium' as 'low' | 'medium' | 'high',
+    category: 'personal',
+    priority: 'medium',
     isRecurring: false,
   });
   const { reminders, toggleComplete, deleteReminder: removeReminder, addReminder, updateReminder } = useReminders();
@@ -40,18 +40,18 @@ const RemindersPage: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleToggleComplete = (id: number) => {
+  const handleToggleComplete = (id) => {
     console.log('Toggling complete for reminder:', id);
     toggleComplete(id);
   };
 
-  const handleDeleteReminder = (id: number) => {
+  const handleDeleteReminder = (id) => {
     console.log('Deleting reminder:', id);
     removeReminder(id);
     setShowDeleteConfirm(null);
   };
 
-  const handleEditReminder = (reminder: any) => {
+  const handleEditReminder = (reminder) => {
     console.log('Editing reminder:', reminder);
     setEditingReminder(reminder);
     setFormData({
@@ -66,7 +66,7 @@ const RemindersPage: React.FC = () => {
     setShowEditModal(true);
   };
 
-  const handleFormChange = (field: string, value: any) => {
+  const handleFormChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -156,8 +156,8 @@ const RemindersPage: React.FC = () => {
       description: 'This is a test notification to verify the system is working',
       date: testTime.toISOString().split('T')[0],
       time: testTime.toTimeString().slice(0, 5),
-      category: 'other' as const,
-      priority: 'high' as const,
+      category: 'other',
+      priority: 'high',
       isCompleted: false,
       isRecurring: false,
       recurrencePattern: '',
@@ -170,7 +170,7 @@ const RemindersPage: React.FC = () => {
     alert(`Test notification scheduled for ${testTime.toLocaleTimeString()}. You should receive a notification in 1 minute.`);
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
       case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
@@ -179,7 +179,7 @@ const RemindersPage: React.FC = () => {
     }
   };
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (category) => {
     switch (category) {
       case 'work': return '💼';
       case 'personal': return '👤';

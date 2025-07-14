@@ -3,7 +3,7 @@ import { User, Camera, Mail, Phone, MapPin, Calendar, Edit3, Save, X } from 'luc
 import AppHeader from '../components/AppHeader';
 import BottomNavigation from '../components/BottomNavigation';
 
-const ProfilePage: React.FC = () => {
+const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: 'Alex Johnson',

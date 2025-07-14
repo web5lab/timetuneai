@@ -6,7 +6,7 @@ export const useVoice = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isVoiceSupported, setIsVoiceSupported] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Initialize voice service
@@ -25,7 +25,7 @@ export const useVoice = () => {
     };
   }, []);
 
-  const startListening = useCallback(async (onResult?: (text: string) => void) => {
+  const startListening = useCallback(async (onResult) => {
     setError(null);
     setTranscribedText('');
     
@@ -68,7 +68,7 @@ export const useVoice = () => {
     setTranscribedText('');
   }, []);
 
-  const speak = useCallback(async (text: string, options?: { rate?: number; pitch?: number; volume?: number }) => {
+  const speak = useCallback(async (text, options) => {
     setIsSpeaking(true);
     const success = await voiceService.speak(text, options);
     
@@ -86,7 +86,7 @@ export const useVoice = () => {
     setIsSpeaking(false);
   }, []);
 
-  const toggleListening = useCallback(async (onResult?: (text: string) => void) => {
+  const toggleListening = useCallback(async (onResult) => {
     console.log('Toggle listening called, current state:', isListening);
     
     if (isListening) {

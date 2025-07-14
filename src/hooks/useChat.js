@@ -2,16 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
 import { useReminders } from '../contexts/RemindersContext';
 
-export interface Message {
-  id: number;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-  type?: 'reminder' | 'confirmation' | 'suggestion';
-}
 
 export const useChat = () => {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState([
     {
       id: 1,
       text: "Hi! I'm TimeTuneAI, your personal reminder assistant. I can help you create, update, delete, and manage your reminders using natural language. Try saying something like 'Remind me to call mom at 3 PM tomorrow' or 'Show me my reminders'!",
@@ -51,13 +44,13 @@ export const useChat = () => {
     });
   }, [addReminder, updateReminder, deleteReminder, findReminders, reminders]);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (text) => {
     if (!text.trim()) return;
 
     console.log('Sending message:', text);
 
     // Add user message
-    const userMessage: Message = {
+    const userMessage = {
       id: Date.now(),
       text: text.trim(),
       sender: 'user',
@@ -74,7 +67,7 @@ export const useChat = () => {
       console.log('Received AI response:', aiResponse);
       
       // Determine message type based on content
-      let messageType: 'reminder' | 'confirmation' | 'suggestion' = 'suggestion';
+      let messageType;
       if (aiResponse.toLowerCase().includes('set') || 
           aiResponse.toLowerCase().includes('created') || 
           aiResponse.toLowerCase().includes('scheduled') || 
@@ -86,7 +79,7 @@ export const useChat = () => {
         messageType = 'reminder';
       }
 
-      const aiMessage: Message = {
+      const aiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
         sender: 'ai',
@@ -99,7 +92,7 @@ export const useChat = () => {
       console.error('Error sending message:', error);
       
       // Fallback error message
-      const errorMessage: Message = {
+      const errorMessage = {
         id: Date.now() + 1,
         text: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
         sender: 'ai',

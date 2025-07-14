@@ -7,7 +7,7 @@ import { useVoice } from '../hooks/useVoice';
 import { useTheme } from '../contexts/ThemeContext';
 import BottomNavigation from '../components/BottomNavigation';
 
-const HomePage: React.FC = () => {
+const HomePage = () => {
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { theme, toggleTheme } = useTheme();
   const {
@@ -23,7 +23,7 @@ const HomePage: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -55,7 +55,7 @@ const HomePage: React.FC = () => {
     }
   }, [voiceError]);
 
-  const handleSendMessage = async (text?: string) => {
+  const handleSendMessage = async (text) => {
     const messageText = text || inputText;
     if (!messageText.trim() || isLoading) return;
 
@@ -74,7 +74,7 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleVoiceModalSend = (text: string) => {
+  const handleVoiceModalSend = (text) => {
     handleSendMessage(text);
     setShowVoiceModal(false);
   };
@@ -101,7 +101,7 @@ const HomePage: React.FC = () => {
     clearChat();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -256,7 +256,7 @@ const HomePage: React.FC = () => {
                     minHeight: '48px'
                   }}
                   onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
+                    const target = e.target ;
                     target.style.height = 'auto';
                     target.style.height = Math.min(target.scrollHeight, 128) + 'px';
                   }}
