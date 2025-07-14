@@ -3,6 +3,7 @@ import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '../store/global.Selctor';
 import { setUser } from '../store/global.Slice';
+import { GetUserData } from '../store/global.Action';
 
 const AuthContext = createContext(undefined);
 
@@ -13,11 +14,9 @@ export const AuthProvider = ({ children }) => {
   const login = async () => {
     try {
       const result = await GoogleAuth.signIn();
-      dispatch(setUser({
-        id: "test 12",
-        name: "test user",
-        email: "helloshiva0801@gmail.com",
-      }))
+      const idToken = result.authentication.idToken;
+      dispatch(GetUserData(idToken));
+      console.log('Login result:', result);
     } catch (err) {
       console.error('Login error 1:', err);
     }

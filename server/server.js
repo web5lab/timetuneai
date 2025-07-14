@@ -4,10 +4,6 @@ import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 
 import authRoutes from './src/routes/auth.js';
-import gameRoutes from './src/routes/game.js';
-import referralRoutes from './src/routes/referral.js';
-import socialRoutes from './src/routes/social.js';
-import adminRoutes from './src/routes/admin.js';
 
 dotenv.config();
 const app = express();
@@ -27,7 +23,7 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 // Connect DB and start server
 connectDB().then(() => {

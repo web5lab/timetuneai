@@ -35,7 +35,7 @@ const RemindersPage = () => {
 
   const filteredReminders = reminders.filter(reminder => {
     const matchesSearch = reminder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         reminder.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      reminder.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || reminder.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -186,7 +186,7 @@ const RemindersPage = () => {
               <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
-          
+
           <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Title</label>
@@ -198,7 +198,7 @@ const RemindersPage = () => {
                 className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Description</label>
               <textarea
@@ -209,7 +209,7 @@ const RemindersPage = () => {
                 className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm sm:text-base transition-colors duration-200"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Date</label>
@@ -230,10 +230,10 @@ const RemindersPage = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Category</label>
-              <select 
+              <select
                 value={formData.category}
                 onChange={(e) => handleFormChange('category', e.target.value)}
                 className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base transition-colors duration-200"
@@ -244,7 +244,7 @@ const RemindersPage = () => {
                 <option value="other">Other</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Priority</label>
               <div className="flex space-x-2 sm:space-x-3">
@@ -252,22 +252,21 @@ const RemindersPage = () => {
                   <button
                     onClick={() => handleFormChange('priority', priority)}
                     key={priority}
-                    className={`flex-1 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl border transition-all duration-200 ${
-                      formData.priority === priority
-                        ? priority === 'high' 
+                    className={`flex-1 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl border transition-all duration-200 ${formData.priority === priority
+                        ? priority === 'high'
                           ? 'border-red-500 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
                           : priority === 'medium'
-                          ? 'border-yellow-500 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
-                          : 'border-green-500 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                            ? 'border-yellow-500 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+                            : 'border-green-500 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600'
-                    }`}
+                      }`}
                   >
                     <span className="capitalize text-xs sm:text-sm font-medium">{priority}</span>
                   </button>
                 ))}
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2 sm:space-x-3">
               <input
                 checked={formData.isRecurring}
@@ -281,7 +280,7 @@ const RemindersPage = () => {
               </label>
             </div>
           </div>
-          
+
           <div className="flex space-x-2 sm:space-x-3 mt-6 sm:mt-8">
             <button
               onClick={handleCloseModal}
@@ -304,7 +303,7 @@ const RemindersPage = () => {
   return (
     <div className="h-full bg-gray-50 dark:bg-slate-900 overflow-hidden flex flex-col transition-colors duration-200">
       <AppHeader />
-      
+
       {/* Special Reminders Header */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-4 transition-colors duration-200">
         <div className="flex items-center justify-between">
@@ -314,16 +313,16 @@ const RemindersPage = () => {
               {upcomingReminders.length} upcoming • {completedReminders.length} completed
             </p>
           </div>
-          
-          <button 
+
+          <button
             onClick={() => setShowAddModal(true)}
             className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add Reminder</span>
           </button>
-          
-      
+
+
         </div>
       </div>
 
@@ -354,31 +353,45 @@ const RemindersPage = () => {
 
       {/* Category Filters */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-colors duration-200">
-        <div className="flex space-x-2 overflow-x-auto scrollbar-hide pb-1">
+
+        {/* Dropdown for small screens */}
+        <div className="block sm:hidden">
+          <select
+            onChange={(e) => setFilterCategory(e.target.value)}
+            value={filterCategory}
+            className="w-full p-2 rounded-md border dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200"
+          >
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name} ({category.count})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Horizontal scroll for larger screens */}
+        <div className="hidden sm:flex space-x-2 overflow-x-auto scrollbar-hide pb-1">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setFilterCategory(category.id)}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                filterCategory === category.id
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap transition-all duration-200 flex-shrink-0 ${filterCategory === category.id
                   ? 'bg-orange-500 text-white shadow-md'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600'
-              }`}
+                }`}
             >
               <div className={`w-2 h-2 rounded-full ${category.color}`}></div>
               <span className="text-xs sm:text-sm font-medium">{category.name}</span>
-              <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
-                filterCategory === category.id 
-                  ? 'bg-white/20 text-white' 
+              <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${filterCategory === category.id
+                  ? 'bg-white/20 text-white'
                   : 'bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-400'
-              }`}>
+                }`}>
                 {category.count}
               </span>
             </button>
           ))}
         </div>
       </div>
-
       {/* Content Area - Responsive */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
         {/* Upcoming Reminders */}
@@ -388,11 +401,10 @@ const RemindersPage = () => {
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-500" />
               Upcoming ({upcomingReminders.length})
             </h2>
-            <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3' 
+            <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid'
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
                 : 'grid-cols-1'
-            }`}>
+              }`}>
               {upcomingReminders.map((reminder) => (
                 <div
                   key={reminder.id}
@@ -438,7 +450,7 @@ const RemindersPage = () => {
 
                   <div className="flex items-center justify-between mt-2 sm:mt-3 lg:mt-4 pt-2 sm:pt-3 lg:pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-center space-x-1 sm:space-x-2">
-                      <button 
+                      <button
                         onClick={() => handleEditReminder(reminder)}
                         className="p-1 sm:p-1.5 lg:p-2 text-gray-400 dark:text-gray-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all"
                       >
@@ -506,7 +518,7 @@ const RemindersPage = () => {
             </div>
             <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No reminders found</h3>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 px-4">Try adjusting your search or filter criteria</p>
-            <button 
+            <button
               onClick={() => setShowAddModal(true)}
               className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 flex items-center space-x-2 mx-auto text-sm sm:text-base"
             >

@@ -19,8 +19,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/auth';
 import Logo from '../assets/logo.png';
 import { useDispatch, useSelector } from 'react-redux';
-import { sidebarOpenSelector } from '../store/global.Selctor';
-import { toggleSidebar } from '../store/global.Slice';
+import { sidebarOpenSelector, userSelector } from '../store/global.Selctor';
+import { setUser, toggleSidebar } from '../store/global.Slice';
 
 const Sidebar = () => {
   const { theme, toggleTheme } = useTheme();
@@ -29,6 +29,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const user = useSelector(userSelector)
 
   const navItems = [
     { to: '/', icon: MessageCircle, label: 'Chat Assistant', color: 'text-blue-500' },
@@ -39,6 +40,7 @@ const Sidebar = () => {
   ];
 
   const handleLogout = async () => {
+    dispatch(setUser(null));
     await logout();
     navigate('/login');
   };
@@ -165,12 +167,12 @@ const Sidebar = () => {
               <div className="space-y-3">
                 {/* User Info */}
                 <div className="flex items-center space-x-3 px-3 py-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    AJ
-                  </div>
+                 
+
+                  <img src={user?.picture} className="w-12 h-12 rounded-full "  />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                      Alex Johnson
+                      {user?.name || 'Anonymous User'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                       Pro Plan
@@ -190,9 +192,7 @@ const Sidebar = () => {
             ) : (
               <div className="space-y-2">
                 {/* Collapsed User Avatar */}
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-semibold text-sm mx-auto">
-                  AJ
-                </div>
+                <img src={user?.picture} className="w-12 h-12 rounded-full mx-auto"  />
                 
                 {/* Collapsed Logout */}
                 <button

@@ -5,11 +5,10 @@ export const GetUserData = createAsyncThunk(
     "global/getUserData",
     async (token) => {
         try {
-            const Response = await axiosInstance.get(`/auth/user-data`, {
-                headers: {
-                    Authorization: `Bearer ${token}` // Add the token to the request headers
-                }
+            const Response = await axiosInstance.post(`/auth/google`, {
+                idToken:token
             });
+            console.log("Response from server:", Response.data);
             return Response.data;
         } catch (err) {
             if (err) {
