@@ -147,29 +147,6 @@ const RemindersPage = () => {
     resetForm();
   };
 
-  const handleTestNotification = () => {
-    const now = new Date();
-    const testTime = new Date(now.getTime() + 60000); // 1 minute from now
-    
-    const testReminder = {
-      title: 'Test Notification',
-      description: 'This is a test notification to verify the system is working',
-      date: testTime.toISOString().split('T')[0],
-      time: testTime.toTimeString().slice(0, 5),
-      category: 'other',
-      priority: 'high',
-      isCompleted: false,
-      isRecurring: false,
-      recurrencePattern: '',
-    };
-
-    console.log('Creating test reminder for:', testTime);
-    const id = addReminder(testReminder);
-    console.log('Test reminder created with ID:', id);
-    
-    alert(`Test notification scheduled for ${testTime.toLocaleTimeString()}. You should receive a notification in 1 minute.`);
-  };
-
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
@@ -346,13 +323,7 @@ const RemindersPage = () => {
             <span className="hidden sm:inline">Add Reminder</span>
           </button>
           
-          <button 
-            onClick={handleTestNotification}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition-colors flex items-center space-x-2 text-sm"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="hidden sm:inline">Test</span>
-          </button>
+      
         </div>
       </div>
 
@@ -579,7 +550,6 @@ const RemindersPage = () => {
           </div>
         </div>
       )}
-          <BottomNavigation/>
     </div>
   );
 };

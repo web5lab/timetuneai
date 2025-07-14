@@ -122,7 +122,6 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-      <BottomNavigation />
     </div>
   );
 };

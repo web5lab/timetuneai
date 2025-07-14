@@ -163,7 +163,7 @@ const SubscriptionPage = () => {
         </div>
       </div>
 
-      <BottomNavigation />
+
     </div>
   );
 };

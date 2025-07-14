@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX, Moon, Sun } from 'lucide-react';
-import Logo from '../components/Logo';
+import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX, Moon, Sun, Menu, Calendar } from 'lucide-react';
 import VoiceInputModal from '../components/VoiceInputModal';
 import { useChat } from '../hooks/useChat';
 import { useVoice } from '../hooks/useVoice';
 import { useTheme } from '../contexts/ThemeContext';
-import BottomNavigation from '../components/BottomNavigation';
+import { useDispatch } from 'react-redux';
+import { toggleSidebar } from '../store/global.Slice';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const { messages, isLoading, sendMessage, clearChat } = useChat();
@@ -24,6 +25,8 @@ const HomePage = () => {
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const messagesEndRef = useRef(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -114,10 +117,17 @@ const HomePage = () => {
     <div className="flex flex-col  h-full bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-200">
       <div className="flex flex-col h-full  flex-1 overflow-hidden">
         {/* Chat Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white   border-b border-gray-200  px-4 py-3 shadow-sm transition-colors duration-200">
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white    px-4 py-3 shadow-sm transition-colors duration-200">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Logo size="sm" variant={theme} showText={false} />
+              <button
+                onClick={() => {
+                  dispatch(toggleSidebar())
+                }}
+                className="p-2 rounded-lg "
+              >
+                <Menu className="w-6 h-6 text-gray-100 dark:text-gray-200" />
+              </button>
               <div>
                 <h2 className="font-semibold ">TimeTuneAI Assistant</h2>
                 <p className="text-xs text-gray-100 flex items-center">
@@ -132,8 +142,8 @@ const HomePage = () => {
                 <button
                   onClick={handleSpeakToggle}
                   className={`p-2 rounded-lg transition-all duration-200 ${autoSpeak
-                      ? 'text-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    ? 'text-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                     }`}
                   title={autoSpeak ? 'Disable auto-speak' : 'Enable auto-speak'}
                 >
@@ -147,11 +157,13 @@ const HomePage = () => {
                 </button>
               )}
 
-<button
-                onClick={toggleTheme}
+              <button
+                onClick={() => {
+                  navigate('/reminders');
+                }}
                 className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
               >
-                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                <Calendar className="w-5 h-5" />
               </button>
               <button
                 onClick={handleClearChat}
@@ -234,8 +246,8 @@ const HomePage = () => {
                   onClick={handleVoiceToggle}
                   disabled={isLoading}
                   className={`p-3 sm:p-4 rounded-full transition-all duration-300 shadow-lg flex-shrink-0 ${isListening
-                      ? 'bg-red-500 text-white animate-pulse scale-110 ring-4 ring-red-200'
-                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'
+                    ? 'bg-red-500 text-white animate-pulse scale-110 ring-4 ring-red-200'
+                    : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'
                     }`}
                   title={isListening ? 'Stop listening' : 'Start voice input'}
                 >
@@ -256,7 +268,7 @@ const HomePage = () => {
                     minHeight: '48px'
                   }}
                   onInput={(e) => {
-                    const target = e.target ;
+                    const target = e.target;
                     target.style.height = 'auto';
                     target.style.height = Math.min(target.scrollHeight, 128) + 'px';
                   }}
@@ -285,7 +297,6 @@ const HomePage = () => {
           </div>
         </div>
 
-        <BottomNavigation />
 
         {/* Voice Input Modal */}
         <VoiceInputModal

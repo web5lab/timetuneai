@@ -3,6 +3,7 @@ import { GetUserData, } from './global.Action'
 
 const initialState = {
   user: null,
+  sidebarOpen: false,
 }
 
 export const globalSlice = createSlice({
@@ -11,6 +12,9 @@ export const globalSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
+    },
+    toggleSidebar: (state) => {
+      state.sidebarOpen = !state.sidebarOpen;
     },
   },
   extraReducers: (builder) => {
@@ -21,6 +25,6 @@ export const globalSlice = createSlice({
   }
 })
 
-export const { setUser } = globalSlice.actions
+export const { setUser ,toggleSidebar } = globalSlice.actions
 
 export default globalSlice.reducer

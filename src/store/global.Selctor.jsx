@@ -6,3 +6,8 @@ export const userSelector = createSelector(
   [globalSelector],
   (global) => global.user
 );
+
+export const sidebarOpenSelector = createSelector(
+  [globalSelector],
+  (global) => global.sidebarOpen
+);

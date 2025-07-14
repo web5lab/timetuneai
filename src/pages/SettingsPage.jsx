@@ -240,7 +240,6 @@ const SettingsPage = () => {
           </div>
         </div>
       </div>
-      <BottomNavigation />
     </div>
   );
 };
