@@ -8,7 +8,7 @@ const BottomNavigation = () => {
     { to: '/reminders', icon: Calendar, label: 'Reminders' },
     { to: '/profile', icon: User, label: 'Profile' },
     { to: '/settings', icon: Settings, label: 'Settings' },
-    // { to: '/subscription', icon: Crown, label: 'Pro' },
+    { to: '/subscription', icon: Crown, label: 'Pro' },
   ];
 
   return (

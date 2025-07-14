@@ -26,7 +26,7 @@ function App() {
             <Route path="reminders" element={<RemindersPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />
-            {/* <Route path="subscription" element={<SubscriptionPage />} /> */}
+            <Route path="subscription" element={<SubscriptionPage />} />
           </Route>
 
           {/* Redirect unknown routes */}

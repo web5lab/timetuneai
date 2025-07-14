@@ -1,24 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { userSelector } from '../store/global.Selctor';
+import { setUser } from '../store/global.Slice';
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState({
-    id: "test 12",
-    name: "test user",
-    email: "helloshiva0801@gmail.com",
-  });
+  const dispatch = useDispatch();
+  const user = useSelector(userSelector)
 
   const login = async () => {
     try {
       const result = await GoogleAuth.signIn();
-      console.log('Login result:', result);
-      setUser({
+      dispatch(setUser({
         id: "test 12",
         name: "test user",
         email: "helloshiva0801@gmail.com",
-      });
+      }))
     } catch (err) {
       console.error('Login error 1:', err);
     }
@@ -26,12 +25,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await GoogleAuth.signOut();
-    setUser(null);
+    dispatch(setUser(null));
   };
 
   useEffect(() => {
     GoogleAuth.initialize(); // Optional (mainly for web)
-    GoogleAuth.refresh().then(setUser).catch(() => setUser(null));
+    GoogleAuth.refresh().then(setUser).catch(() => dispatch(setUser(null)));
   }, []);
 
   return (

@@ -21,7 +21,7 @@ const HomePage = () => {
     stopSpeaking
   } = useVoice();
   const [inputText, setInputText] = useState('');
-  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [autoSpeak, setAutoSpeak] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -140,9 +140,9 @@ const HomePage = () => {
                   {isSpeaking ? (
                     <VolumeX className="w-4 h-4" />
                   ) : autoSpeak ? (
-                    <Volume2 className="w-4 h-4" />
-                  ) : (
                     <VolumeX className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
                   )}
                 </button>
               )}

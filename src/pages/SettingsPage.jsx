@@ -93,16 +93,6 @@ const SettingsPage = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Email Notifications</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Get reminders via email</p>
-                </div>
-                <ToggleSwitch
-                  enabled={settings.notifications.email}
-                  onChange={(value) => updateSetting('notifications', 'email', value)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
                   <h3 className="font-medium text-gray-900 dark:text-gray-100">Sound</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Play sound for notifications</p>
                 </div>
@@ -157,18 +147,6 @@ const SettingsPage = () => {
                     <span>Dark</span>
                   </button>
                 </div>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Font Size</h3>
-                <select
-                  value={settings.appearance.fontSize}
-                  onChange={(e) => updateSetting('appearance', 'fontSize', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
-                >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                </select>
               </div>
             </div>
           </div>

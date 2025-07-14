@@ -95,54 +95,6 @@ const ProfilePage = () => {
                   </p>
                 )}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    value={profileData.phone}
-                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
-                  />
-                ) : (
-                  <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-slate-700 px-4 py-3 rounded-lg flex items-center">
-                    <Phone className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                    {profileData.phone}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={profileData.location}
-                    onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
-                  />
-                ) : (
-                  <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-slate-700 px-4 py-3 rounded-lg flex items-center">
-                    <MapPin className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                    {profileData.location}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
-                {isEditing ? (
-                  <textarea
-                    value={profileData.bio}
-                    onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none transition-colors duration-200"
-                  />
-                ) : (
-                  <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-slate-700 px-4 py-3 rounded-lg">{profileData.bio}</p>
-                )}
-              </div>
             </div>
           </div>
 
