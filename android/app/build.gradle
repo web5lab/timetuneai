@@ -3,6 +3,16 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.timetuneai.app"
     compileSdk rootProject.ext.compileSdkVersion
+
+    signingConfigs {
+        release {
+            storeFile file("release-key.jks")
+            storePassword "77395644"
+            keyAlias "my-key-alias"
+            keyPassword "77395644"
+        }
+    }
+
     defaultConfig {
         applicationId "com.timetuneai.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -11,18 +21,19 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release // 🔐 Use the signing config
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
+
 
 repositories {
     flatDir{

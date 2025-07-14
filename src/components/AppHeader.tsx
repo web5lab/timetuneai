@@ -70,10 +70,10 @@ const AppHeader: React.FC = () => {
                         <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         <a href="#/settings" className="text-gray-900 dark:text-gray-100">Account Settings</a>
                       </button>
-                      <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
+                      {/* <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
                         <Bell className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         <a href="#/subscription" className="text-gray-900 dark:text-gray-100">Subscription</a>
-                      </button>
+                      </button> */}
                     </div>
                     <div className="p-3 border-t border-gray-200 dark:border-gray-700">
                       <button className="w-full text-center text-red-600 hover:text-red-700 font-medium text-sm">
