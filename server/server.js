@@ -10,9 +10,7 @@ const app = express();
 
 // Fix CORS error (Allow all origins)
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: '*'
 }));
 
 app.use(express.json());
