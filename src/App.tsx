@@ -13,6 +13,11 @@ import Download from './components/Download';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 
+// Privacy and data management pages
+import PrivacyPolicy from './components/PrivacyPolicy';
+import RequestDelete from './components/RequestDelete';
+import RequestData from './components/RequestData';
+
 const LandingPage: React.FC = () => {
   return (
     <div className="font-sans text-gray-800 dark:text-gray-200 bg-white dark:bg-slate-900 antialiased overflow-x-hidden transition-colors duration-200">
@@ -38,6 +43,11 @@ function App() {
       <Routes>
         {/* Landing page route */}
         <Route path="/" element={<LandingPage />} />
+        
+        {/* Privacy and data management routes */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/request-delete" element={<RequestDelete />} />
+        <Route path="/request-data" element={<RequestData />} />
       </Routes>
     </Router>
   );

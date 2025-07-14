@@ -11,14 +11,27 @@ const Footer: React.FC = () => {
           <img src={logo} className="w-10 h-10 " />
             TimeTuneAI
           </a>
-          <div className="flex space-x-6">
-            <a href="#" className="text-gray-300 hover:text-white transition duration-200">Privacy Policy</a>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            <a href="/privacy" className="text-gray-300 hover:text-white transition duration-200">Privacy Policy</a>
             <a href="#" className="text-gray-300 hover:text-white transition duration-200">Terms of Service</a>
-            <a href="#" className="text-gray-300 hover:text-white transition duration-200">Contact Us</a>
+            <a href="/request-data" className="text-gray-300 hover:text-white transition duration-200">Request Data</a>
+            <a href="/request-delete" className="text-gray-300 hover:text-white transition duration-200">Delete Account</a>
+            <a href="mailto:support@timetuneai.com" className="text-gray-300 hover:text-white transition duration-200">Contact Us</a>
           </div>
         </div>
-        <div className="border-t border-yellow-800 pt-8 text-gray-400 text-sm">
-          &copy; 2023 TimeTuneAI. All rights reserved.
+        <div className="border-t border-yellow-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
+            <div className="mb-4 md:mb-0">
+              &copy; 2025 TimeTuneAI. All rights reserved.
+            </div>
+            <div className="flex flex-wrap justify-center gap-4 text-xs">
+              <span>🔒 Your privacy is protected</span>
+              <span>•</span>
+              <span>📧 GDPR Compliant</span>
+              <span>•</span>
+              <span>🛡️ Secure by design</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
