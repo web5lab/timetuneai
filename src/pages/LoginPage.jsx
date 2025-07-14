@@ -4,6 +4,7 @@ import { useAuth } from '../auth/auth';
 import { useSelector } from 'react-redux';
 import { userSelector } from '../store/global.Selctor';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,12 +33,9 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 relative overflow-hidden">
-     
-
       <div className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 py-8">
         <div className="w-full max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            
             {/* Left Side - Welcome Content */}
             <div className="text-center hidden md:block lg:text-left space-y-6 lg:space-y-8 order-2 lg:order-1">
               {/* Badge */}
@@ -45,7 +43,6 @@ const LoginPage = () => {
                 <Star className="w-4 h-4 text-yellow-500 fill-current" />
                 <span className="text-sm font-medium text-gray-700">Trusted by 50,000+ users</span>
               </div>
-
               {/* Welcome Message */}
               <div className="space-y-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
@@ -58,7 +55,6 @@ const LoginPage = () => {
                   Your intelligent reminder assistant that keeps everything organized and secure on your device.
                 </p>
               </div>
-
               {/* Privacy Features */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center justify-center lg:justify-start">
@@ -86,7 +82,6 @@ const LoginPage = () => {
                   </div>
                 </div>
               </div>
-
               {/* App Features Preview */}
               <div className="hidden lg:block space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">What you'll get:</h3>
@@ -110,7 +105,6 @@ const LoginPage = () => {
                 </div>
               </div>
             </div>
-
             {/* Right Side - Login Form */}
             <div className="flex items-center justify-center order-1 lg:order-2">
               <div className="w-full max-w-md">
@@ -119,17 +113,15 @@ const LoginPage = () => {
                   {/* Card Background Effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-50/50 to-red-50/50 rounded-3xl"></div>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/20 to-red-200/20 rounded-full blur-2xl"></div>
-                  
                   <div className="relative z-10 space-y-6">
                     {/* Header */}
                     <div className="text-center space-y-3">
-                      <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                        <Bot className="w-8 h-8 text-white" />
+                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                        <img src={logo} className="w-16 h-16 text-white" />
                       </div>
                       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Get Started</h2>
                       <p className="text-gray-600">Sign in to access your personal AI assistant</p>
                     </div>
-
                     {/* Privacy Notice */}
                     <div className="bg-green-50 border border-green-200 rounded-2xl p-4 space-y-2">
                       <div className="flex items-center space-x-2">
@@ -140,7 +132,6 @@ const LoginPage = () => {
                         All your reminders are stored locally on your device. We never access, store, or share your personal data.
                       </p>
                     </div>
-
                     {/* Google Login Button */}
                     <button
                       onClick={handleGoogleLogin}
@@ -149,7 +140,6 @@ const LoginPage = () => {
                     >
                       {/* Button Background Effect */}
                       <div className="absolute inset-0 bg-gradient-to-r from-orange-50 to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
                       <div className="relative z-10 flex items-center space-x-3">
                         {isLoading ? (
                           <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>

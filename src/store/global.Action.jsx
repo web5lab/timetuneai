@@ -11,7 +11,7 @@ export const GetUserData = createAsyncThunk(
             console.log("Response from server:", Response.data);
             return Response.data;
         } catch (err) {
-            clg
+            console.log("Error in GetUserData:", err);
             if (err) {
                 throw err;
             }
