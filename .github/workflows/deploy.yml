@@ -19,7 +19,7 @@ jobs:
           node-version: 22.7.0
 
       # -----------------------
-      # Build Main Frontend (project/)
+      # Build Main Frontend
       # -----------------------
       - name: Install Dependencies (Main)
         run: |
@@ -28,7 +28,6 @@ jobs:
       - name: Build Project (Main)
         env:
           VITE_SERVER_URL: https://api.timetuneai.com
-
         run: |
           npm run build
 
@@ -36,7 +35,7 @@ jobs:
         run: |
           cp .htaccess dist/.htaccess
 
-      - name: FTP Deploy Main (preserve /adminxyd folder)
+      - name: FTP Deploy Main
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
