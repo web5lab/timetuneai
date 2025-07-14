@@ -1,0 +1,49 @@
+name: Build and Deploy to FTP
+
+on:
+  push:
+    branches:
+      - website  # Or your deployment branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.7.0
+
+      # -----------------------
+      # Build Main Frontend (project/)
+      # -----------------------
+      - name: Install Dependencies (Main)
+        run: |
+          cd project
+          npm ci
+
+      - name: Build Project (Main)
+        env:
+          VITE_SERVER_URL: https://api.timetuneai.com
+
+        run: |
+          cd project
+          npm run build
+
+      - name: Copy Extra Files to dist (Main)
+        run: |
+          cp .htaccess project/dist/.htaccess
+
+      - name: FTP Deploy Main (preserve /adminxyd folder)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/
+          local-dir: project/dist/
+ 
