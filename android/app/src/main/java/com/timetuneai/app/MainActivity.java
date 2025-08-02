@@ -2,6 +2,7 @@ package com.timetuneai.app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.app.NotificationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
@@ -32,6 +33,33 @@ public class MainActivity extends BridgeActivity {
     
     // Add JavaScript interface for reminder sync
     setupJavaScriptInterface();
+    
+    // Handle incoming call actions
+    handleIncomingCallActions();
+  }
+  
+  private void handleIncomingCallActions() {
+    Intent intent = getIntent();
+    if (intent != null && intent.hasExtra("action")) {
+      String action = intent.getStringExtra("action");
+      int reminderId = intent.getIntExtra("reminderId", 0);
+      
+      Log.d(TAG, "Handling call action: " + action + " for reminder: " + reminderId);
+      
+      // Cancel the notification
+      NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+      notificationManager.cancel(reminderId + 10000);
+      
+      if ("answer_call".equals(action)) {
+        // Handle answer call action
+        Log.d(TAG, "Call answered for reminder: " + reminderId);
+        // You can add specific logic here for answered calls
+      } else if ("dismiss_call".equals(action)) {
+        // Handle dismiss call action
+        Log.d(TAG, "Call dismissed for reminder: " + reminderId);
+        // You can add specific logic here for dismissed calls
+      }
+    }
   }
   
   private void requestBatteryOptimizationExemption() {
@@ -97,6 +125,9 @@ public class MainActivity extends BridgeActivity {
 
     // Ensure background service is running
     startReminderBackgroundService();
+    
+    // Handle any pending call actions
+    handleIncomingCallActions();
   }
 
 }

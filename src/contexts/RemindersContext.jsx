@@ -112,6 +112,21 @@ export const RemindersProvider= ({ children }) => {
         console.error('Error syncing reminders with native storage:', error);
       }
     }
+    
+    // Also sync immediately when reminders change (for background service)
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const remindersJson = JSON.stringify(state.reminders);
+        localStorage.setItem('reminders', remindersJson);
+        
+        // Sync with Android SharedPreferences if available
+        if (window.AndroidReminders) {
+          window.AndroidReminders.syncReminders(remindersJson);
+        }
+      } catch (error) {
+        console.error('Error syncing reminders for background service:', error);
+      }
+    }
   }, [state.reminders]);
 
   const addReminder = (reminder)=> {

@@ -20,26 +20,30 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class ReminderBackgroundService extends Service {
     private static final String TAG = "ReminderBgService";
     private static final String CHANNEL_ID = "reminder_background_service";
+    private static final String CALL_CHANNEL_ID = "virtual_calls_bg";
     private static final int NOTIFICATION_ID = 1001;
-    private static final int CHECK_INTERVAL = 30000; // 30 seconds
+    private static final int CHECK_INTERVAL = 15000; // 15 seconds for more frequent checks
     
     private Handler handler;
     private Runnable reminderChecker;
     private PowerManager.WakeLock wakeLock;
     private boolean isRunning = false;
+    private Set<Integer> triggeredReminders = new HashSet<>();
     
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Background service created");
         
-        // Create notification channel
-        createNotificationChannel();
+        // Create notification channels
+        createNotificationChannels();
         
         // Acquire wake lock to keep service running
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -80,24 +84,44 @@ public class ReminderBackgroundService extends Service {
             wakeLock.release();
         }
         
-        // Restart service
+        // Restart service immediately
         Intent restartIntent = new Intent(this, ReminderBackgroundService.class);
-        startService(restartIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(restartIntent);
+        } else {
+            startService(restartIntent);
+        }
     }
     
-    private void createNotificationChannel() {
+    private void createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            
+            // Background service channel
+            NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
                 "Reminder Background Service",
                 NotificationManager.IMPORTANCE_LOW
             );
-            channel.setDescription("Keeps TimeTuneAI running to monitor reminders");
-            channel.setShowBadge(false);
-            channel.setSound(null, null);
+            serviceChannel.setDescription("Keeps TimeTuneAI running to monitor reminders");
+            serviceChannel.setShowBadge(false);
+            serviceChannel.setSound(null, null);
+            manager.createNotificationChannel(serviceChannel);
             
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
+            // Virtual calls channel
+            NotificationChannel callChannel = new NotificationChannel(
+                CALL_CHANNEL_ID,
+                "Virtual Calls (Background)",
+                NotificationManager.IMPORTANCE_HIGH
+            );
+            callChannel.setDescription("Full-screen virtual calls for reminders");
+            callChannel.enableVibration(true);
+            callChannel.setVibrationPattern(new long[]{1000, 1000, 1000, 1000});
+            callChannel.enableLights(true);
+            callChannel.setLightColor(0xFFF97316);
+            callChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            callChannel.setBypassDnd(true);
+            manager.createNotificationChannel(callChannel);
         }
     }
     
@@ -117,6 +141,7 @@ public class ReminderBackgroundService extends Service {
             .setSilent(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
             .build();
     }
     
@@ -156,7 +181,7 @@ public class ReminderBackgroundService extends Service {
         try {
             Log.d(TAG, "Checking for due reminders...");
             
-            // Get reminders from SharedPreferences (since we can't access localStorage directly)
+            // Get reminders from SharedPreferences
             SharedPreferences prefs = getSharedPreferences("TimeTuneAI", Context.MODE_PRIVATE);
             String remindersJson = prefs.getString("reminders", "[]");
             
@@ -174,6 +199,7 @@ public class ReminderBackgroundService extends Service {
             String currentTime = timeFormat.format(now);
             
             Log.d(TAG, "Current time: " + currentDate + " " + currentTime);
+            Log.d(TAG, "Found " + reminders.length() + " reminders to check");
             
             for (int i = 0; i < reminders.length(); i++) {
                 JSONObject reminder = reminders.getJSONObject(i);
@@ -182,8 +208,17 @@ public class ReminderBackgroundService extends Service {
                     continue;
                 }
                 
+                int reminderId = reminder.getInt("id");
+                
+                // Skip if already triggered
+                if (triggeredReminders.contains(reminderId)) {
+                    continue;
+                }
+                
                 String reminderDate = reminder.getString("date");
                 String reminderTime = reminder.getString("time");
+                
+                Log.d(TAG, "Checking reminder: " + reminder.getString("title") + " at " + reminderDate + " " + reminderTime);
                 
                 // Check if reminder is due (within 1 minute tolerance)
                 if (reminderDate.equals(currentDate)) {
@@ -196,6 +231,7 @@ public class ReminderBackgroundService extends Service {
                             
                             if (timeDiff <= 60000) { // 1 minute tolerance
                                 Log.d(TAG, "Found due reminder: " + reminder.getString("title"));
+                                triggeredReminders.add(reminderId);
                                 triggerVirtualCall(reminder);
                             }
                         }
@@ -205,8 +241,20 @@ public class ReminderBackgroundService extends Service {
                 }
             }
             
+            // Clean up old triggered reminders (older than 5 minutes)
+            cleanupTriggeredReminders();
+            
         } catch (Exception e) {
             Log.e(TAG, "Error checking reminders: " + e.getMessage());
+        }
+    }
+    
+    private void cleanupTriggeredReminders() {
+        // Remove reminders that were triggered more than 5 minutes ago
+        // This prevents the same reminder from being triggered multiple times
+        // but allows it to be triggered again if rescheduled
+        if (triggeredReminders.size() > 50) {
+            triggeredReminders.clear();
         }
     }
     
@@ -245,7 +293,7 @@ public class ReminderBackgroundService extends Service {
                 Log.d(TAG, "Started virtual call activity");
             }
             
-            // Also show a high-priority notification as backup
+            // Always show a high-priority notification as backup
             showVirtualCallNotification(reminder);
             
         } catch (Exception e) {
@@ -265,26 +313,13 @@ public class ReminderBackgroundService extends Service {
         try {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             
-            // Create high-priority channel for virtual calls
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel callChannel = new NotificationChannel(
-                    "virtual_calls_bg",
-                    "Virtual Calls (Background)",
-                    NotificationManager.IMPORTANCE_HIGH
-                );
-                callChannel.setDescription("Full-screen virtual calls for reminders");
-                callChannel.enableVibration(true);
-                callChannel.setVibrationPattern(new long[]{1000, 1000, 1000, 1000});
-                callChannel.enableLights(true);
-                callChannel.setLightColor(0xFFF97316);
-                notificationManager.createNotificationChannel(callChannel);
-            }
-            
             // Create full-screen intent
             Intent fullScreenIntent = new Intent(this, VirtualCallActivity.class);
             fullScreenIntent.putExtra("reminderTitle", reminder.getString("title"));
             fullScreenIntent.putExtra("reminderDescription", reminder.optString("description", ""));
             fullScreenIntent.putExtra("reminderId", reminder.getInt("id"));
+            fullScreenIntent.putExtra("reminderDate", reminder.getString("date"));
+            fullScreenIntent.putExtra("reminderTime", reminder.getString("time"));
             fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             
             PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
@@ -292,21 +327,56 @@ public class ReminderBackgroundService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
             
+            // Create answer action
+            Intent answerIntent = new Intent(this, MainActivity.class);
+            answerIntent.putExtra("action", "answer_call");
+            answerIntent.putExtra("reminderId", reminder.getInt("id"));
+            answerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            
+            PendingIntent answerPendingIntent = PendingIntent.getActivity(
+                this, reminder.getInt("id") + 1000, answerIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            
+            // Create dismiss action
+            Intent dismissIntent = new Intent(this, MainActivity.class);
+            dismissIntent.putExtra("action", "dismiss_call");
+            dismissIntent.putExtra("reminderId", reminder.getInt("id"));
+            dismissIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            
+            PendingIntent dismissPendingIntent = PendingIntent.getActivity(
+                this, reminder.getInt("id") + 2000, dismissIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            
             // Build notification
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "virtual_calls_bg")
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CALL_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notification)
                 .setContentTitle("TimeTuneAI - Incoming Call")
                 .setContentText(reminder.getString("title"))
+                .setLargeIcon(null)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
                 .setFullScreenIntent(fullScreenPendingIntent, true)
-                .setAutoCancel(true)
+                .setAutoCancel(false)
                 .setOngoing(true)
                 .setVibrate(new long[]{1000, 1000, 1000, 1000})
                 .setLights(0xFFF97316, 1000, 1000)
-                .setSound(null); // We'll handle sound in the overlay
+                .setSound(null)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setShowWhen(true)
+                .setWhen(System.currentTimeMillis())
+                .addAction(R.drawable.ic_stat_notification, "Answer", answerPendingIntent)
+                .addAction(R.drawable.ic_stat_notification, "Dismiss", dismissPendingIntent);
+            
+            // Set custom heads-up display
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+            }
             
             notificationManager.notify(reminder.getInt("id") + 10000, builder.build());
+            
+            Log.d(TAG, "Virtual call notification shown for: " + reminder.getString("title"));
             
         } catch (Exception e) {
             Log.e(TAG, "Error showing virtual call notification: " + e.getMessage());
