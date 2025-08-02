@@ -1,6 +1,6 @@
 package com.timetuneai.app;
-
 import android.app.Notification;
+import android.graphics.Bitmap;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -354,7 +354,7 @@ public class ReminderBackgroundService extends Service {
                 .setSmallIcon(R.drawable.ic_stat_notification)
                 .setContentTitle("TimeTuneAI - Incoming Call")
                 .setContentText(reminder.getString("title"))
-                .setLargeIcon(null)
+                .setLargeIcon((Bitmap) null) 
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
                 .setFullScreenIntent(fullScreenPendingIntent, true)
