@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 export class NotificationService {
    static instance;
    isInitialized = false;
+  virtualCallCallbacks = [];
 
   static getInstance(){
     if (!NotificationService.instance) {
@@ -12,6 +13,26 @@ export class NotificationService {
     return NotificationService.instance;
   }
 
+  // Register callback for virtual calling system
+  onReminderDue(callback) {
+    this.virtualCallCallbacks.push(callback);
+  }
+
+  // Remove callback
+  removeReminderDueCallback(callback) {
+    this.virtualCallCallbacks = this.virtualCallCallbacks.filter(cb => cb !== callback);
+  }
+
+  // Trigger virtual call for due reminders
+  triggerVirtualCall(reminder) {
+    this.virtualCallCallbacks.forEach(callback => {
+      try {
+        callback(reminder);
+      } catch (error) {
+        console.error('Error triggering virtual call callback:', error);
+      }
+    });
+  }
   async initialize() {
     if (this.isInitialized) return true;
 
@@ -41,6 +62,11 @@ export class NotificationService {
         await LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
           console.log('Notification action performed:', notification);
           this.handleNotificationAction(notification);
+          
+          // Also trigger virtual call if reminder data is available
+          if (notification.notification?.extra?.reminderData) {
+            this.triggerVirtualCall(notification.notification.extra.reminderData);
+          }
         });
 
         return true;
@@ -88,6 +114,7 @@ export class NotificationService {
               reminderId: reminder.id,
               category: reminder.category,
               priority: reminder.priority,
+             reminderData: reminder,
             },
             smallIcon: 'ic_stat_notification',
             iconColor: '#FF6B35',

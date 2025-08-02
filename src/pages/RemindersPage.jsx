@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell, MoreVertical, Star, X, Save } from 'lucide-react';
+import { Plus, Search, Filter, Clock, CheckCircle, Trash2, Edit3, Calendar, Bell, MoreVertical, Star, X, Save, Phone } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import { useReminders } from '../contexts/RemindersContext';
 import { useNotifications } from '../hooks/useNotifications';
 import BottomNavigation from '../components/BottomNavigation';
+import { useVirtualCalling } from '../hooks/useVirtualCalling';
 
 const RemindersPage = () => {
   const { isPermissionGranted, requestPermission } = useNotifications();
+  const { triggerTestCall } = useVirtualCalling();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -458,6 +460,13 @@ const RemindersPage = () => {
                       </button>
                       <button className="p-1 sm:p-1.5 lg:p-2 text-gray-400 dark:text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
                         <Bell className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </button>
+                      <button
+                        onClick={() => triggerTestCall(reminder)}
+                        className="p-1 sm:p-1.5 lg:p-2 text-gray-400 dark:text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
+                        title="Test Virtual Call"
+                      >
+                        <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                     <button

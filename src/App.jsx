@@ -8,10 +8,20 @@ import SubscriptionPage from './pages/SubscriptionPage';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './auth/auth';
+import VirtualCallOverlay from './components/VirtualCallOverlay';
+import { useVirtualCalling } from './hooks/useVirtualCalling';
 
-function App() {
+const AppWithCalling = () => {
+  const {
+    activeCall,
+    answerCall,
+    dismissCall,
+    snoozeCall,
+    isCallActive
+  } = useVirtualCalling();
+
   return (
-    <AuthProvider>
+    <>
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -33,6 +43,22 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+
+      {/* Virtual Call Overlay */}
+      <VirtualCallOverlay
+        isVisible={isCallActive}
+        reminder={activeCall}
+        onAnswer={answerCall}
+        onDismiss={dismissCall}
+        onSnooze={snoozeCall}
+      />
+    </>
+  );
+};
+function App() {
+  return (
+    <AuthProvider>
+      <AppWithCalling />
     </AuthProvider>
   );
 }

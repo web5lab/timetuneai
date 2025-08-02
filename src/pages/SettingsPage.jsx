@@ -10,6 +10,7 @@ const SettingsPage = () => {
   const [settings, setSettings] = useState({
     notifications: {
       push: true,
+      virtualCalling: true,
       email: false,
       sound: true,
       vibration: true,
@@ -89,6 +90,16 @@ const SettingsPage = () => {
                 <ToggleSwitch
                   enabled={settings.notifications.push}
                   onChange={(value) => updateSetting('notifications', 'push', value)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Virtual Calling</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Show full-screen call interface for reminders</p>
+                </div>
+                <ToggleSwitch
+                  enabled={settings.notifications.virtualCalling || true}
+                  onChange={(value) => updateSetting('notifications', 'virtualCalling', value)}
                 />
               </div>
               <div className="flex items-center justify-between">

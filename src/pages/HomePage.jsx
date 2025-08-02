@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX, Moon, Sun, Menu, Calendar } from 'lucide-react';
+import { Send, Mic, MicOff, Sparkles, Clock, RotateCcw, Zap, Volume2, VolumeX, Moon, Sun, Menu, Calendar, Phone } from 'lucide-react';
 import VoiceInputModal from '../components/VoiceInputModal';
 import { useChat } from '../hooks/useChat';
 import { useVoice } from '../hooks/useVoice';
@@ -7,10 +7,12 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useDispatch } from 'react-redux';
 import { toggleSidebar } from '../store/global.Slice';
 import { useNavigate } from 'react-router-dom';
+import { useVirtualCalling } from '../hooks/useVirtualCalling';
 
 const HomePage = () => {
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { theme, toggleTheme } = useTheme();
+  const { triggerTestCall } = useVirtualCalling();
   const {
     isListening,
     isSpeaking,
@@ -104,6 +106,20 @@ const HomePage = () => {
     clearChat();
   };
 
+  const handleTestCall = () => {
+    // Create a test reminder for demonstration
+    const testReminder = {
+      id: Date.now(),
+      title: "Test Virtual Call",
+      description: "This is a test of the virtual calling system. You can answer, dismiss, or snooze this call.",
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toTimeString().slice(0, 5),
+      category: "personal",
+      priority: "medium",
+      isCompleted: false
+    };
+    triggerTestCall(testReminder);
+  };
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -171,6 +187,13 @@ const HomePage = () => {
                 title="Clear chat"
               >
                 <RotateCcw className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleTestCall}
+                className="p-2 text-gray-100 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200"
+                title="Test Virtual Call"
+              >
+                <Phone className="w-4 h-4" />
               </button>
             </div>
           </div>
