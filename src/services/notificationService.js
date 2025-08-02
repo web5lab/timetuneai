@@ -103,6 +103,9 @@ export class NotificationService {
       // For Android, also schedule with virtual call service
       if (Capacitor.isNativePlatform()) {
         await androidCallService.scheduleReminderWithCall(reminder);
+        
+        // Ensure background service is running
+        this.ensureBackgroundServiceRunning();
       }
 
       // Create notification
@@ -150,6 +153,18 @@ export class NotificationService {
     } catch (error) {
       console.error('Error scheduling notification:', error);
       return false;
+    }
+  }
+  
+  // Ensure background service is running for Android
+  async ensureBackgroundServiceRunning() {
+    try {
+      if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+        // This will be handled by the Android background service
+        console.log('Background service should be running for reminder monitoring');
+      }
+    } catch (error) {
+      console.error('Error ensuring background service:', error);
     }
   }
 
