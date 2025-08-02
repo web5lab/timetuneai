@@ -28,6 +28,9 @@ export class AndroidCallService {
       // Initialize local notifications for background processing
       await LocalNotifications.requestPermissions();
       
+      // Request battery optimization exemption
+      this.requestBatteryOptimizationExemption();
+      
       // Set up app state listeners
       App.addListener('appStateChange', (state) => {
         console.log('App state changed:', state);
@@ -49,6 +52,18 @@ export class AndroidCallService {
     } catch (error) {
       console.error('Error initializing Android call service:', error);
       return false;
+    }
+  }
+
+  // Request battery optimization exemption for better background performance
+  requestBatteryOptimizationExemption() {
+    try {
+      if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+        // This will be handled by MainActivity.java
+        console.log('Battery optimization exemption will be requested by native code');
+      }
+    } catch (error) {
+      console.error('Error requesting battery optimization exemption:', error);
     }
   }
 

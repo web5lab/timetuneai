@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { notificationService } from '../services/notificationService';
-import { useVirtualCalling } from '../hooks/useVirtualCalling';
+import { Capacitor } from '@capacitor/core';
 
 
 
@@ -86,7 +86,33 @@ export const RemindersProvider= ({ children }) => {
         console.error('Error loading reminders from localStorage:', error);
       }
     }
+    
+    // Sync with Android native storage if on native platform
+    if (Capacitor.isNativePlatform() && window.AndroidReminders) {
+      try {
+        const nativeReminders = window.AndroidReminders.getReminders();
+        if (nativeReminders && nativeReminders !== '[]') {
+          const parsedNativeReminders = JSON.parse(nativeReminders);
+          dispatch({ type: 'LOAD_REMINDERS', payload: parsedNativeReminders });
+        }
+      } catch (error) {
+        console.error('Error loading reminders from native storage:', error);
+      }
+    }
   }, []);
+
+  // Sync reminders with Android native storage whenever they change
+  useEffect(() => {
+    if (Capacitor.isNativePlatform() && window.AndroidReminders && state.reminders.length > 0) {
+      try {
+        const remindersJson = JSON.stringify(state.reminders);
+        window.AndroidReminders.syncReminders(remindersJson);
+        console.log('Reminders synced with Android native storage');
+      } catch (error) {
+        console.error('Error syncing reminders with native storage:', error);
+      }
+    }
+  }, [state.reminders]);
 
   const addReminder = (reminder)=> {
     const id =  Math.floor(Date.now() % 2147483647);
