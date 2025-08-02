@@ -18,7 +18,17 @@ const config: CapacitorConfig = {
       smallIcon: "ic_stat_icon_config_sample",
       iconColor: "#F97316",
       sound: "beep.wav",
+      requestPermissions: true,
+      enableVibration: true,
     },
+    App: {
+      handleBackButton: false,
+    },
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: true,
   },
 };
 

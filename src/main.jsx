@@ -15,6 +15,16 @@ notificationService.initialize().then(() => {
   notificationService.createNotificationChannel();
 });
 
+// Initialize Android call service for native platforms
+import { androidCallService } from './services/androidCallService';
+import { Capacitor } from '@capacitor/core';
+
+if (Capacitor.isNativePlatform()) {
+  androidCallService.initialize().then(() => {
+    androidCallService.createVirtualCallChannel();
+  });
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>

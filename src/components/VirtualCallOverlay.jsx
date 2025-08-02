@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, PhoneOff, Clock, User, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { useVoice } from '../hooks/useVoice';
+import { Capacitor } from '@capacitor/core';
 
 const VirtualCallOverlay = ({ 
   isVisible, 
@@ -32,9 +33,45 @@ const VirtualCallOverlay = ({
         const message = `Hello! This is your TimeTuneAI assistant calling to remind you about: ${reminder.title}. ${reminder.description ? reminder.description : ''}`;
         speak(message);
       }
+      
+      // For Android, ensure screen stays on during call
+      if (Capacitor.isNativePlatform() && isVisible) {
+        document.body.style.userSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
+        
+        // Prevent Android back button
+        const handleBackButton = (e) => {
+          e.preventDefault();
+          return false;
+        };
+        
+        document.addEventListener('backbutton', handleBackButton);
+        
+        return () => {
+          document.removeEventListener('backbutton', handleBackButton);
+          document.body.style.userSelect = '';
+          document.body.style.webkitUserSelect = '';
+        };
+      }
     }
   }, [isVisible, reminder, isSpeakerOn, speak, isAnswered]);
 
+  // Expose trigger function globally for Android integration
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.triggerVirtualCall = (reminderData) => {
+        console.log('Virtual call triggered from Android:', reminderData);
+        // This would be called by the Android WebView
+        // The parent component should handle this through props
+      };
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete window.triggerVirtualCall;
+      }
+    };
+  }, []);
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;

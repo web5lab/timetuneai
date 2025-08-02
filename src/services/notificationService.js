@@ -1,5 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
+import { androidCallService } from './androidCallService';
 
 export class NotificationService {
    static instance;
@@ -99,6 +100,11 @@ export class NotificationService {
 
       console.log(`Scheduling notification for: ${reminder.title} at ${reminderDateTime}`);
 
+      // For Android, also schedule with virtual call service
+      if (Capacitor.isNativePlatform()) {
+        await androidCallService.scheduleReminderWithCall(reminder);
+      }
+
       // Create notification
       await LocalNotifications.schedule({
         notifications: [
@@ -154,6 +160,11 @@ export class NotificationService {
       await LocalNotifications.cancel({
         notifications: [{ id:reminderId }],
       });
+
+      // Also cancel virtual call if on Android
+      if (Capacitor.isNativePlatform()) {
+        await androidCallService.cancelVirtualCall(reminderId);
+      }
 
       console.log(`Notification cancelled for reminder: ${reminderId}`);
       return true;

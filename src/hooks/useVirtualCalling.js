@@ -1,10 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useReminders } from '../contexts/RemindersContext';
+import { androidCallService } from '../services/androidCallService';
+import { Capacitor } from '@capacitor/core';
 
 export const useVirtualCalling = () => {
   const [activeCall, setActiveCall] = useState(null);
   const [callQueue, setCallQueue] = useState([]);
   const { reminders, toggleComplete, updateReminder } = useReminders();
+
+  // Initialize Android call service
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      androidCallService.initialize().then(() => {
+        androidCallService.createVirtualCallChannel();
+        
+        // Register callback for virtual calls
+        androidCallService.onVirtualCall((reminder) => {
+          setActiveCall(reminder);
+        });
+      });
+    }
+
+    return () => {
+      if (Capacitor.isNativePlatform()) {
+        androidCallService.destroy();
+      }
+    };
+  }, []);
 
   // Check for due reminders every minute
   useEffect(() => {
@@ -27,7 +49,12 @@ export const useVirtualCalling = () => {
       dueReminders.forEach(reminder => {
         if (!callQueue.find(call => call.id === reminder.id) && 
             (!activeCall || activeCall.id !== reminder.id)) {
-          setCallQueue(prev => [...prev, reminder]);
+          // Use Android service for native platform, fallback to web behavior
+          if (Capacitor.isNativePlatform()) {
+            androidCallService.triggerVirtualCall(reminder);
+          } else {
+            setCallQueue(prev => [...prev, reminder]);
+          }
         }
       });
     };
@@ -86,10 +113,14 @@ export const useVirtualCalling = () => {
 
   // Test function to trigger a call manually
   const triggerTestCall = useCallback((reminder) => {
-    if (!activeCall) {
-      setActiveCall(reminder);
+    if (Capacitor.isNativePlatform()) {
+      androidCallService.triggerVirtualCall(reminder);
     } else {
-      setCallQueue(prev => [...prev, reminder]);
+      if (!activeCall) {
+        setActiveCall(reminder);
+      } else {
+        setCallQueue(prev => [...prev, reminder]);
+      }
     }
   }, [activeCall]);
 
