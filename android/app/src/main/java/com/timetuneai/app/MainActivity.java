@@ -24,6 +24,9 @@ public class MainActivity extends BridgeActivity {
     // Request battery optimization exemption
     requestBatteryOptimizationExemption();
     
+    // Request overlay permission
+    OverlayCallService.requestOverlayPermission(this);
+    
     // Start background service
     startReminderBackgroundService();
     

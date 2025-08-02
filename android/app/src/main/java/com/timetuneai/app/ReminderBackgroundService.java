@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import org.json.JSONArray;
@@ -213,19 +214,36 @@ public class ReminderBackgroundService extends Service {
         try {
             Log.d(TAG, "Triggering virtual call for: " + reminder.getString("title"));
             
-            // Create intent for VirtualCallActivity
-            Intent callIntent = new Intent(this, VirtualCallActivity.class);
-            callIntent.putExtra("reminderTitle", reminder.getString("title"));
-            callIntent.putExtra("reminderDescription", reminder.optString("description", ""));
-            callIntent.putExtra("reminderId", reminder.getInt("id"));
-            callIntent.putExtra("reminderDate", reminder.getString("date"));
-            callIntent.putExtra("reminderTime", reminder.getString("time"));
-            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                              Intent.FLAG_ACTIVITY_CLEAR_TOP | 
-                              Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            // Check if we should use overlay or full activity
+            boolean useOverlay = shouldUseOverlay();
             
-            // Start the virtual call activity
-            startActivity(callIntent);
+            if (useOverlay) {
+                // Use overlay service for calls over other apps
+                Intent overlayIntent = new Intent(this, OverlayCallService.class);
+                overlayIntent.setAction(OverlayCallService.ACTION_SHOW_OVERLAY_CALL);
+                overlayIntent.putExtra("reminderTitle", reminder.getString("title"));
+                overlayIntent.putExtra("reminderDescription", reminder.optString("description", ""));
+                overlayIntent.putExtra("reminderId", reminder.getInt("id"));
+                overlayIntent.putExtra("reminderDate", reminder.getString("date"));
+                overlayIntent.putExtra("reminderTime", reminder.getString("time"));
+                
+                startService(overlayIntent);
+                Log.d(TAG, "Started overlay call service");
+            } else {
+                // Use full activity for traditional calls
+                Intent callIntent = new Intent(this, VirtualCallActivity.class);
+                callIntent.putExtra("reminderTitle", reminder.getString("title"));
+                callIntent.putExtra("reminderDescription", reminder.optString("description", ""));
+                callIntent.putExtra("reminderId", reminder.getInt("id"));
+                callIntent.putExtra("reminderDate", reminder.getString("date"));
+                callIntent.putExtra("reminderTime", reminder.getString("time"));
+                callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+                                  Intent.FLAG_ACTIVITY_CLEAR_TOP | 
+                                  Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                
+                startActivity(callIntent);
+                Log.d(TAG, "Started virtual call activity");
+            }
             
             // Also show a high-priority notification as backup
             showVirtualCallNotification(reminder);
@@ -233,6 +251,14 @@ public class ReminderBackgroundService extends Service {
         } catch (Exception e) {
             Log.e(TAG, "Error triggering virtual call: " + e.getMessage());
         }
+    }
+    
+    private boolean shouldUseOverlay() {
+        // Check if overlay permission is granted
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(this);
+        }
+        return true;
     }
     
     private void showVirtualCallNotification(JSONObject reminder) {

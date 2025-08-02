@@ -61,17 +61,49 @@ const VirtualCallOverlay = ({
     if (typeof window !== 'undefined') {
       window.triggerVirtualCall = (reminderData) => {
         console.log('Virtual call triggered from Android:', reminderData);
-        // This would be called by the Android WebView
-        // The parent component should handle this through props
+        
+        // Set the reminder data and show the call
+        if (reminderData && !activeCall) {
+          // Trigger the call through the parent component's callback
+          if (onAnswer && onDismiss && onSnooze) {
+            // This is called from Android overlay - show the call immediately
+            setActiveCall(reminderData);
+          }
+        }
+      };
+      
+      // Also expose functions to control overlay from Android
+      window.dismissVirtualCall = () => {
+        console.log('Dismissing virtual call from Android');
+        if (activeCall) {
+          onDismiss();
+        }
+      };
+      
+      window.answerVirtualCall = () => {
+        console.log('Answering virtual call from Android');
+        if (activeCall) {
+          onAnswer();
+        }
+      };
+      
+      window.snoozeVirtualCall = () => {
+        console.log('Snoozing virtual call from Android');
+        if (activeCall) {
+          onSnooze();
+        }
       };
     }
     
     return () => {
       if (typeof window !== 'undefined') {
         delete window.triggerVirtualCall;
+        delete window.dismissVirtualCall;
+        delete window.answerVirtualCall;
+        delete window.snoozeVirtualCall;
       }
     };
-  }, []);
+  }, [activeCall, onAnswer, onDismiss, onSnooze]);
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;

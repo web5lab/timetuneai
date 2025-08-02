@@ -91,8 +91,19 @@ export class AndroidCallService {
         }
       });
     } else {
-      // If app is in background, show full-screen notification
-      this.showFullScreenNotification(reminder);
+      // If app is in background, use overlay service or full-screen notification
+      this.triggerBackgroundCall(reminder);
+    }
+  }
+
+  // Trigger call when app is in background
+  async triggerBackgroundCall(reminder) {
+    try {
+      // For Android, the background service will handle overlay vs activity decision
+      // Just show the notification as backup
+      await this.showFullScreenNotification(reminder);
+    } catch (error) {
+      console.error('Error triggering background call:', error);
     }
   }
 

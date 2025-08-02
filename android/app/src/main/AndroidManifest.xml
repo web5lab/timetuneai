@@ -48,6 +48,12 @@
                 android:value="reminder_monitoring" />
         </service>
         
+        <!-- Overlay Call Service -->
+        <service
+            android:name=".OverlayCallService"
+            android:enabled="true"
+            android:exported="false" />
+        
         <!-- Boot Receiver -->
         <receiver
             android:name=".BootReceiver"
@@ -94,4 +100,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" android:minSdkVersion="30"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.ACTION_MANAGE_OVERLAY_PERMISSION"/>
 </manifest>
