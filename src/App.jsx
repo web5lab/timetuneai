@@ -18,9 +18,9 @@ function App() {
 
           {/* Protected app routes */}
           <Route path="/" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <AppLayout />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }>
             <Route index element={<HomePage />} />
             <Route path="reminders" element={<RemindersPage />} />

@@ -1,112 +1,113 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const getApiKey = () => {
-  return 'AIzaSyDpj_YVxGgUxTsmcHCgPEbzkSspl1il4vo'
+  return 'AIzaSyDpj_YVxGgUxTsmcHCgPEbzkSspl1il4vo';
 };
 
 const API_KEY = getApiKey();
 
-if (!API_KEY || API_KEY === 'your_gemini_api_key_here') {
-  console.warn('Gemini API key not found. Please add VITE_GEMINI_API_KEY to your .env file');
+if (!API_KEY || API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+  console.warn('Gemini API key not found or is a placeholder. Please add your VITE_GEMINI_API_KEY to your environment or replace the placeholder.');
 }
 
 let genAI = null;
 
 const initializeGenAI = () => {
   const apiKey = getApiKey();
-  if (apiKey && apiKey !== 'your_gemini_api_key_here') {
+  if (apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE') {
     genAI = new GoogleGenerativeAI(apiKey);
     return true;
   }
   return false;
 };
 
-const SYSTEM_PROMPT = `You are TimeTuneAI, an intelligent reminder assistant. Your primary role is to help users create, manage, and organize reminders through natural conversation.
+// Updated System Prompt with instructions for current time and multiple reminders
+const SYSTEM_PROMPT = `You are TimeTuneAI, an intelligent and friendly reminder assistant. Your primary role is to help users create, manage, and organize reminders through natural conversation.
+
+CURRENT CONTEXT:
+- The user's message will be prepended with the current date and time in ISO format (e.g., "Current time is 2024-07-23T10:00:00.000Z").
+- You MUST use this timestamp as the point of reference for all relative time requests (e.g., "tomorrow", "in 2 hours", "next Monday").
 
 CORE RESPONSIBILITIES:
-1. Parse natural language to extract reminder details (title, date, time, description, priority, category)
-2. Create, update, delete, and manage reminders based on user requests
-3. Provide helpful suggestions for reminder optimization
-4. Be conversational, friendly, and efficient
-5. Handle reminder queries like "show my reminders", "delete the meeting reminder", etc.
+1.  Parse natural language to extract reminder details (title, date, time, description).
+2.  Handle multiple reminder requests in a single user message.
+3.  Be conversational, friendly, empathetic, and efficient.
+4.  Handle queries like "show my reminders", "delete the meeting reminder", etc.
+5.  Summarize the actions you've taken in a clear, friendly message.
 
 REMINDER EXTRACTION RULES:
-- Extract: title, description, date, time, priority (high/medium/low), category (work/personal/health/other)
-- Handle relative dates: "tomorrow", "next week", "in 2 hours", etc.
-- Handle recurring patterns: "daily", "weekly", "every Monday", etc.
-- Default to medium priority if not specified
-- Default to personal category if not specified
-- For dates: use YYYY-MM-DD format
-- For times: use HH:MM format (24-hour)
+- Extract: title, description, date, time, priority (high/medium/low), category (work/personal/health/other).
+- Handle relative dates and times based on the provided "Current time".
+- Default to medium priority if not specified.
+- Default to personal category if not specified.
+- For dates: use YYYY-MM-DD format.
+- For times: use HH:MM format (24-hour).
 
 FUNCTION CALLING:
-You can perform these actions by responding with JSON in this format:
+You can perform actions by responding with a single, valid JSON object. Do not include any text outside the JSON object.
 
-CREATE REMINDER:
+CREATE A SINGLE REMINDER:
 {
   "action": "create_reminder",
   "data": {
     "title": "Call mom",
     "description": "Weekly check-in call",
-    "date": "2024-01-16",
+    "date": "2024-07-24",
     "time": "15:00",
     "priority": "medium",
-    "category": "personal",
-    "isRecurring": false,
-    "recurrencePattern": ""
+    "category": "personal"
   },
-  "message": "Perfect! I've set a reminder for you to call mom tomorrow at 3:00 PM."
+  "message": "Perfect! I've set a reminder for you to call mom tomorrow at 3:00 PM. ✨"
 }
 
-UPDATE REMINDER:
+CREATE MULTIPLE REMINDERS:
+If the user asks to set multiple reminders at once, use this action. The "data" field must be an array of reminder objects.
 {
-  "action": "update_reminder",
-  "data": {
-    "query": "meeting reminder",
-    "updates": {
-      "time": "14:00",
-      "priority": "high"
+  "action": "create_multiple_reminders",
+  "data": [
+    {
+      "title": "Submit project report",
+      "description": "Final version for Q2",
+      "date": "2024-07-26",
+      "time": "11:00",
+      "priority": "high",
+      "category": "work"
+    },
+    {
+      "title": "Dentist appointment",
+      "description": "Annual check-up",
+      "date": "2024-07-29",
+      "time": "14:30",
+      "priority": "medium",
+      "category": "health"
     }
-  },
-  "message": "I've updated your meeting reminder to 2:00 PM and marked it as high priority."
-}
-
-DELETE REMINDER:
-{
-  "action": "delete_reminder",
-  "data": {
-    "query": "call mom"
-  },
-  "message": "I've deleted the reminder to call mom."
+  ],
+  "message": "All set! I've scheduled two reminders for you: one to submit your project report on Friday, and another for your dentist appointment next Monday. 👍"
 }
 
 LIST REMINDERS:
 {
   "action": "list_reminders",
-  "data": {
-    "filter": "today" // or "all", "completed", "pending", "work", "personal", etc.
-  },
+  "data": { "filter": "today" },
   "message": "Here are your reminders for today:"
 }
 
+DELETE REMINDER:
+{
+  "action": "delete_reminder",
+  "data": { "query": "call mom" },
+  "message": "I've deleted the 'call mom' reminder for you."
+}
+
 REGULAR CONVERSATION:
-For general questions or when no action is needed, respond normally without JSON.
+For general questions, greetings, or when no action is needed, respond with plain text, not JSON. Be warm and helpful.
 
-CONVERSATION STYLE:
-- Be warm, helpful, and encouraging
-- Use emojis sparingly but effectively
-- Keep responses concise but complete
-- Acknowledge successful reminder creation
-- Offer related suggestions when appropriate
-
-IMPORTANT: Always respond with either valid JSON for actions or regular text for conversation. Never mix both in the same response.`;
-
-
-
+IMPORTANT: Always respond with either a valid JSON object for actions or regular text for conversation. Never mix both. Your JSON must be perfectly formatted.
+`;
 
 export class GeminiService {
-   model;
-   chat;
+  model;
+  chat;
   callbacks;
 
   constructor() {
@@ -115,30 +116,29 @@ export class GeminiService {
 
   initializeModel() {
     if (initializeGenAI() && genAI) {
-      this.model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash",
-       generationConfig: {
-      maxOutputTokens: 65536,
-      temperature: 1,
-      thinkingConfig: {
-        thinkingBudget: 0,
-      },
-    }
+      this.model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash", // Using a capable model
+        generationConfig: {
+          responseMimeType: "application/json", // Instructs the model to output JSON
+          temperature: 0.2 // Lower temperature for more predictable JSON output
+        },
+        systemInstruction: SYSTEM_PROMPT,
       });
       this.initializeChat();
     }
   }
 
-   initializeChat() {
+  initializeChat() {
     this.chat = this.model.startChat({
       history: [
+        // The system prompt is now part of the model initialization
         {
           role: "user",
-          parts: [{ text: SYSTEM_PROMPT }],
+          parts: [{ text: "Hello!" }],
         },
         {
           role: "model",
-          parts: [{ text: "Hello! I'm TimeTuneAI, your personal reminder assistant. I'm here to help you stay organized and never miss anything important. You can tell me about any reminder you'd like to set using natural language - just speak or type as you normally would. What would you like me to help you remember today?" }],
+          parts: [{ text: "Hello! I'm TimeTuneAI, your personal reminder assistant. How can I help you stay organized today? You can ask me to set one or multiple reminders at once! 😊" }],
         },
       ],
     });
@@ -148,163 +148,95 @@ export class GeminiService {
     this.callbacks = callbacks;
   }
 
- parseDate(dateStr) {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const lowerDate = dateStr.toLowerCase();
-    
-    if (lowerDate.includes('today')) {
-      return today.toISOString().split('T')[0];
-    } else if (lowerDate.includes('tomorrow')) {
-      return tomorrow.toISOString().split('T')[0];
-    } else if (lowerDate.includes('next week')) {
-      const nextWeek = new Date(today);
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      return nextWeek.toISOString().split('T')[0];
-    }
-    
-    // Try to parse as date
+  // Helper functions remain useful for standardizing data from AI
+  parseDate(dateStr) {
+    if (!dateStr) return new Date().toISOString().split('T')[0];
+    // The AI should provide a valid YYYY-MM-DD, so we trust it but have a fallback.
     const parsed = new Date(dateStr);
     if (!isNaN(parsed.getTime())) {
       return parsed.toISOString().split('T')[0];
     }
-    
-    return today.toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0];
+
   }
 
   parseTime(timeStr) {
-    // Handle common time formats
-    const time = timeStr.toLowerCase().replace(/\s+/g, '');
-    
-    // Handle AM/PM format
-    if (time.includes('am') || time.includes('pm')) {
-      const isPM = time.includes('pm');
-      const numericTime = time.replace(/[ap]m/, '');
-      let [hours, minutes = '00'] = numericTime.split(':');
-      
-      hours = parseInt(hours);
-      if (isPM && hours !== 12) hours += 12;
-      if (!isPM && hours === 12) hours = 0;
-      
-      return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    if (!timeStr) return '09:00';
+    // AI should provide HH:MM, this is just a safeguard.
+    if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeStr)) {
+      return timeStr;
     }
-    
-    // Handle 24-hour format
-    if (time.includes(':')) {
-      return time;
-    }
-    
-    // Default to current time + 1 hour
-    const now = new Date();
-    now.setHours(now.getHours() + 1);
-    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    return '09:00'; // Default fallback
   }
 
-   async executeAction(actionData) {
+  async executeAction(actionData) {
     try {
       console.log('Executing action:', actionData);
-      
-      switch (actionData.action) {
+      const { action, data, message } = actionData;
+
+      switch (action) {
         case 'create_reminder': {
-          if (!this.callbacks.addReminder) {
-            console.error('addReminder callback not available');
-            return "I'm sorry, I can't create reminders right now. Please try again.";
-          }
-          
-          console.log('Creating reminder with data:', actionData.data);
-          
+          if (!this.callbacks.addReminder) return "I can't create reminders right now.";
+
           const reminderData = {
-            title: actionData.data.title,
-            description: actionData.data.description || '',
-            date: this.parseDate(actionData.data.date || 'today'),
-            time: this.parseTime(actionData.data.time || '09:00'),
-            priority: actionData.data.priority || 'medium',
-            category: actionData.data.category || 'personal',
+            title: data.title,
+            description: data.description || '',
+            date: this.parseDate(data.date),
+            time: this.parseTime(data.time),
+            priority: data.priority || 'medium',
+            category: data.category || 'personal',
             isCompleted: false,
-            isRecurring: actionData.data.isRecurring || false,
-            recurrencePattern: actionData.data.recurrencePattern || '',
           };
-          
-          console.log('Parsed reminder data:', reminderData);
-          
-          const id = this.callbacks.addReminder(reminderData);
-          console.log('Reminder created with ID:', id);
-          return actionData.message + ` (ID: ${id})`;
+          this.callbacks.addReminder(reminderData);
+          return message; // Use the friendly message from the AI
         }
-        
-        case 'update_reminder': {
-          if (!this.callbacks.findReminders || !this.callbacks.updateReminder) {
-            return "I'm sorry, I can't update reminders right now. Please try again.";
-          }
-          
-          const reminders = this.callbacks.findReminders(actionData.data.query);
-          if (reminders.length === 0) {
-            return `I couldn't find any reminders matching "${actionData.data.query}".`;
-          }
-          
-          const reminder = reminders[0]; // Update the first match
-          this.callbacks.updateReminder(reminder.id, actionData.data.updates);
-          return actionData.message;
+
+        case 'create_multiple_reminders': {
+          if (!this.callbacks.addReminder) return "I can't create reminders right now.";
+          if (!Array.isArray(data)) return "I received an incorrect format for multiple reminders.";
+
+          data.forEach(item => {
+            const reminderData = {
+              title: item.title,
+              description: item.description || '',
+              date: this.parseDate(item.date),
+              time: this.parseTime(item.time),
+              priority: item.priority || 'medium',
+              category: item.category || 'personal',
+              isCompleted: false,
+            };
+            this.callbacks.addReminder(reminderData);
+          });
+          return message; // Use the friendly summary message from the AI
         }
-        
-        case 'delete_reminder': {
-          if (!this.callbacks.findReminders || !this.callbacks.deleteReminder) {
-            return "I'm sorry, I can't delete reminders right now. Please try again.";
-          }
-          
-          const reminders = this.callbacks.findReminders(actionData.data.query);
-          if (reminders.length === 0) {
-            return `I couldn't find any reminders matching "${actionData.data.query}".`;
-          }
-          
-          const reminder = reminders[0]; // Delete the first match
-          this.callbacks.deleteReminder(reminder.id);
-          return actionData.message;
-        }
-        
+
         case 'list_reminders': {
-          if (!this.callbacks.getAllReminders) {
-            return "I'm sorry, I can't list reminders right now. Please try again.";
-          }
-          
+          if (!this.callbacks.getAllReminders) return "I can't list reminders right now.";
+
           const allReminders = this.callbacks.getAllReminders();
-          const filter = actionData.data.filter || 'all';
-          
-          let filteredReminders = allReminders;
+          const filter = data.filter || 'all';
           const today = new Date().toISOString().split('T')[0];
-          
+          let filteredReminders = allReminders;
+
           switch (filter) {
             case 'today':
-              filteredReminders = allReminders.filter(r => r.date === today);
+              filteredReminders = allReminders.filter(r => r.date === today && !r.isCompleted);
               break;
-            case 'completed':
-              filteredReminders = allReminders.filter(r => r.isCompleted);
-              break;
-            case 'pending':
-              filteredReminders = allReminders.filter(r => !r.isCompleted);
-              break;
-            case 'work':
-              filteredReminders = allReminders.filter(r => r.category === 'work');
-              break;
-            case 'personal':
-              filteredReminders = allReminders.filter(r => r.category === 'personal');
-              break;
+            // Add more filters as needed
           }
-          
+
           if (filteredReminders.length === 0) {
             return `You don't have any ${filter === 'all' ? '' : filter + ' '}reminders.`;
           }
-          
+
           const remindersList = filteredReminders
-            .slice(0, 5) // Limit to 5 reminders
-            .map(r => `• ${r.title} - ${r.date} at ${r.time} (${r.priority} priority)`)
+            .slice(0, 5)
+            .map(r => `• ${r.title} at ${r.time}`)
             .join('\n');
-          
-          return `${actionData.message}\n\n${remindersList}${filteredReminders.length > 5 ? '\n\n...and more in your reminders page.' : ''}`;
+
+          return `${message}\n\n${remindersList}${filteredReminders.length > 5 ? '\n...and a few more.' : ''}`;
         }
-        
+
         default:
           return "I'm sorry, I don't understand that action.";
       }
@@ -313,165 +245,48 @@ export class GeminiService {
       return "I'm sorry, something went wrong while processing your request.";
     }
   }
-  async sendMessage(message) {
-    try {
-      console.log('Gemini service sending message:', message);
-      
-      const apiKey = getApiKey();
-      if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        return "I'm sorry, but I need an API key to function properly. Please add your Gemini API key to the environment variables.";
-      }
-      
-      if (!this.model || !this.chat) {
-        this.initializeModel();
-        if (!this.model || !this.chat) {
-          return "I'm having trouble initializing. Please check your API key and try again.";
-        }
-      }
 
-      const result = await this.chat.sendMessage(message);
+  async sendMessage(message) {
+    if (!this.model || !this.chat) {
+      this.initializeModel();
+      if (!this.model || !this.chat) {
+        return "I'm having trouble initializing. Please check your API key and try again.";
+      }
+    }
+
+    try {
+      // Prepend the current time to the user's message for context
+      const currentTime = new Date().toLocaleString();
+      const messageWithContext = `Current time is ${currentTime}. User's request: "${message}"`;
+
+      console.log('Sending to Gemini:', messageWithContext);
+
+      const result = await this.chat.sendMessage(messageWithContext);
       const response = await result.response;
       const responseText = response.text();
-      
+
       console.log('Raw Gemini response:', responseText);
-      
-      // Try to parse as JSON action
+
+      // Since we requested JSON, we can be more confident in parsing it.
       try {
-        // Clean up the response text to extract JSON
-        let cleanedResponse = responseText.trim();
-        
-        console.log('Attempting to parse JSON from response...');
-        
-        // Look for JSON patterns in the response
-        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const jsonString = jsonMatch[0];
-          console.log('Found JSON string:', jsonString);
-          const actionData = JSON.parse(jsonString);
-          
-          if (actionData.action && actionData.message) {
-            console.log('Valid action data found, executing...');
-            return await this.executeAction(actionData);
-          }
-        }
-        
-        // If no JSON found, try parsing the entire response
-        console.log('Trying to parse entire response as JSON...');
-        const actionData = JSON.parse(cleanedResponse);
-        if (actionData.action && actionData.message) {
-          console.log('Entire response is valid JSON action, executing...');
+        const actionData = JSON.parse(responseText);
+        // Check for the essential fields
+        if (actionData.action && actionData.data && actionData.message) {
           return await this.executeAction(actionData);
+        } else {
+          // It's 
+          return responseText;
         }
       } catch (e) {
-        console.log('JSON parsing failed, checking for JSON-like content...');
-        // Not valid JSON, check if it contains JSON-like content
-        if (responseText.includes('"action"') && responseText.includes('"create_reminder"')) {
-          // Try to extract and fix malformed JSON
-          try {
-            console.log('Attempting to extract malformed JSON...');
-            const jsonStart = responseText.indexOf('{');
-            const jsonEnd = responseText.lastIndexOf('}') + 1;
-            if (jsonStart !== -1 && jsonEnd > jsonStart) {
-              const jsonPart = responseText.substring(jsonStart, jsonEnd);
-              console.log('Extracted JSON part:', jsonPart);
-              const actionData = JSON.parse(jsonPart);
-              if (actionData.action && actionData.message) {
-                console.log('Extracted JSON is valid, executing...');
-                return await this.executeAction(actionData);
-              }
-            }
-          } catch (parseError) {
-            console.error('Failed to parse extracted JSON:', parseError);
-          }
-        }
+        // If it's not JSON, it's a regular conversation
+        console.log('Response is not JSON, treating as plain text.');
+        return responseText;
       }
-      
-      console.log('No valid JSON action found, returning raw response');
-      return responseText;
     } catch (error) {
       console.error('Error sending message to Gemini:', error);
-      
-      // Fallback responses for common reminder patterns
-      return this.getFallbackResponse(message);
+      // Fallback for network errors or API issues
+      return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.";
     }
-  }
-
-   getFallbackResponse(message) {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('list') || lowerMessage.includes('show') || lowerMessage.includes('my reminders')) {
-      if (this.callbacks.getAllReminders) {
-        const reminders = this.callbacks.getAllReminders();
-        if (reminders.length === 0) {
-          return "You don't have any reminders yet. Would you like me to create one for you?";
-        }
-        const remindersList = reminders
-          .slice(0, 3)
-          .map(r => `• ${r.title} - ${r.date} at ${r.time}`)
-          .join('\n');
-        return `Here are your recent reminders:\n\n${remindersList}${reminders.length > 3 ? '\n\n...and more in your reminders page.' : ''}`;
-      }
-    } else if (lowerMessage.includes('delete') || lowerMessage.includes('remove')) {
-      return "I can help you delete reminders! Please tell me which reminder you'd like to remove, for example: 'Delete my meeting reminder' or 'Remove the call mom reminder'.";
-    } else if (lowerMessage.includes('update') || lowerMessage.includes('change') || lowerMessage.includes('modify')) {
-      return "I can help you update your reminders! Tell me which reminder you want to change and what you'd like to update. For example: 'Change my meeting time to 3 PM' or 'Update the call mom reminder to high priority'.";
-    } else if (lowerMessage.includes('remind')) {
-      // Try to create a basic reminder with fallback
-      if (this.callbacks.addReminder) {
-        const reminderData = {
-          title: message.replace(/remind me to /i, '').replace(/remind me /i, ''),
-          description: '',
-          date: new Date().toISOString().split('T')[0],
-          time: '09:00',
-          priority: 'medium' ,
-          category: 'personal' ,
-          isCompleted: false,
-          isRecurring: false,
-          recurrencePattern: '',
-        };
-        
-        const id = this.callbacks.addReminder(reminderData);
-        return `I've created a reminder for you: "${reminderData.title}". I set it for today at 9:00 AM. You can update the time and date in your reminders page if needed.`;
-      }
-      return "I understand you want to set a reminder. Could you please provide more details like the date and time? For example: 'Remind me to call mom tomorrow at 3 PM'.";
-    } else {
-      return "I'm here to help you manage your reminders! You can ask me to create, update, delete, or list your reminders. Try saying something like 'Remind me to call mom tomorrow at 3 PM' or 'Show me my reminders'.";
-    }
-  }
-
-  // Method to extract reminder data from conversation (for future use)
-  extractReminderData(message) {
-    const data = {};
-    const lowerMessage = message.toLowerCase();
-
-    // Extract priority
-    if (lowerMessage.includes('urgent') || lowerMessage.includes('important') || lowerMessage.includes('critical')) {
-      data.priority = 'high';
-    } else if (lowerMessage.includes('low priority') || lowerMessage.includes('when I have time')) {
-      data.priority = 'low';
-    } else {
-      data.priority = 'medium';
-    }
-
-    // Extract category
-    if (lowerMessage.includes('work') || lowerMessage.includes('meeting') || lowerMessage.includes('office')) {
-      data.category = 'work';
-    } else if (lowerMessage.includes('doctor') || lowerMessage.includes('medicine') || lowerMessage.includes('health') || lowerMessage.includes('workout')) {
-      data.category = 'health';
-    } else {
-      data.category = 'personal';
-    }
-
-    // Extract recurring pattern
-    if (lowerMessage.includes('daily') || lowerMessage.includes('every day')) {
-      data.recurring = true;
-      data.recurrencePattern = 'daily';
-    } else if (lowerMessage.includes('weekly') || lowerMessage.includes('every week')) {
-      data.recurring = true;
-      data.recurrencePattern = 'weekly';
-    }
-
-    return data;
   }
 
   resetChat() {
