@@ -156,44 +156,84 @@ public class OverlayCallService extends Service {
         ));
         callInterface.setOrientation(LinearLayout.VERTICAL);
         callInterface.setGravity(android.view.Gravity.CENTER);
+        callInterface.setPadding(60, 120, 60, 120);
         
-        // Title
+        // App Title with better styling
         TextView titleView = new TextView(this);
-        titleView.setText("TimeTuneAI Reminder");
+        titleView.setText("📱 TimeTuneAI Assistant");
         titleView.setTextColor(0xFFFFFFFF);
-        titleView.setTextSize(24);
+        titleView.setTextSize(28);
         titleView.setGravity(android.view.Gravity.CENTER);
-        titleView.setPadding(20, 20, 20, 10);
+        titleView.setPadding(30, 30, 30, 20);
+        titleView.setTypeface(null, android.graphics.Typeface.BOLD);
         callInterface.addView(titleView);
+        
+        // Status indicator
+        TextView statusView = new TextView(this);
+        statusView.setText("🔔 Incoming Reminder Call");
+        statusView.setTextColor(0xFFFFB74D);
+        statusView.setTextSize(16);
+        statusView.setGravity(android.view.Gravity.CENTER);
+        statusView.setPadding(20, 0, 20, 30);
+        callInterface.addView(statusView);
+        
+        // Card container for reminder details
+        LinearLayout cardContainer = new LinearLayout(this);
+        cardContainer.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        cardContainer.setOrientation(LinearLayout.VERTICAL);
+        cardContainer.setBackgroundColor(0x33FFFFFF); // Semi-transparent white
+        cardContainer.setPadding(40, 30, 40, 30);
+        
+        // Create rounded corners effect (limited on older Android)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
+            shape.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+            shape.setCornerRadius(30);
+            shape.setColor(0x33FFFFFF);
+            cardContainer.setBackground(shape);
+        }
         
         // Reminder title
         TextView reminderTitle = new TextView(this);
         reminderTitle.setText(title);
         reminderTitle.setTextColor(0xFFFFFFFF);
-        reminderTitle.setTextSize(20);
+        reminderTitle.setTextSize(22);
         reminderTitle.setGravity(android.view.Gravity.CENTER);
-        reminderTitle.setPadding(20, 10, 20, 10);
-        callInterface.addView(reminderTitle);
+        reminderTitle.setPadding(0, 0, 0, 15);
+        reminderTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+        cardContainer.addView(reminderTitle);
         
         // Description
         if (description != null && !description.isEmpty()) {
             TextView descView = new TextView(this);
             descView.setText(description);
-            descView.setTextColor(0xFFCCCCCC);
-            descView.setTextSize(16);
+            descView.setTextColor(0xFFE0E0E0);
+            descView.setTextSize(15);
             descView.setGravity(android.view.Gravity.CENTER);
-            descView.setPadding(20, 10, 20, 20);
-            callInterface.addView(descView);
+            descView.setPadding(0, 0, 0, 15);
+            cardContainer.addView(descView);
         }
         
         // Time info
         TextView timeView = new TextView(this);
-        timeView.setText(time + " • " + date);
-        timeView.setTextColor(0xFFCCCCCC);
-        timeView.setTextSize(14);
+        timeView.setText("🕐 " + time + " • " + date);
+        timeView.setTextColor(0xFFFFB74D);
+        timeView.setTextSize(13);
         timeView.setGravity(android.view.Gravity.CENTER);
-        timeView.setPadding(20, 10, 20, 40);
-        callInterface.addView(timeView);
+        timeView.setPadding(0, 0, 0, 0);
+        cardContainer.addView(timeView);
+        
+        callInterface.addView(cardContainer);
+        
+        // Add some spacing
+        android.view.View spacer = new android.view.View(this);
+        spacer.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 60
+        ));
+        callInterface.addView(spacer);
         
         // Buttons container
         LinearLayout buttonsContainer = new LinearLayout(this);
@@ -203,44 +243,69 @@ public class OverlayCallService extends Service {
         ));
         buttonsContainer.setOrientation(LinearLayout.HORIZONTAL);
         buttonsContainer.setGravity(android.view.Gravity.CENTER);
+        buttonsContainer.setPadding(0, 20, 0, 0);
+        
+        // Dismiss button (left)
+        Button dismissButton = createStyledButton("❌ Dismiss", 0xFFF44336, 0xFFD32F2F);
+        LinearLayout.LayoutParams dismissParams = new LinearLayout.LayoutParams(
+            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+        );
+        dismissParams.setMargins(0, 0, 15, 0);
+        dismissButton.setLayoutParams(dismissParams);
+        dismissButton.setOnClickListener(v -> handleDismissCall(reminderId));
         
         // Answer button
-        Button answerButton = new Button(this);
-        answerButton.setText("Answer");
-        answerButton.setBackgroundColor(0xFF4CAF50);
-        answerButton.setTextColor(0xFFFFFFFF);
-        answerButton.setPadding(40, 20, 40, 20);
+        Button answerButton = createStyledButton("📞 Answer", 0xFF4CAF50, 0xFF388E3C);
         LinearLayout.LayoutParams answerParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
         );
-        answerParams.setMargins(20, 0, 20, 0);
+        answerParams.setMargins(15, 0, 0, 0);
         answerButton.setLayoutParams(answerParams);
-        answerButton.setOnClickListener(v -> {
-            handleAnswerCall(reminderId);
-        });
+        answerButton.setOnClickListener(v -> handleAnswerCall(reminderId));
         
-        // Dismiss button
-        Button dismissButton = new Button(this);
-        dismissButton.setText("Dismiss");
-        dismissButton.setBackgroundColor(0xFFF44336);
-        dismissButton.setTextColor(0xFFFFFFFF);
-        dismissButton.setPadding(40, 20, 40, 20);
-        LinearLayout.LayoutParams dismissParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        dismissParams.setMargins(20, 0, 20, 0);
-        dismissButton.setLayoutParams(dismissParams);
-        dismissButton.setOnClickListener(v -> {
-            handleDismissCall(reminderId);
-        });
-        
-        buttonsContainer.addView(answerButton);
         buttonsContainer.addView(dismissButton);
+        buttonsContainer.addView(answerButton);
         callInterface.addView(buttonsContainer);
         
+        // Add snooze button below
+        Button snoozeButton = createStyledButton("⏰ Snooze 5 min", 0xFFFF9800, 0xFFF57C00);
+        LinearLayout.LayoutParams snoozeParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        snoozeParams.setMargins(40, 20, 40, 0);
+        snoozeButton.setLayoutParams(snoozeParams);
+        snoozeButton.setOnClickListener(v -> handleSnoozeCall(reminderId));
+        callInterface.addView(snoozeButton);
+        
         return callInterface;
+    }
+    
+    private Button createStyledButton(String text, int backgroundColor, int pressedColor) {
+        Button button = new Button(this);
+        button.setText(text);
+        button.setTextColor(0xFFFFFFFF);
+        button.setTextSize(16);
+        button.setPadding(30, 25, 30, 25);
+        button.setTypeface(null, android.graphics.Typeface.BOLD);
+        
+        // Create rounded button background
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
+            shape.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+            shape.setCornerRadius(25);
+            shape.setColor(backgroundColor);
+            button.setBackground(shape);
+        } else {
+            button.setBackgroundColor(backgroundColor);
+        }
+        
+        return button;
+    }
+    
+    private void handleSnoozeCall(int reminderId) {
+        Log.d(TAG, "Call snoozed for reminder: " + reminderId);
+        hideOverlayCall();
     }
     
     private void handleAnswerCall(int reminderId) {

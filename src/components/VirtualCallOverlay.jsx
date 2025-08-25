@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, PhoneOff, Clock, User, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Phone, PhoneOff, Clock, User, Mic, MicOff, Volume2, VolumeX, CheckCircle, RotateCcw } from 'lucide-react';
 import { useVoice } from '../hooks/useVoice';
 import { Capacitor } from '@capacitor/core';
 
@@ -16,11 +16,15 @@ const VirtualCallOverlay = ({
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [isCallVisible, setIsCallVisible] = useState(false);
+  const [isRinging, setIsRinging] = useState(true);
   const { speak, stopSpeaking, isSpeaking } = useVoice();
 
   // Update visibility state
   useEffect(() => {
     setIsCallVisible(isVisible && reminder);
+    if (isVisible && reminder) {
+      setIsRinging(true);
+    }
   }, [isVisible, reminder]);
 
   useEffect(() => {
@@ -79,6 +83,7 @@ const VirtualCallOverlay = ({
           setIsCallVisible(true);
           setIsAnswered(false);
           setCallDuration(0);
+          setIsRinging(true);
         }
       };
       
@@ -118,6 +123,7 @@ const VirtualCallOverlay = ({
   const handleAnswer = () => {
     console.log('Call answered');
     setIsAnswered(true);
+    setIsRinging(false);
     setCallDuration(0);
     
     if (onAnswer) {
@@ -139,6 +145,7 @@ const VirtualCallOverlay = ({
     setCallDuration(0);
     setIsCallVisible(false);
     setActiveCall(null);
+    setIsRinging(false);
     
     if (onDismiss) {
       onDismiss();
@@ -152,6 +159,7 @@ const VirtualCallOverlay = ({
     setCallDuration(0);
     setIsCallVisible(false);
     setActiveCall(null);
+    setIsRinging(false);
     
     if (onSnooze) {
       onSnooze();
@@ -178,190 +186,257 @@ const VirtualCallOverlay = ({
   if (!isCallVisible || !currentReminder) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 flex flex-col" style={{ zIndex: 2147483647 }}>
+    <div className="fixed inset-0 z-[9999] overflow-hidden" style={{ zIndex: 2147483647 }}>
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-red-500 to-pink-600">
+        {/* Animated Circles */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full animate-pulse"></div>
+        <div className="absolute top-32 right-16 w-24 h-24 bg-white/5 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-20 left-20 w-40 h-40 bg-white/5 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-32 right-10 w-20 h-20 bg-white/10 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10"></div>
+      </div>
+
       {/* Status Bar */}
-      <div className="flex justify-between items-center p-4 text-white text-sm">
+      <div className="relative z-10 flex justify-between items-center p-4 pt-8 text-white">
         <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 bg-white rounded-full"></div>
-          <span>TimeTuneAI</span>
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+          <span className="font-medium">TimeTuneAI</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-4 h-2 bg-white rounded-sm opacity-60"></div>
-          <div className="w-4 h-2 bg-white rounded-sm opacity-80"></div>
-          <div className="w-4 h-2 bg-white rounded-sm"></div>
+          <div className="w-1 h-3 bg-white/60 rounded-full"></div>
+          <div className="w-1 h-4 bg-white/80 rounded-full"></div>
+          <div className="w-1 h-5 bg-white rounded-full"></div>
+          <div className="w-1 h-4 bg-white rounded-full"></div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 text-white relative z-10">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 text-white min-h-screen">
         {/* Call Status */}
-        <div className="text-center mb-8">
-          <p className="text-lg opacity-90 mb-2">
-            {isAnswered ? 'Connected' : 'Incoming call from'}
-          </p>
-          <h1 className="text-3xl font-bold mb-4">TimeTuneAI Assistant</h1>
-          {isAnswered && (
-            <p className="text-xl opacity-80">{formatDuration(callDuration)}</p>
-          )}
-        </div>
-
-        {/* Avatar */}
-        <div className="relative mb-8">
-          <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-white/30">
-            <User className="w-16 h-16 text-white" />
-          </div>
-          {!isAnswered && (
-            <>
-              <div className="absolute inset-0 w-32 h-32 rounded-full bg-white/20 animate-ping"></div>
-              <div className="absolute inset-0 w-32 h-32 rounded-full bg-white/10 animate-ping" style={{ animationDelay: '0.5s' }}></div>
-            </>
-          )}
-        </div>
-
-        {/* Reminder Details */}
-        <div className="text-center mb-8 max-w-sm">
+        <div className="text-center mb-8 animate-fade-in-up">
           <div className="flex items-center justify-center mb-3">
-            <Clock className="w-5 h-5 mr-2" />
-            <span className="text-lg">Reminder Alert</span>
+            {isRinging && (
+              <div className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></div>
+            )}
+            <p className="text-lg font-medium opacity-90">
+              {isAnswered ? 'Connected' : 'Incoming Reminder Call'}
+            </p>
           </div>
-          <h2 className="text-xl font-semibold mb-2">{currentReminder.title}</h2>
-          {currentReminder.description && (
-            <p className="text-white/80 text-sm leading-relaxed">{currentReminder.description}</p>
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">
+            TimeTuneAI Assistant
+          </h1>
+          {isAnswered && (
+            <div className="flex items-center justify-center">
+              <Clock className="w-4 h-4 mr-2" />
+              <p className="text-xl font-mono">{formatDuration(callDuration)}</p>
+            </div>
           )}
-          <div className="flex items-center justify-center mt-3 text-sm opacity-75">
-            <span>{currentReminder.time} • {new Date(currentReminder.date).toLocaleDateString()}</span>
+        </div>
+
+        {/* Avatar with Enhanced Animation */}
+        <div className="relative mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="relative">
+            {/* Main Avatar */}
+            <div className="w-40 h-40 bg-gradient-to-br from-white/30 to-white/10 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-white/40 shadow-2xl">
+              <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-inner">
+                <User className="w-16 h-16 text-white drop-shadow-lg" />
+              </div>
+            </div>
+            
+            {/* Pulsing Rings for Incoming Call */}
+            {!isAnswered && isRinging && (
+              <>
+                <div className="absolute inset-0 w-40 h-40 rounded-full border-4 border-white/30 animate-ping"></div>
+                <div className="absolute inset-0 w-40 h-40 rounded-full border-2 border-white/20 animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                <div className="absolute inset-0 w-40 h-40 rounded-full border border-white/10 animate-ping" style={{ animationDelay: '1s' }}></div>
+              </>
+            )}
+            
+            {/* Connected Indicator */}
+            {isAnswered && (
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Reminder Details Card */}
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-8 max-w-sm w-full border border-white/20 shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mr-3">
+                <Clock className="w-6 h-6 text-orange-200" />
+              </div>
+              <div className="text-left">
+                <p className="text-orange-200 text-sm font-medium">Reminder Alert</p>
+                <p className="text-white/80 text-xs">{currentReminder.time} • {new Date(currentReminder.date).toLocaleDateString()}</p>
+              </div>
+            </div>
+            
+            <h2 className="text-xl font-bold mb-3 text-white leading-tight">{currentReminder.title}</h2>
+            
+            {currentReminder.description && (
+              <p className="text-white/80 text-sm leading-relaxed mb-4 bg-white/5 rounded-xl p-3">
+                {currentReminder.description}
+              </p>
+            )}
+            
+            {/* Priority Badge */}
+            <div className="flex items-center justify-center">
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                currentReminder.priority === 'high' 
+                  ? 'bg-red-500/20 text-red-200 border border-red-400/30' 
+                  : currentReminder.priority === 'medium'
+                  ? 'bg-yellow-500/20 text-yellow-200 border border-yellow-400/30'
+                  : 'bg-green-500/20 text-green-200 border border-green-400/30'
+              }`}>
+                {currentReminder.priority?.toUpperCase()} PRIORITY
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Call Controls */}
         {!isAnswered ? (
           /* Incoming Call Controls */
-          <div className="flex items-center justify-center space-x-8">
+          <div className="flex items-center justify-center space-x-8 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             {/* Dismiss */}
-            <button
-              onClick={handleDismiss}
-              className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              <PhoneOff className="w-8 h-8 text-white" />
-            </button>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={handleDismiss}
+                className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-all duration-300 border-4 border-red-400/30"
+              >
+                <PhoneOff className="w-8 h-8 text-white" />
+              </button>
+              <span className="text-xs mt-2 opacity-75 font-medium">Dismiss</span>
+            </div>
 
             {/* Answer */}
-            <button
-              onClick={handleAnswer}
-              className="w-20 h-20 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse"
-            >
-              <Phone className="w-10 h-10 text-white" />
-            </button>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={handleAnswer}
+                className="w-20 h-20 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-all duration-300 animate-pulse border-4 border-green-400/30"
+              >
+                <Phone className="w-10 h-10 text-white" />
+              </button>
+              <span className="text-xs mt-2 opacity-75 font-medium">Answer</span>
+            </div>
 
             {/* Snooze */}
-            <button
-              onClick={handleSnooze}
-              className="w-16 h-16 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              <Clock className="w-8 h-8 text-white" />
-            </button>
+            <div className="flex flex-col items-center">
+              <button
+                onClick={handleSnooze}
+                className="w-16 h-16 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-all duration-300 border-4 border-yellow-400/30"
+              >
+                <RotateCcw className="w-8 h-8 text-white" />
+              </button>
+              <span className="text-xs mt-2 opacity-75 font-medium">Snooze</span>
+            </div>
           </div>
         ) : (
           /* Active Call Controls */
-          <div className="flex items-center justify-center space-x-6">
-            {/* Mute */}
-            <button
-              onClick={toggleMute}
-              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-200 ${
-                isMuted ? 'bg-red-500 hover:bg-red-600' : 'bg-white/20 hover:bg-white/30'
-              }`}
-            >
-              {isMuted ? (
-                <MicOff className="w-6 h-6 text-white" />
-              ) : (
-                <Mic className="w-6 h-6 text-white" />
-              )}
-            </button>
+          <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            {/* Primary Controls */}
+            <div className="flex items-center justify-center space-x-6">
+              {/* Mute */}
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={toggleMute}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-all duration-300 border-2 ${
+                    isMuted 
+                      ? 'bg-red-500 hover:bg-red-600 border-red-400/50' 
+                      : 'bg-white/20 hover:bg-white/30 border-white/30'
+                  }`}
+                >
+                  {isMuted ? (
+                    <MicOff className="w-6 h-6 text-white" />
+                  ) : (
+                    <Mic className="w-6 h-6 text-white" />
+                  )}
+                </button>
+                <span className="text-xs mt-1 opacity-75">{isMuted ? 'Unmute' : 'Mute'}</span>
+              </div>
 
-            {/* Speaker */}
-            <button
-              onClick={toggleSpeaker}
-              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-200 ${
-                isSpeakerOn ? 'bg-blue-500 hover:bg-blue-600' : 'bg-white/20 hover:bg-white/30'
-              }`}
-            >
-              {isSpeakerOn ? (
-                <Volume2 className="w-6 h-6 text-white" />
-              ) : (
-                <VolumeX className="w-6 h-6 text-white" />
-              )}
-            </button>
+              {/* Speaker */}
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={toggleSpeaker}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-all duration-300 border-2 ${
+                    isSpeakerOn 
+                      ? 'bg-blue-500 hover:bg-blue-600 border-blue-400/50' 
+                      : 'bg-white/20 hover:bg-white/30 border-white/30'
+                  }`}
+                >
+                  {isSpeakerOn ? (
+                    <Volume2 className="w-6 h-6 text-white" />
+                  ) : (
+                    <VolumeX className="w-6 h-6 text-white" />
+                  )}
+                </button>
+                <span className="text-xs mt-1 opacity-75">Speaker</span>
+              </div>
 
-            {/* End Call */}
-            <button
-              onClick={handleDismiss}
-              className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              <PhoneOff className="w-8 h-8 text-white" />
-            </button>
+              {/* End Call */}
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={handleDismiss}
+                  className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-all duration-300 border-2 border-red-400/50"
+                >
+                  <PhoneOff className="w-8 h-8 text-white" />
+                </button>
+                <span className="text-xs mt-1 opacity-75">End Call</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3 w-full max-w-sm">
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    // Mark as complete
+                    handleDismiss();
+                  }}
+                  className="flex-1 bg-green-500/20 hover:bg-green-500/30 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-green-400/30 flex items-center justify-center space-x-2 transform hover:scale-105"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Mark Complete</span>
+                </button>
+                <button
+                  onClick={handleSnooze}
+                  className="flex-1 bg-yellow-500/20 hover:bg-yellow-500/30 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-yellow-400/30 flex items-center justify-center space-x-2 transform hover:scale-105"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  <span>Snooze 5m</span>
+                </button>
+              </div>
+              <button
+                onClick={handleDismiss}
+                className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-white/20 transform hover:scale-105"
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Action Labels */}
-        <div className="flex items-center justify-center space-x-8 mt-4 text-xs opacity-75">
-          {!isAnswered ? (
-            <>
-              <span>Dismiss</span>
-              <span>Answer</span>
-              <span>Snooze</span>
-            </>
-          ) : (
-            <>
-              <span>{isMuted ? 'Unmute' : 'Mute'}</span>
-              <span>{isSpeakerOn ? 'Speaker On' : 'Speaker Off'}</span>
-              <span>End Call</span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom Actions (when answered) */}
-      {isAnswered && (
-        <div className="p-6 space-y-3">
-          <div className="flex space-x-3">
-            <button
-              onClick={() => {
-                // Mark as complete
-                handleDismiss();
-              }}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-xl font-medium transition-colors"
-            >
-              Mark Complete
-            </button>
-            <button
-              onClick={handleSnooze}
-              className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-6 rounded-xl font-medium transition-colors"
-            >
-              Snooze 5 min
-            </button>
-          </div>
-          <button
-            onClick={handleDismiss}
-            className="w-full bg-white/20 hover:bg-white/30 text-white py-3 px-6 rounded-xl font-medium transition-colors backdrop-blur-sm"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {/* Speaking Indicator */}
-      {isSpeaking && isSpeakerOn && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-          <div className="flex items-center space-x-2 bg-black/20 backdrop-blur-sm rounded-full px-4 py-2">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        {/* Speaking Indicator */}
+        {isSpeaking && isSpeakerOn && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="flex items-center space-x-3 bg-black/30 backdrop-blur-md rounded-full px-6 py-3 border border-white/20">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+              <span className="text-white text-sm font-medium">AI Speaking...</span>
             </div>
-            <span className="text-white text-sm">Speaking...</span>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
