@@ -17,6 +17,7 @@ const VirtualCallOverlay = ({
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [isCallVisible, setIsCallVisible] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
+  const [showCallDetails, setShowCallDetails] = useState(false);
   const { speak, stopSpeaking, isSpeaking } = useVoice();
 
   // Update visibility state
@@ -24,6 +25,9 @@ const VirtualCallOverlay = ({
     setIsCallVisible(isVisible && reminder);
     if (isVisible && reminder) {
       setIsRinging(true);
+      setShowCallDetails(false);
+      // Show call details after a brief delay for better UX
+      setTimeout(() => setShowCallDetails(true), 500);
     }
   }, [isVisible, reminder]);
 
@@ -265,7 +269,9 @@ const VirtualCallOverlay = ({
         </div>
 
         {/* Reminder Details Card */}
-        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-8 max-w-sm w-full border border-white/20 shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+        <div className={`bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-8 max-w-sm w-full border border-white/20 shadow-2xl transition-all duration-500 ${
+          showCallDetails ? 'animate-fade-in-up opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}>
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mr-3">
@@ -303,12 +309,14 @@ const VirtualCallOverlay = ({
         {/* Call Controls */}
         {!isAnswered ? (
           /* Incoming Call Controls */
-          <div className="flex items-center justify-center space-x-8 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+          <div className={`flex items-center justify-center space-x-8 transition-all duration-700 ${
+            showCallDetails ? 'animate-fade-in-up opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
             {/* Dismiss */}
             <div className="flex flex-col items-center">
               <button
                 onClick={handleDismiss}
-                className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-all duration-300 border-4 border-red-400/30"
+                className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 active:scale-95 transition-all duration-300 border-4 border-red-400/30"
               >
                 <PhoneOff className="w-8 h-8 text-white" />
               </button>
@@ -319,8 +327,9 @@ const VirtualCallOverlay = ({
             <div className="flex flex-col items-center">
               <button
                 onClick={handleAnswer}
-                className="w-20 h-20 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-all duration-300 animate-pulse border-4 border-green-400/30"
+                className="w-20 h-20 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 active:scale-95 transition-all duration-300 animate-pulse border-4 border-green-400/30 relative overflow-hidden"
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 rounded-full animate-ping opacity-20"></div>
                 <Phone className="w-10 h-10 text-white" />
               </button>
               <span className="text-xs mt-2 opacity-75 font-medium">Answer</span>
@@ -330,7 +339,7 @@ const VirtualCallOverlay = ({
             <div className="flex flex-col items-center">
               <button
                 onClick={handleSnooze}
-                className="w-16 h-16 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-all duration-300 border-4 border-yellow-400/30"
+                className="w-16 h-16 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 active:scale-95 transition-all duration-300 border-4 border-yellow-400/30"
               >
                 <RotateCcw className="w-8 h-8 text-white" />
               </button>
@@ -339,14 +348,14 @@ const VirtualCallOverlay = ({
           </div>
         ) : (
           /* Active Call Controls */
-          <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+          <div className="space-y-6 animate-fade-in-up opacity-100">
             {/* Primary Controls */}
             <div className="flex items-center justify-center space-x-6">
               {/* Mute */}
               <div className="flex flex-col items-center">
                 <button
                   onClick={toggleMute}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-all duration-300 border-2 ${
+                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-300 border-2 ${
                     isMuted 
                       ? 'bg-red-500 hover:bg-red-600 border-red-400/50' 
                       : 'bg-white/20 hover:bg-white/30 border-white/30'
@@ -365,7 +374,7 @@ const VirtualCallOverlay = ({
               <div className="flex flex-col items-center">
                 <button
                   onClick={toggleSpeaker}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-all duration-300 border-2 ${
+                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-300 border-2 ${
                     isSpeakerOn 
                       ? 'bg-blue-500 hover:bg-blue-600 border-blue-400/50' 
                       : 'bg-white/20 hover:bg-white/30 border-white/30'
@@ -384,7 +393,7 @@ const VirtualCallOverlay = ({
               <div className="flex flex-col items-center">
                 <button
                   onClick={handleDismiss}
-                  className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-all duration-300 border-2 border-red-400/50"
+                  className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-red-400/50"
                 >
                   <PhoneOff className="w-8 h-8 text-white" />
                 </button>
@@ -400,14 +409,14 @@ const VirtualCallOverlay = ({
                     // Mark as complete
                     handleDismiss();
                   }}
-                  className="flex-1 bg-green-500/20 hover:bg-green-500/30 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-green-400/30 flex items-center justify-center space-x-2 transform hover:scale-105"
+                  className="flex-1 bg-green-500/20 hover:bg-green-500/30 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-green-400/30 flex items-center justify-center space-x-2 transform hover:scale-105 active:scale-95"
                 >
                   <CheckCircle className="w-5 h-5" />
                   <span>Mark Complete</span>
                 </button>
                 <button
                   onClick={handleSnooze}
-                  className="flex-1 bg-yellow-500/20 hover:bg-yellow-500/30 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-yellow-400/30 flex items-center justify-center space-x-2 transform hover:scale-105"
+                  className="flex-1 bg-yellow-500/20 hover:bg-yellow-500/30 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-yellow-400/30 flex items-center justify-center space-x-2 transform hover:scale-105 active:scale-95"
                 >
                   <RotateCcw className="w-5 h-5" />
                   <span>Snooze 5m</span>
@@ -415,7 +424,7 @@ const VirtualCallOverlay = ({
               </div>
               <button
                 onClick={handleDismiss}
-                className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-white/20 transform hover:scale-105"
+                className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium transition-all duration-300 border border-white/20 transform hover:scale-105 active:scale-95"
               >
                 Dismiss
               </button>

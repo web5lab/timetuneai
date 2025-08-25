@@ -81,6 +81,15 @@ const RemindersPage = () => {
       return;
     }
 
+    // Validate that the reminder is not set for the past (except test reminders)
+    const reminderDateTime = new Date(`${formData.date}T${formData.time}`);
+    const now = new Date();
+    
+    if (reminderDateTime <= now && !formData.title.toLowerCase().includes('test')) {
+      alert('Please select a future date and time for your reminder');
+      return;
+    }
+
     const reminderData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
@@ -109,6 +118,15 @@ const RemindersPage = () => {
     }
 
     if (!editingReminder) return;
+
+    // Validate that the reminder is not set for the past (except test reminders)
+    const reminderDateTime = new Date(`${formData.date}T${formData.time}`);
+    const now = new Date();
+    
+    if (reminderDateTime <= now && !formData.title.toLowerCase().includes('test')) {
+      alert('Please select a future date and time for your reminder');
+      return;
+    }
 
     const updates = {
       title: formData.title.trim(),

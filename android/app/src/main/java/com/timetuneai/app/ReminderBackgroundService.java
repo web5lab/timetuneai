@@ -245,16 +245,18 @@ public class ReminderBackgroundService extends Service {
                 
                 Log.d(TAG, "Checking reminder: " + reminder.getString("title") + " at " + reminderDate + " " + reminderTime);
                 
-                // Check if reminder is due (within 1 minute tolerance)
+                // Check if reminder is due (only trigger after the scheduled time)
                 if (reminderDate.equals(currentDate)) {
                     try {
                         Date reminderDateTime = timeFormat.parse(reminderTime);
                         Date currentDateTime = timeFormat.parse(currentTime);
                         
                         if (reminderDateTime != null && currentDateTime != null) {
-                            long timeDiff = Math.abs(currentDateTime.getTime() - reminderDateTime.getTime());
+                            long timeDiff = currentDateTime.getTime() - reminderDateTime.getTime();
                             
-                            if (timeDiff <= 120000) { // 2 minute tolerance for better reliability
+                            // Only trigger if current time is after reminder time (timeDiff >= 0)
+                            // And within 2 minute window for reliability
+                            if (timeDiff >= 0 && timeDiff <= 120000) {
                                 Log.d(TAG, "Found due reminder: " + reminder.getString("title"));
                                 triggeredReminders.add(reminderId);
                                 triggerVirtualCall(reminder);

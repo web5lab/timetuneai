@@ -42,20 +42,24 @@ export const useVirtualCalling = () => {
   useEffect(() => {
     const checkDueReminders = () => {
       const now = new Date();
+      const currentTime = now.getTime();
 
       const dueReminders = reminders.filter(reminder => {
         if (reminder.isCompleted) return false;
         
         const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);
-        const timeDiff = Math.abs(now.getTime() - reminderDateTime.getTime());
+        const reminderTime = reminderDateTime.getTime();
         
-        // Trigger call if reminder is due (within 2 minutes for better reliability)
-        return timeDiff <= 120000; // 2 minute tolerance
+        // Only trigger if reminder time has passed (not before)
+        // And within 2 minutes tolerance for reliability
+        const timeDiff = currentTime - reminderTime;
+        return timeDiff >= 0 && timeDiff <= 120000; // 2 minute window after due time
       });
 
       // Add due reminders to call queue
       dueReminders.forEach(reminder => {
-        console.log('Found due reminder:', reminder.title, 'at', reminder.time);
+        const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);
+        console.log('Found due reminder:', reminder.title, 'scheduled for:', reminderDateTime.toLocaleString(), 'current time:', now.toLocaleString());
         
         if (!callQueue.find(call => call.id === reminder.id) && 
             (!activeCall || activeCall.id !== reminder.id)) {
@@ -71,9 +75,9 @@ export const useVirtualCalling = () => {
       });
     };
 
-    // Check immediately and then every 15 seconds for better responsiveness
-    checkDueReminders();
-    const interval = setInterval(checkDueReminders, 15000);
+    // Don't check immediately to avoid triggering on app start
+    // Check every 30 seconds for better battery life
+    const interval = setInterval(checkDueReminders, 30000);
 
     return () => clearInterval(interval);
   }, [reminders, callQueue, activeCall]);

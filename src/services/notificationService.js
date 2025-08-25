@@ -92,13 +92,14 @@ export class NotificationService {
       const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);
       const now = new Date();
 
-      // Don't schedule notifications for past dates (except for test reminders)
-      if (reminderDateTime <= now && !reminder.title.includes('Test')) {
-        console.log('Cannot schedule notification for past date');
+      // Don't schedule notifications for past dates (with 1 minute buffer)
+      const timeDiff = reminderDateTime.getTime() - now.getTime();
+      if (timeDiff < -60000 && !reminder.title.includes('Test')) {
+        console.log('Cannot schedule notification for past date:', reminderDateTime.toLocaleString(), 'current:', now.toLocaleString());
         return false;
       }
 
-      console.log(`Scheduling notification for: ${reminder.title} at ${reminderDateTime}`);
+      console.log(`Scheduling notification for: ${reminder.title} at ${reminderDateTime.toLocaleString()} (in ${Math.round(timeDiff / 1000 / 60)} minutes)`);
 
       // For Android, also schedule with virtual call service
       if (Capacitor.isNativePlatform()) {
