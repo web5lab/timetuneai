@@ -140,16 +140,20 @@ public class VirtualCallActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
             setTurnScreenOn(true);
+            
+            // Request to dismiss keyguard
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             if (keyguardManager != null) {
                 keyguardManager.requestDismissKeyguard(this, null);
             }
             Log.d(TAG, "Set show when locked and turn screen on (API 27+)");
         } else {
+            // For older Android versions
             getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                WindowManager.LayoutParams.FLAG_ACQUIRE_CAUSES_WAKEUP
             );
             Log.d(TAG, "Set show when locked and turn screen on (API < 27)");
         }
@@ -159,12 +163,13 @@ public class VirtualCallActivity extends Activity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN |
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
-            WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
         );
         
-        // Set highest priority
-        getWindow().getAttributes().type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        // Set window attributes for better visibility
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
+        getWindow().setAttributes(attrs);
         
         // Hide system UI for immersive experience
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -182,7 +187,7 @@ public class VirtualCallActivity extends Activity {
         // Ensure activity stays on top
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setTaskDescription(new android.app.ActivityManager.TaskDescription(
-                "TimeTuneAI Call", null, 0xFF000000
+                "TimeTuneAI Call", null, 0xFFF97316
             ));
         }
     }

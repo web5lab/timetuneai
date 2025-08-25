@@ -41,6 +41,8 @@ public class OverlayCallService extends Service {
     
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "OverlayCallService onStartCommand called");
+        
         if (intent != null) {
             String action = intent.getAction();
             Log.d(TAG, "OverlayCallService action: " + action);
@@ -52,27 +54,28 @@ public class OverlayCallService extends Service {
                 String reminderDate = intent.getStringExtra("reminderDate");
                 String reminderTime = intent.getStringExtra("reminderTime");
                 
+                Log.d(TAG, "Showing overlay call for: " + reminderTitle);
                 showOverlayCall(reminderTitle, reminderDescription, reminderId, reminderDate, reminderTime);
             } else if (ACTION_HIDE_OVERLAY_CALL.equals(action)) {
                 hideOverlayCall();
             }
+        } else {
+            Log.w(TAG, "OverlayCallService started with null intent");
         }
         
-        return START_REDELIVER_INTENT;
+        return START_NOT_STICKY; // Don't restart if killed
     }
     
     private void showOverlayCall(String title, String description, int reminderId, String date, String time) {
         if (!canDrawOverlays()) {
             Log.e(TAG, "Cannot draw overlays - permission not granted");
             // Fallback to full-screen activity
-            boolean started = startFullScreenActivity(title, description, reminderId, date, time);
-            if (!started) {
-                Log.e(TAG, "Failed to start full-screen activity fallback");
-            }
+            startFullScreenActivity(title, description, reminderId, date, time);
             return;
         }
         
         if (isOverlayShowing) {
+            Log.d(TAG, "Overlay already showing, hiding previous one");
             hideOverlayCall();
         }
         
@@ -93,24 +96,11 @@ public class OverlayCallService extends Service {
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_FULLSCREEN |
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 PixelFormat.TRANSLUCENT
             );
             
-            params.gravity = Gravity.TOP | Gravity.LEFT;
-            params.x = 0;
-            params.y = 0;
-            
-            // Ensure overlay appears on top
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-            }
-            
-            params.gravity = Gravity.TOP | Gravity.LEFT;
+            params.gravity = Gravity.CENTER;
             params.x = 0;
             params.y = 0;
             
@@ -120,13 +110,16 @@ public class OverlayCallService extends Service {
             
             Log.d(TAG, "Overlay call displayed successfully");
             
+            // Auto-dismiss after 60 seconds
+            new android.os.Handler().postDelayed(() -> {
+                Log.d(TAG, "Auto-dismissing overlay after timeout");
+                hideOverlayCall();
+            }, 60000);
+            
         } catch (Exception e) {
             Log.e(TAG, "Error showing overlay call: " + e.getMessage());
             // Fallback to full-screen activity
-            boolean started = startFullScreenActivity(title, description, reminderId, date, time);
-            if (!started) {
-                Log.e(TAG, "Failed to start full-screen activity fallback after overlay error");
-            }
+            startFullScreenActivity(title, description, reminderId, date, time);
         }
     }
     

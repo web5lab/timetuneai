@@ -35,12 +35,9 @@
             android:taskAffinity=""
             android:allowTaskReparenting="false"
             android:exported="false"
-            android:priority="1000"
-            android:enabled="true">
-            <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            android:enabled="true"
+            android:noHistory="true"
+            android:finishOnTaskLaunch="true">
         </activity>
         
         <!-- Background Service for Reminder Monitoring -->
@@ -58,7 +55,12 @@
         <service
             android:name=".OverlayCallService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="overlay_display" />
+        </service>
         
         <!-- Boot Receiver -->
         <receiver
