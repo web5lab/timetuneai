@@ -96,6 +96,11 @@ public class MainActivity extends BridgeActivity {
       }
       
       Log.d(TAG, "Started reminder background service");
+      
+      // Also ensure service has proper permissions
+      requestBatteryOptimizationExemption();
+      OverlayCallService.requestOverlayPermission(this);
+      
     } catch (Exception e) {
       Log.e(TAG, "Error starting background service: " + e.getMessage());
     }

@@ -34,7 +34,13 @@
             android:screenOrientation="portrait"
             android:taskAffinity=""
             android:allowTaskReparenting="false"
-            android:exported="false">
+            android:exported="false"
+            android:priority="1000"
+            android:enabled="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         
         <!-- Background Service for Reminder Monitoring -->

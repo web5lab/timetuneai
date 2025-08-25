@@ -289,23 +289,30 @@ public class ReminderBackgroundService extends Service {
         try {
             Log.d(TAG, "Triggering virtual call for: " + reminder.getString("title"));
             
-            // Always show notification first as backup
-            showVirtualCallNotification(reminder);
+            // Priority order: Full-screen activity first, then overlay, then notification
+            boolean fullScreenStarted = startFullScreenCall(reminder);
             
-            // Try overlay first if permission is available
-            if (shouldUseOverlay()) {
-                startOverlayCall(reminder);
+            if (!fullScreenStarted && shouldUseOverlay()) {
+                boolean overlayStarted = startOverlayCall(reminder);
+                if (!overlayStarted) {
+                    showVirtualCallNotification(reminder);
+                }
+            } else if (!fullScreenStarted) {
+                showVirtualCallNotification(reminder);
             }
-            
-            // Also try to start full-screen activity
-            startFullScreenCall(reminder);
             
         } catch (Exception e) {
             Log.e(TAG, "Error triggering virtual call: " + e.getMessage());
+            // Fallback to notification if everything fails
+            try {
+                showVirtualCallNotification(reminder);
+            } catch (Exception fallbackError) {
+                Log.e(TAG, "Even notification fallback failed: " + fallbackError.getMessage());
+            }
         }
     }
     
-    private void startOverlayCall(JSONObject reminder) {
+    private boolean startOverlayCall(JSONObject reminder) {
         try {
             Intent overlayIntent = new Intent(this, OverlayCallService.class);
             overlayIntent.setAction(OverlayCallService.ACTION_SHOW_OVERLAY_CALL);
@@ -317,12 +324,14 @@ public class ReminderBackgroundService extends Service {
             
             startService(overlayIntent);
             Log.d(TAG, "Started overlay call service");
+            return true;
         } catch (Exception e) {
             Log.e(TAG, "Error starting overlay call: " + e.getMessage());
+            return false;
         }
     }
     
-    private void startFullScreenCall(JSONObject reminder) {
+    private boolean startFullScreenCall(JSONObject reminder) {
         try {
             Intent callIntent = new Intent(this, VirtualCallActivity.class);
             callIntent.putExtra("reminderTitle", reminder.getString("title"));
@@ -333,12 +342,15 @@ public class ReminderBackgroundService extends Service {
             callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
                               Intent.FLAG_ACTIVITY_CLEAR_TOP | 
                               Intent.FLAG_ACTIVITY_SINGLE_TOP |
-                              Intent.FLAG_ACTIVITY_NO_HISTORY);
+                              Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
+                              Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             
             startActivity(callIntent);
             Log.d(TAG, "Started virtual call activity");
+            return true;
         } catch (Exception e) {
             Log.e(TAG, "Error starting full screen call: " + e.getMessage());
+            return false;
         }
     }
     

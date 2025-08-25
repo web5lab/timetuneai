@@ -140,11 +140,16 @@ public class VirtualCallActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
             setTurnScreenOn(true);
+            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            if (keyguardManager != null) {
+                keyguardManager.requestDismissKeyguard(this, null);
+            }
             Log.d(TAG, "Set show when locked and turn screen on (API 27+)");
         } else {
             getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             );
             Log.d(TAG, "Set show when locked and turn screen on (API < 27)");
         }
@@ -153,10 +158,13 @@ public class VirtualCallActivity extends Activity {
         getWindow().addFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN |
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
+            WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
         );
+        
+        // Set highest priority
+        getWindow().getAttributes().type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         
         // Hide system UI for immersive experience
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -169,6 +177,13 @@ public class VirtualCallActivity extends Activity {
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             );
             Log.d(TAG, "Set immersive system UI flags");
+        }
+        
+        // Ensure activity stays on top
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setTaskDescription(new android.app.ActivityManager.TaskDescription(
+                "TimeTuneAI Call", null, 0xFF000000
+            ));
         }
     }
     

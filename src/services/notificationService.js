@@ -107,6 +107,16 @@ export class NotificationService {
         
         // Ensure background service is running
         this.ensureBackgroundServiceRunning();
+        
+        // Also register with Android native storage for background access
+        try {
+          const remindersJson = JSON.stringify([reminder]);
+          if (window.AndroidReminders) {
+            window.AndroidReminders.syncReminders(remindersJson);
+          }
+        } catch (error) {
+          console.error('Error syncing with Android native storage:', error);
+        }
       }
 
       // Create notification

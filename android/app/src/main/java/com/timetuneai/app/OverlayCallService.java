@@ -65,7 +65,10 @@ public class OverlayCallService extends Service {
         if (!canDrawOverlays()) {
             Log.e(TAG, "Cannot draw overlays - permission not granted");
             // Fallback to full-screen activity
-            startFullScreenActivity(title, description, reminderId, date, time);
+            boolean started = startFullScreenActivity(title, description, reminderId, date, time);
+            if (!started) {
+                Log.e(TAG, "Failed to start full-screen activity fallback");
+            }
             return;
         }
         
@@ -90,9 +93,22 @@ public class OverlayCallService extends Service {
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
             );
+            
+            params.gravity = Gravity.TOP | Gravity.LEFT;
+            params.x = 0;
+            params.y = 0;
+            
+            // Ensure overlay appears on top
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            } else {
+                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+            }
             
             params.gravity = Gravity.TOP | Gravity.LEFT;
             params.x = 0;
@@ -107,11 +123,14 @@ public class OverlayCallService extends Service {
         } catch (Exception e) {
             Log.e(TAG, "Error showing overlay call: " + e.getMessage());
             // Fallback to full-screen activity
-            startFullScreenActivity(title, description, reminderId, date, time);
+            boolean started = startFullScreenActivity(title, description, reminderId, date, time);
+            if (!started) {
+                Log.e(TAG, "Failed to start full-screen activity fallback after overlay error");
+            }
         }
     }
     
-    private void startFullScreenActivity(String title, String description, int reminderId, String date, String time) {
+    private boolean startFullScreenActivity(String title, String description, int reminderId, String date, String time) {
         try {
             Intent callIntent = new Intent(this, VirtualCallActivity.class);
             callIntent.putExtra("reminderTitle", title);
@@ -121,12 +140,16 @@ public class OverlayCallService extends Service {
             callIntent.putExtra("reminderTime", time);
             callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
                               Intent.FLAG_ACTIVITY_CLEAR_TOP | 
-                              Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                              Intent.FLAG_ACTIVITY_SINGLE_TOP |
+                              Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
+                              Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             
             startActivity(callIntent);
             Log.d(TAG, "Started fallback full-screen activity");
+            return true;
         } catch (Exception e) {
             Log.e(TAG, "Error starting fallback activity: " + e.getMessage());
+            return false;
         }
     }
     
