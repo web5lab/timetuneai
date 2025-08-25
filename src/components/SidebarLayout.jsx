@@ -13,7 +13,8 @@ import {
   Moon,
   Sun,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Users
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/auth';
@@ -34,6 +35,7 @@ const Sidebar = () => {
   const navItems = [
     { to: '/', icon: MessageCircle, label: 'Chat Assistant', color: 'text-blue-500' },
     { to: '/reminders', icon: Calendar, label: 'Reminders', color: 'text-green-500' },
+    { to: '/friends', icon: Users, label: 'Friends', color: 'text-purple-500' },
     { to: '/profile', icon: User, label: 'Profile', color: 'text-purple-500' },
     { to: '/settings', icon: Settings, label: 'Settings', color: 'text-gray-500' },
     { to: '/subscription', icon: Crown, label: 'Pro Plan', color: 'text-yellow-500' },

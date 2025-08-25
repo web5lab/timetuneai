@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Calendar, BellRing, User, Settings, Crown, MessageCircle } from 'lucide-react';
+import { Calendar, BellRing, User, Settings, Crown, MessageCircle, Users } from 'lucide-react';
 
 const BottomNavigation = () => {
   const navItems = [
     { to: '/', icon: MessageCircle, label: 'Chat' },
     { to: '/reminders', icon: Calendar, label: 'Reminders' },
+    { to: '/friends', icon: Users, label: 'Friends' },
     { to: '/profile', icon: User, label: 'Profile' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
     { to: '/subscription', icon: Crown, label: 'Pro' },
   ];
 

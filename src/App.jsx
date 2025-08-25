@@ -2,6 +2,7 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/AppLayout';
 import HomePage from './pages/HomePage';
 import RemindersPage from './pages/RemindersPage';
+import FriendsPage from './pages/FriendsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SubscriptionPage from './pages/SubscriptionPage';
@@ -34,6 +35,7 @@ const AppWithCalling = () => {
           }>
             <Route index element={<HomePage />} />
             <Route path="reminders" element={<RemindersPage />} />
+            <Route path="friends" element={<FriendsPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="subscription" element={<SubscriptionPage />} />

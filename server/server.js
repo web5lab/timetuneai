@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 
 import authRoutes from './src/routes/auth.js';
+import friendsRoutes from './src/routes/friends.js';
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/friends', friendsRoutes);
 
 // Connect DB and start server
 connectDB().then(() => {

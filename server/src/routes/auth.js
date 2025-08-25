@@ -17,17 +17,33 @@ router.post('/google', async (req, res) => {
     });
     const payload = ticket.getPayload();
     const { email, name, sub: googleId, picture } = payload;
-    const existingUser = await User.findOne({ googleId })
+    
+    let existingUser = await User.findOne({ googleId });
+    
     if (!existingUser) {
+      // Generate unique username
+      const username = await User.generateUsername(email, name);
+      
       const newUser = new User({
         email,
         name,
+        username,
         googleId,
         picture: picture || 'https://via.placeholder.com/150', // Default picture if none provided
       });
-      await newUser.save();
+      existingUser = await newUser.save();
     }
-    res.json({ success: true, user: { email, name, googleId, picture } });
+    
+    res.json({ 
+      success: true, 
+      user: { 
+        email: existingUser.email, 
+        name: existingUser.name, 
+        username: existingUser.username,
+        googleId: existingUser.googleId, 
+        picture: existingUser.picture 
+      } 
+    });
   } catch (err) {
     console.error('Google login error', err);
     res.status(401).json({ error: 'Invalid token' });
