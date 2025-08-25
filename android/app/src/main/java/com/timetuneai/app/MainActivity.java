@@ -48,7 +48,9 @@ public class MainActivity extends BridgeActivity {
       
       // Cancel the notification
       NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-      notificationManager.cancel(reminderId + 10000);
+      if (notificationManager != null) {
+        notificationManager.cancel(reminderId + 10000);
+      }
       
       if ("answer_call".equals(action)) {
         // Handle answer call action
@@ -65,37 +67,46 @@ public class MainActivity extends BridgeActivity {
   private void requestBatteryOptimizationExemption() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-      String packageName = getPackageName();
       
-      if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-        Log.d(TAG, "Requesting battery optimization exemption");
-        Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-        intent.setData(Uri.parse("package:" + packageName));
-        try {
-          startActivity(intent);
-        } catch (Exception e) {
-          Log.e(TAG, "Error requesting battery optimization exemption: " + e.getMessage());
+      if (powerManager != null) {
+        String packageName = getPackageName();
+        
+        if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+          Log.d(TAG, "Requesting battery optimization exemption");
+          Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+          intent.setData(Uri.parse("package:" + packageName));
+          try {
+            startActivity(intent);
+          } catch (Exception e) {
+            Log.e(TAG, "Error requesting battery optimization exemption: " + e.getMessage());
+          }
         }
       }
     }
   }
   
   private void startReminderBackgroundService() {
-    Intent serviceIntent = new Intent(this, ReminderBackgroundService.class);
-    
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      startForegroundService(serviceIntent);
-    } else {
-      startService(serviceIntent);
+    try {
+      Intent serviceIntent = new Intent(this, ReminderBackgroundService.class);
+      
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(serviceIntent);
+      } else {
+        startService(serviceIntent);
+      }
+      
+      Log.d(TAG, "Started reminder background service");
+    } catch (Exception e) {
+      Log.e(TAG, "Error starting background service: " + e.getMessage());
     }
-    
-    Log.d(TAG, "Started reminder background service");
   }
   
   private void setupJavaScriptInterface() {
     // Add JavaScript interface to sync reminders with native storage
     WebView webView = getBridge().getWebView();
-    webView.addJavascriptInterface(new ReminderJSInterface(), "AndroidReminders");
+    if (webView != null) {
+      webView.addJavascriptInterface(new ReminderJSInterface(), "AndroidReminders");
+    }
   }
   
   public class ReminderJSInterface {
@@ -107,7 +118,7 @@ public class MainActivity extends BridgeActivity {
       SharedPreferences prefs = getSharedPreferences("TimeTuneAI", Context.MODE_PRIVATE);
       SharedPreferences.Editor editor = prefs.edit();
       editor.putString("reminders", remindersJson);
-      editor.apply();
+      editor.commit(); // Use commit for immediate write
       
       Log.d(TAG, "Reminders synced successfully");
     }
@@ -127,6 +138,15 @@ public class MainActivity extends BridgeActivity {
     startReminderBackgroundService();
     
     // Handle any pending call actions
+    handleIncomingCallActions();
+  }
+  
+  @Override
+  protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    setIntent(intent);
+    
+    // Handle call actions from new intent
     handleIncomingCallActions();
   }
 

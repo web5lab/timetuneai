@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.WindowManager;
 import androidx.core.app.NotificationCompat;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,25 +30,30 @@ public class ReminderBackgroundService extends Service {
     private static final String CHANNEL_ID = "reminder_background_service";
     private static final String CALL_CHANNEL_ID = "virtual_calls_bg";
     private static final int NOTIFICATION_ID = 1001;
-    private static final int CHECK_INTERVAL = 15000; // 15 seconds for more frequent checks
+    private static final int CHECK_INTERVAL = 30000; // 30 seconds for better battery life
     
     private Handler handler;
     private Runnable reminderChecker;
     private PowerManager.WakeLock wakeLock;
     private boolean isRunning = false;
     private Set<Integer> triggeredReminders = new HashSet<>();
+    private NotificationManager notificationManager;
     
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Background service created");
         
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        
         // Create notification channels
         createNotificationChannels();
         
         // Acquire wake lock to keep service running
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TimeTuneAI::ReminderWakeLock");
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TimeTuneAI::ReminderWakeLock");
+        }
         
         handler = new Handler(Looper.getMainLooper());
         setupReminderChecker();
@@ -85,18 +91,33 @@ public class ReminderBackgroundService extends Service {
         }
         
         // Restart service immediately
-        Intent restartIntent = new Intent(this, ReminderBackgroundService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(restartIntent);
-        } else {
-            startService(restartIntent);
+        scheduleServiceRestart();
+    }
+    
+    private void scheduleServiceRestart() {
+        try {
+            Intent restartIntent = new Intent(this, ReminderBackgroundService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(
+                this, 0, restartIntent, 
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            
+            // Schedule restart after 5 seconds
+            android.app.AlarmManager alarmManager = (android.app.AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    android.os.SystemClock.elapsedRealtime() + 5000,
+                    pendingIntent
+                );
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error scheduling service restart: " + e.getMessage());
         }
     }
     
     private void createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            
             // Background service channel
             NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
@@ -106,7 +127,7 @@ public class ReminderBackgroundService extends Service {
             serviceChannel.setDescription("Keeps TimeTuneAI running to monitor reminders");
             serviceChannel.setShowBadge(false);
             serviceChannel.setSound(null, null);
-            manager.createNotificationChannel(serviceChannel);
+            notificationManager.createNotificationChannel(serviceChannel);
             
             // Virtual calls channel
             NotificationChannel callChannel = new NotificationChannel(
@@ -121,7 +142,7 @@ public class ReminderBackgroundService extends Service {
             callChannel.setLightColor(0xFFF97316);
             callChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             callChannel.setBypassDnd(true);
-            manager.createNotificationChannel(callChannel);
+            notificationManager.createNotificationChannel(callChannel);
         }
     }
     
@@ -162,7 +183,11 @@ public class ReminderBackgroundService extends Service {
         isRunning = true;
         
         if (wakeLock != null && !wakeLock.isHeld()) {
-            wakeLock.acquire(10 * 60 * 1000L); // 10 minutes
+            try {
+                wakeLock.acquire(10 * 60 * 1000L); // 10 minutes
+            } catch (Exception e) {
+                Log.e(TAG, "Error acquiring wake lock: " + e.getMessage());
+            }
         }
         
         handler.post(reminderChecker);
@@ -229,7 +254,7 @@ public class ReminderBackgroundService extends Service {
                         if (reminderDateTime != null && currentDateTime != null) {
                             long timeDiff = Math.abs(currentDateTime.getTime() - reminderDateTime.getTime());
                             
-                            if (timeDiff <= 60000) { // 1 minute tolerance
+                            if (timeDiff <= 120000) { // 2 minute tolerance for better reliability
                                 Log.d(TAG, "Found due reminder: " + reminder.getString("title"));
                                 triggeredReminders.add(reminderId);
                                 triggerVirtualCall(reminder);
@@ -262,42 +287,56 @@ public class ReminderBackgroundService extends Service {
         try {
             Log.d(TAG, "Triggering virtual call for: " + reminder.getString("title"));
             
-            // Check if we should use overlay or full activity
-            boolean useOverlay = shouldUseOverlay();
+            // Always show notification first as backup
+            showVirtualCallNotification(reminder);
             
-            if (useOverlay) {
-                // Use overlay service for calls over other apps
-                Intent overlayIntent = new Intent(this, OverlayCallService.class);
-                overlayIntent.setAction(OverlayCallService.ACTION_SHOW_OVERLAY_CALL);
-                overlayIntent.putExtra("reminderTitle", reminder.getString("title"));
-                overlayIntent.putExtra("reminderDescription", reminder.optString("description", ""));
-                overlayIntent.putExtra("reminderId", reminder.getInt("id"));
-                overlayIntent.putExtra("reminderDate", reminder.getString("date"));
-                overlayIntent.putExtra("reminderTime", reminder.getString("time"));
-                
-                startService(overlayIntent);
-                Log.d(TAG, "Started overlay call service");
-            } else {
-                // Use full activity for traditional calls
-                Intent callIntent = new Intent(this, VirtualCallActivity.class);
-                callIntent.putExtra("reminderTitle", reminder.getString("title"));
-                callIntent.putExtra("reminderDescription", reminder.optString("description", ""));
-                callIntent.putExtra("reminderId", reminder.getInt("id"));
-                callIntent.putExtra("reminderDate", reminder.getString("date"));
-                callIntent.putExtra("reminderTime", reminder.getString("time"));
-                callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                                  Intent.FLAG_ACTIVITY_CLEAR_TOP | 
-                                  Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                
-                startActivity(callIntent);
-                Log.d(TAG, "Started virtual call activity");
+            // Try overlay first if permission is available
+            if (shouldUseOverlay()) {
+                startOverlayCall(reminder);
             }
             
-            // Always show a high-priority notification as backup
-            showVirtualCallNotification(reminder);
+            // Also try to start full-screen activity
+            startFullScreenCall(reminder);
             
         } catch (Exception e) {
             Log.e(TAG, "Error triggering virtual call: " + e.getMessage());
+        }
+    }
+    
+    private void startOverlayCall(JSONObject reminder) {
+        try {
+            Intent overlayIntent = new Intent(this, OverlayCallService.class);
+            overlayIntent.setAction(OverlayCallService.ACTION_SHOW_OVERLAY_CALL);
+            overlayIntent.putExtra("reminderTitle", reminder.getString("title"));
+            overlayIntent.putExtra("reminderDescription", reminder.optString("description", ""));
+            overlayIntent.putExtra("reminderId", reminder.getInt("id"));
+            overlayIntent.putExtra("reminderDate", reminder.getString("date"));
+            overlayIntent.putExtra("reminderTime", reminder.getString("time"));
+            
+            startService(overlayIntent);
+            Log.d(TAG, "Started overlay call service");
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting overlay call: " + e.getMessage());
+        }
+    }
+    
+    private void startFullScreenCall(JSONObject reminder) {
+        try {
+            Intent callIntent = new Intent(this, VirtualCallActivity.class);
+            callIntent.putExtra("reminderTitle", reminder.getString("title"));
+            callIntent.putExtra("reminderDescription", reminder.optString("description", ""));
+            callIntent.putExtra("reminderId", reminder.getInt("id"));
+            callIntent.putExtra("reminderDate", reminder.getString("date"));
+            callIntent.putExtra("reminderTime", reminder.getString("time"));
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+                              Intent.FLAG_ACTIVITY_CLEAR_TOP | 
+                              Intent.FLAG_ACTIVITY_SINGLE_TOP |
+                              Intent.FLAG_ACTIVITY_NO_HISTORY);
+            
+            startActivity(callIntent);
+            Log.d(TAG, "Started virtual call activity");
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting full screen call: " + e.getMessage());
         }
     }
     
@@ -311,8 +350,6 @@ public class ReminderBackgroundService extends Service {
     
     private void showVirtualCallNotification(JSONObject reminder) {
         try {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            
             // Create full-screen intent
             Intent fullScreenIntent = new Intent(this, VirtualCallActivity.class);
             fullScreenIntent.putExtra("reminderTitle", reminder.getString("title"));
@@ -320,7 +357,9 @@ public class ReminderBackgroundService extends Service {
             fullScreenIntent.putExtra("reminderId", reminder.getInt("id"));
             fullScreenIntent.putExtra("reminderDate", reminder.getString("date"));
             fullScreenIntent.putExtra("reminderTime", reminder.getString("time"));
-            fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
             
             PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
                 this, reminder.getInt("id"), fullScreenIntent,
@@ -366,6 +405,7 @@ public class ReminderBackgroundService extends Service {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setShowWhen(true)
                 .setWhen(System.currentTimeMillis())
+                .setTimeoutAfter(60000) // Auto-dismiss after 1 minute
                 .addAction(R.drawable.ic_stat_notification, "Answer", answerPendingIntent)
                 .addAction(R.drawable.ic_stat_notification, "Dismiss", dismissPendingIntent);
             

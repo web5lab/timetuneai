@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ public class OverlayCallService extends Service {
     private WindowManager windowManager;
     private View overlayView;
     private boolean isOverlayShowing = false;
+    private WebView webView;
     
     public static final String ACTION_SHOW_OVERLAY_CALL = "SHOW_OVERLAY_CALL";
     public static final String ACTION_HIDE_OVERLAY_CALL = "HIDE_OVERLAY_CALL";
@@ -56,12 +58,14 @@ public class OverlayCallService extends Service {
             }
         }
         
-        return START_NOT_STICKY;
+        return START_REDELIVER_INTENT;
     }
     
     private void showOverlayCall(String title, String description, int reminderId, String date, String time) {
         if (!canDrawOverlays()) {
             Log.e(TAG, "Cannot draw overlays - permission not granted");
+            // Fallback to full-screen activity
+            startFullScreenActivity(title, description, reminderId, date, time);
             return;
         }
         
@@ -82,11 +86,11 @@ public class OverlayCallService extends Service {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O 
                     ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                     : WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 PixelFormat.TRANSLUCENT
             );
             
@@ -102,6 +106,27 @@ public class OverlayCallService extends Service {
             
         } catch (Exception e) {
             Log.e(TAG, "Error showing overlay call: " + e.getMessage());
+            // Fallback to full-screen activity
+            startFullScreenActivity(title, description, reminderId, date, time);
+        }
+    }
+    
+    private void startFullScreenActivity(String title, String description, int reminderId, String date, String time) {
+        try {
+            Intent callIntent = new Intent(this, VirtualCallActivity.class);
+            callIntent.putExtra("reminderTitle", title);
+            callIntent.putExtra("reminderDescription", description);
+            callIntent.putExtra("reminderId", reminderId);
+            callIntent.putExtra("reminderDate", date);
+            callIntent.putExtra("reminderTime", time);
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+                              Intent.FLAG_ACTIVITY_CLEAR_TOP | 
+                              Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            
+            startActivity(callIntent);
+            Log.d(TAG, "Started fallback full-screen activity");
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting fallback activity: " + e.getMessage());
         }
     }
     
@@ -116,12 +141,135 @@ public class OverlayCallService extends Service {
         container.setBackgroundColor(0xFF000000); // Black background
         container.setPadding(40, 100, 40, 100);
         
+        // Create simple native UI instead of WebView for better reliability
+        LinearLayout callInterface = createNativeCallInterface(title, description, reminderId, date, time);
+        container.addView(callInterface);
+        
+        return container;
+    }
+    
+    private LinearLayout createNativeCallInterface(String title, String description, int reminderId, String date, String time) {
+        LinearLayout callInterface = new LinearLayout(this);
+        callInterface.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        ));
+        callInterface.setOrientation(LinearLayout.VERTICAL);
+        callInterface.setGravity(android.view.Gravity.CENTER);
+        
+        // Title
+        TextView titleView = new TextView(this);
+        titleView.setText("TimeTuneAI Reminder");
+        titleView.setTextColor(0xFFFFFFFF);
+        titleView.setTextSize(24);
+        titleView.setGravity(android.view.Gravity.CENTER);
+        titleView.setPadding(20, 20, 20, 10);
+        callInterface.addView(titleView);
+        
+        // Reminder title
+        TextView reminderTitle = new TextView(this);
+        reminderTitle.setText(title);
+        reminderTitle.setTextColor(0xFFFFFFFF);
+        reminderTitle.setTextSize(20);
+        reminderTitle.setGravity(android.view.Gravity.CENTER);
+        reminderTitle.setPadding(20, 10, 20, 10);
+        callInterface.addView(reminderTitle);
+        
+        // Description
+        if (description != null && !description.isEmpty()) {
+            TextView descView = new TextView(this);
+            descView.setText(description);
+            descView.setTextColor(0xFFCCCCCC);
+            descView.setTextSize(16);
+            descView.setGravity(android.view.Gravity.CENTER);
+            descView.setPadding(20, 10, 20, 20);
+            callInterface.addView(descView);
+        }
+        
+        // Time info
+        TextView timeView = new TextView(this);
+        timeView.setText(time + " • " + date);
+        timeView.setTextColor(0xFFCCCCCC);
+        timeView.setTextSize(14);
+        timeView.setGravity(android.view.Gravity.CENTER);
+        timeView.setPadding(20, 10, 20, 40);
+        callInterface.addView(timeView);
+        
+        // Buttons container
+        LinearLayout buttonsContainer = new LinearLayout(this);
+        buttonsContainer.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        buttonsContainer.setOrientation(LinearLayout.HORIZONTAL);
+        buttonsContainer.setGravity(android.view.Gravity.CENTER);
+        
+        // Answer button
+        Button answerButton = new Button(this);
+        answerButton.setText("Answer");
+        answerButton.setBackgroundColor(0xFF4CAF50);
+        answerButton.setTextColor(0xFFFFFFFF);
+        answerButton.setPadding(40, 20, 40, 20);
+        LinearLayout.LayoutParams answerParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        answerParams.setMargins(20, 0, 20, 0);
+        answerButton.setLayoutParams(answerParams);
+        answerButton.setOnClickListener(v -> {
+            handleAnswerCall(reminderId);
+        });
+        
+        // Dismiss button
+        Button dismissButton = new Button(this);
+        dismissButton.setText("Dismiss");
+        dismissButton.setBackgroundColor(0xFFF44336);
+        dismissButton.setTextColor(0xFFFFFFFF);
+        dismissButton.setPadding(40, 20, 40, 20);
+        LinearLayout.LayoutParams dismissParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        dismissParams.setMargins(20, 0, 20, 0);
+        dismissButton.setLayoutParams(dismissParams);
+        dismissButton.setOnClickListener(v -> {
+            handleDismissCall(reminderId);
+        });
+        
+        buttonsContainer.addView(answerButton);
+        buttonsContainer.addView(dismissButton);
+        callInterface.addView(buttonsContainer);
+        
+        return callInterface;
+    }
+    
+    private void handleAnswerCall(int reminderId) {
+        Log.d(TAG, "Call answered for reminder: " + reminderId);
+        
+        // Open main app
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        mainIntent.putExtra("action", "answer_call");
+        mainIntent.putExtra("reminderId", reminderId);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(mainIntent);
+        
+        hideOverlayCall();
+    }
+    
+    private void handleDismissCall(int reminderId) {
+        Log.d(TAG, "Call dismissed for reminder: " + reminderId);
+        hideOverlayCall();
+    }
+    
+    private View createWebViewInterface(String title, String description, int reminderId, String date, String time) {
         // Create WebView for full call interface
-        WebView webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAllowContentAccess(true);
+        webView = new WebView(this);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
         
         LinearLayout.LayoutParams webViewParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -163,43 +311,30 @@ public class OverlayCallService extends Service {
                 
                 webView.evaluateJavascript(js, null);
             }
+            
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                Log.e(TAG, "WebView error: " + description);
+                // Fallback to native interface
+                hideOverlayCall();
+            }
         });
         
         // Load the main app
         String appUrl = "file:///android_asset/public/index.html";
         webView.loadUrl(appUrl);
         
-        container.addView(webView);
-        
-        // Add close button overlay
-        Button closeButton = new Button(this);
-        closeButton.setText("×");
-        closeButton.setTextSize(24);
-        closeButton.setBackgroundColor(0x80FF0000);
-        closeButton.setTextColor(0xFFFFFFFF);
-        closeButton.setPadding(20, 10, 20, 10);
-        
-        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        closeParams.gravity = Gravity.TOP | Gravity.RIGHT;
-        closeParams.setMargins(0, -80, 20, 0);
-        closeButton.setLayoutParams(closeParams);
-        
-        closeButton.setOnClickListener(v -> {
-            Log.d(TAG, "Close button clicked");
-            hideOverlayCall();
-        });
-        
-        container.addView(closeButton);
-        
-        return container;
+        return webView;
     }
     
     private void hideOverlayCall() {
         if (overlayView != null && isOverlayShowing) {
             try {
+                if (webView != null) {
+                    webView.destroy();
+                    webView = null;
+                }
                 windowManager.removeView(overlayView);
                 overlayView = null;
                 isOverlayShowing = false;
@@ -208,6 +343,9 @@ public class OverlayCallService extends Service {
                 Log.e(TAG, "Error hiding overlay call: " + e.getMessage());
             }
         }
+        
+        // Stop the service
+        stopSelf();
     }
     
     private boolean canDrawOverlays() {
@@ -224,7 +362,11 @@ public class OverlayCallService extends Service {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 intent.setData(Uri.parse("package:" + context.getPackageName()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
+                try {
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error requesting overlay permission: " + e.getMessage());
+                }
             }
         }
     }

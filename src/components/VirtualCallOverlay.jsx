@@ -15,36 +15,44 @@ const VirtualCallOverlay = ({
   const [isAnswered, setIsAnswered] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  const [isCallVisible, setIsCallVisible] = useState(false);
   const { speak, stopSpeaking, isSpeaking } = useVoice();
 
-
+  // Update visibility state
+  useEffect(() => {
+    setIsCallVisible(isVisible && reminder);
+  }, [isVisible, reminder]);
 
   useEffect(() => {
     let interval;
-    if (isVisible && isAnswered) {
+    if (isCallVisible && isAnswered) {
       interval = setInterval(() => {
         setCallDuration(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isVisible, isAnswered]);
+  }, [isCallVisible, isAnswered]);
 
   useEffect(() => {
-    if (isVisible && !isAnswered) {
+    if (isCallVisible && !isAnswered && reminder) {
       // Start speaking the reminder when call appears
       if (reminder && isSpeakerOn) {
         const message = `Hello! This is your TimeTuneAI assistant calling to remind you about: ${reminder.title}. ${reminder.description ? reminder.description : ''}`;
-        speak(message);
+        // Delay speaking to ensure overlay is fully visible
+        setTimeout(() => {
+          speak(message);
+        }, 1000);
       }
       
       // For Android, ensure screen stays on during call
-      if (Capacitor.isNativePlatform() && isVisible) {
+      if (Capacitor.isNativePlatform()) {
         document.body.style.userSelect = 'none';
         document.body.style.webkitUserSelect = 'none';
         
         // Prevent Android back button
         const handleBackButton = (e) => {
           e.preventDefault();
+          handleDismiss();
           return false;
         };
         
@@ -57,7 +65,7 @@ const VirtualCallOverlay = ({
         };
       }
     }
-  }, [isVisible, reminder, isSpeakerOn, speak, isAnswered]);
+  }, [isCallVisible, reminder, isSpeakerOn, speak, isAnswered]);
 
   // Expose trigger function globally for Android integration
   useEffect(() => {
@@ -67,34 +75,27 @@ const VirtualCallOverlay = ({
         
         // Set the reminder data and show the call
         if (reminderData && !activeCall) {
-          // Trigger the call through the parent component's callback
-          if (onAnswer && onDismiss && onSnooze) {
-            // This is called from Android overlay - show the call immediately
-            setActiveCall(reminderData);
-          }
+          setActiveCall(reminderData);
+          setIsCallVisible(true);
+          setIsAnswered(false);
+          setCallDuration(0);
         }
       };
       
       // Also expose functions to control overlay from Android
       window.dismissVirtualCall = () => {
         console.log('Dismissing virtual call from Android');
-        if (activeCall) {
-          onDismiss();
-        }
+        handleDismiss();
       };
       
       window.answerVirtualCall = () => {
         console.log('Answering virtual call from Android');
-        if (activeCall) {
-          onAnswer();
-        }
+        handleAnswer();
       };
       
       window.snoozeVirtualCall = () => {
         console.log('Snoozing virtual call from Android');
-        if (activeCall) {
-          onSnooze();
-        }
+        handleSnooze();
       };
     }
     
@@ -106,7 +107,8 @@ const VirtualCallOverlay = ({
         delete window.snoozeVirtualCall;
       }
     };
-  }, [activeCall, onAnswer, onDismiss, onSnooze]);
+  }, [activeCall]);
+  
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -114,29 +116,46 @@ const VirtualCallOverlay = ({
   };
 
   const handleAnswer = () => {
+    console.log('Call answered');
     setIsAnswered(true);
     setCallDuration(0);
-    onAnswer();
+    
+    if (onAnswer) {
+      onAnswer();
+    }
     
     // Speak a greeting when answered
     if (isSpeakerOn) {
-      const greeting = `Hi! I'm calling to remind you about ${reminder?.title}. Would you like me to mark this as complete or snooze it for later?`;
+      const currentReminder = reminder || activeCall;
+      const greeting = `Hi! I'm calling to remind you about ${currentReminder?.title}. Would you like me to mark this as complete or snooze it for later?`;
       speak(greeting);
     }
   };
 
   const handleDismiss = () => {
+    console.log('Call dismissed');
     stopSpeaking();
     setIsAnswered(false);
     setCallDuration(0);
-    onDismiss();
+    setIsCallVisible(false);
+    setActiveCall(null);
+    
+    if (onDismiss) {
+      onDismiss();
+    }
   };
 
   const handleSnooze = () => {
+    console.log('Call snoozed');
     stopSpeaking();
     setIsAnswered(false);
     setCallDuration(0);
-    onSnooze();
+    setIsCallVisible(false);
+    setActiveCall(null);
+    
+    if (onSnooze) {
+      onSnooze();
+    }
   };
 
   const toggleMute = () => {
@@ -153,10 +172,13 @@ const VirtualCallOverlay = ({
     }
   };
 
-  if (!isVisible || !reminder) return null;
+  // Use activeCall if available, otherwise use reminder prop
+  const currentReminder = activeCall || reminder;
+  
+  if (!isCallVisible || !currentReminder) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 flex flex-col">
+    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 flex flex-col" style={{ zIndex: 2147483647 }}>
       {/* Status Bar */}
       <div className="flex justify-between items-center p-4 text-white text-sm">
         <div className="flex items-center space-x-2">
@@ -202,12 +224,12 @@ const VirtualCallOverlay = ({
             <Clock className="w-5 h-5 mr-2" />
             <span className="text-lg">Reminder Alert</span>
           </div>
-          <h2 className="text-xl font-semibold mb-2">{reminder.title}</h2>
-          {reminder.description && (
-            <p className="text-white/80 text-sm leading-relaxed">{reminder.description}</p>
+          <h2 className="text-xl font-semibold mb-2">{currentReminder.title}</h2>
+          {currentReminder.description && (
+            <p className="text-white/80 text-sm leading-relaxed">{currentReminder.description}</p>
           )}
           <div className="flex items-center justify-center mt-3 text-sm opacity-75">
-            <span>{reminder.time} • {new Date(reminder.date).toLocaleDateString()}</span>
+            <span>{currentReminder.time} • {new Date(currentReminder.date).toLocaleDateString()}</span>
           </div>
         </div>
 

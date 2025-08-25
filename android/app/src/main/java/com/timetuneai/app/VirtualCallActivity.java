@@ -5,16 +5,20 @@ import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
 
 public class VirtualCallActivity extends Activity {
     private static final String TAG = "VirtualCallActivity";
     private WebView webView;
+    private Handler timeoutHandler;
+    private Runnable timeoutRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +32,12 @@ public class VirtualCallActivity extends Activity {
         // Unlock screen if locked
         unlockScreen();
         
+        // Set up auto-dismiss timeout
+        setupAutoTimeout();
+        
         // Create WebView for the call interface
         webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAllowContentAccess(true);
+        setupWebView();
         
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -74,6 +78,14 @@ public class VirtualCallActivity extends Activity {
                 Log.d(TAG, "Executing JavaScript: " + js);
                 webView.evaluateJavascript(js, null);
             }
+            
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                Log.e(TAG, "WebView error: " + description);
+                // Close activity on error
+                finish();
+            }
         });
         
         // Load the main app
@@ -81,6 +93,41 @@ public class VirtualCallActivity extends Activity {
         Log.d(TAG, "Loading WebView with URL: " + appUrl);
         webView.loadUrl(appUrl);
         setContentView(webView);
+    }
+    
+    private void setupWebView() {
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        
+        // Enable debugging in debug builds
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
+    }
+    
+    private void setupAutoTimeout() {
+        timeoutHandler = new Handler();
+        timeoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Auto-dismissing call activity after timeout");
+                finish();
+            }
+        };
+        
+        // Auto-dismiss after 60 seconds
+        timeoutHandler.postDelayed(timeoutRunnable, 60000);
+    }
+    
+    private void cancelTimeout() {
+        if (timeoutHandler != null && timeoutRunnable != null) {
+            timeoutHandler.removeCallbacks(timeoutRunnable);
+        }
     }
     
     private void setupFullScreenCall() {
@@ -107,7 +154,8 @@ public class VirtualCallActivity extends Activity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN |
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
             WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
         );
         
         // Hide system UI for immersive experience
@@ -127,7 +175,9 @@ public class VirtualCallActivity extends Activity {
     private void unlockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-            keyguardManager.requestDismissKeyguard(this, null);
+            if (keyguardManager != null) {
+                keyguardManager.requestDismissKeyguard(this, null);
+            }
             Log.d(TAG, "Requested dismiss keyguard (API 27+)");
         }
     }
@@ -135,28 +185,49 @@ public class VirtualCallActivity extends Activity {
     @Override
     public void onBackPressed() {
         // Prevent back button from closing the call
-        // User must use call controls to dismiss
-        Log.d(TAG, "Back button pressed - ignoring");
+        Log.d(TAG, "Back button pressed - closing call");
+        finish();
     }
     
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "VirtualCallActivity resumed");
+        
+        // Keep screen on while activity is visible
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "VirtualCallActivity paused");
+        
+        // Remove keep screen on flag
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "VirtualCallActivity destroyed");
+        
+        cancelTimeout();
+        
         if (webView != null) {
             webView.destroy();
+            webView = null;
         }
+    }
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "VirtualCallActivity received new intent");
+        setIntent(intent);
+        
+        // Reset timeout
+        cancelTimeout();
+        setupAutoTimeout();
     }
 }

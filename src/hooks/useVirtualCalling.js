@@ -11,14 +11,24 @@ export const useVirtualCalling = () => {
   // Initialize Android call service
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      androidCallService.initialize().then(() => {
-        androidCallService.createVirtualCallChannel();
-        
-        // Register callback for virtual calls
-        androidCallService.onVirtualCall((reminder) => {
-          setActiveCall(reminder);
-        });
-      });
+      const initializeService = async () => {
+        try {
+          await androidCallService.initialize();
+          await androidCallService.createVirtualCallChannel();
+          
+          // Register callback for virtual calls
+          androidCallService.onVirtualCall((reminder) => {
+            console.log('Virtual call callback triggered:', reminder);
+            setActiveCall(reminder);
+          });
+          
+          console.log('Android call service initialized successfully');
+        } catch (error) {
+          console.error('Error initializing Android call service:', error);
+        }
+      };
+      
+      initializeService();
     }
 
     return () => {
@@ -32,8 +42,6 @@ export const useVirtualCalling = () => {
   useEffect(() => {
     const checkDueReminders = () => {
       const now = new Date();
-      const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
-      const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
 
       const dueReminders = reminders.filter(reminder => {
         if (reminder.isCompleted) return false;
@@ -41,27 +49,31 @@ export const useVirtualCalling = () => {
         const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);
         const timeDiff = Math.abs(now.getTime() - reminderDateTime.getTime());
         
-        // Trigger call if reminder is due (within 1 minute)
-        return timeDiff <= 60000; // 1 minute tolerance
+        // Trigger call if reminder is due (within 2 minutes for better reliability)
+        return timeDiff <= 120000; // 2 minute tolerance
       });
 
       // Add due reminders to call queue
       dueReminders.forEach(reminder => {
+        console.log('Found due reminder:', reminder.title, 'at', reminder.time);
+        
         if (!callQueue.find(call => call.id === reminder.id) && 
             (!activeCall || activeCall.id !== reminder.id)) {
           // Use Android service for native platform, fallback to web behavior
           if (Capacitor.isNativePlatform()) {
+            console.log('Triggering Android virtual call for:', reminder.title);
             androidCallService.triggerVirtualCall(reminder);
           } else {
+            console.log('Adding reminder to call queue:', reminder.title);
             setCallQueue(prev => [...prev, reminder]);
           }
         }
       });
     };
 
-    // Check immediately and then every 30 seconds
+    // Check immediately and then every 15 seconds for better responsiveness
     checkDueReminders();
-    const interval = setInterval(checkDueReminders, 30000);
+    const interval = setInterval(checkDueReminders, 15000);
 
     return () => clearInterval(interval);
   }, [reminders, callQueue, activeCall]);
@@ -70,6 +82,7 @@ export const useVirtualCalling = () => {
   useEffect(() => {
     if (!activeCall && callQueue.length > 0) {
       const nextCall = callQueue[0];
+      console.log('Processing next call from queue:', nextCall.title);
       setActiveCall(nextCall);
       setCallQueue(prev => prev.slice(1));
     }
@@ -101,6 +114,7 @@ export const useVirtualCalling = () => {
         time: snoozeTime.toTimeString().slice(0, 5)
       };
       
+      console.log('Snoozing reminder to:', updates.date, updates.time);
       updateReminder(activeCall.id, updates);
     }
     setActiveCall(null);
@@ -113,6 +127,8 @@ export const useVirtualCalling = () => {
 
   // Test function to trigger a call manually
   const triggerTestCall = useCallback((reminder) => {
+    console.log('Triggering test call for:', reminder.title);
+    
     if (Capacitor.isNativePlatform()) {
       androidCallService.triggerVirtualCall(reminder);
     } else {
